@@ -1,0 +1,6 @@
+{"name":"fixer-stu-duet","start":{"room":"stu-globe","x":13,"y":15,"items":["booties","floss","raft","band","glider","thimble","glow","earplugs","feather"],"party":["pip","chip"],"rescued":["stripe","katy","duo","frost","hump","jam","rin","digby","mote","chip"]},"frames":85,"events":[[20,"KeyC","down"],
+[23,"KeyC","up"],
+[33,"KeyE","down"],
+[36,"KeyE","up"],
+[42,"KeyC","down"],
+[45,"KeyC","up"]],"expect":{"room":"stu-globe","levelComplete":false,"items":["booties","floss","raft","band","glider","thimble","glow","earplugs","feather"]},"endState":{"room":"stu-globe","x":525,"y":616,"state":"ground","health":5,"items":["band","booties","earplugs","feather","floss","glider","glow","raft","thimble"],"rescued":["chip","digby","duo","frost","hump","jam","katy","mote","rin","stripe"],"levelComplete":false,"frame":85}}

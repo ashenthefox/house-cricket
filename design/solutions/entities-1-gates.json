@@ -1,0 +1,8 @@
+{"name":"entities-1-gates","start":{"room":"et-gates","items":["thimble"],"rescued":["stripe"]},"frames":337,"events":[[20,"ArrowRight","down"],
+[39,"ArrowRight","up"],
+[43,"KeyX","down"],
+[47,"KeyX","up"],
+[51,"ArrowRight","down"],
+[280,"KeyZ","down"],
+[290,"KeyZ","up"],
+[307,"ArrowRight","up"]],"expect":{"room":"et-lifts","levelComplete":false,"items":["thimble"]},"endState":{"room":"et-lifts","x":2.7,"y":616,"state":"ground","health":5,"items":["thimble"],"rescued":["stripe"],"levelComplete":false,"frame":331}}

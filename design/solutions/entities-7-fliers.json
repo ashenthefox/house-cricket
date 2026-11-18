@@ -1,0 +1,8 @@
+{"name":"entities-7-fliers","start":{"room":"et-fliers","x":2,"y":15,"items":[]},"frames":338,"events":[[10,"KeyC","down"],
+[13,"KeyC","up"],
+[23,"ArrowRight","down"],
+[127,"ArrowRight","up"],
+[157,"KeyC","down"],
+[160,"KeyC","up"],
+[166,"ArrowRight","down"],
+[308,"ArrowRight","up"]],"expect":{"room":"et-fliers","levelComplete":false,"items":["glow"]},"endState":{"room":"et-fliers","x":1141.3,"y":616,"state":"ground","health":5,"items":["glow"],"rescued":[],"levelComplete":false,"frame":308}}

@@ -21,9 +21,9 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Published repo holds only the game, README, media and the workflow (no --making-of)
-/design/
-/tools/
+# Published with the making-of: design/ and tools/ go in (screenshots stay out)
+__pycache__/
+tools/_cwdbg*.mjs
 /assets/
 /game/gallery.html
 /game/src/gallery.js

@@ -1,0 +1,12 @@
+{"name":"entities-6-walkers","start":{"room":"et-walkers","items":[]},"frames":360,"events":[[10,"ArrowRight","down"],
+[47,"ArrowRight","up"],
+[47,"KeyX","down"],
+[51,"KeyX","up"],
+[57,"ArrowRight","down"],
+[102,"KeyZ","down"],
+[116,"KeyZ","up"],
+[137,"ArrowRight","down"],
+[142,"KeyZ","down"],
+[156,"KeyZ","up"],
+[200,"ArrowRight","down"],
+[330,"ArrowRight","up"]],"expect":{"room":"et-fliers","levelComplete":false,"items":[]},"endState":{"room":"et-fliers","x":-7.1,"y":616,"state":"ground","health":4,"items":[],"rescued":[],"levelComplete":false,"frame":354}}

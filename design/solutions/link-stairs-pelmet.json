@@ -1,0 +1,4 @@
+{"name":"link-stairs-pelmet","start":{"room":"stair-flight","x":50,"y":21,"items":["booties","floss","raft","glider"],"party":["duo"]},"frames":254,"events":[[20,"ArrowRight","down"],
+[33,"KeyZ","down"],
+[208,"KeyZ","up"],
+[208,"ArrowRight","up"]],"expect":{"room":"liv-armchair","levelComplete":false,"items":["booties","floss","raft","glider"]},"endState":{"room":"liv-armchair","x":8.1,"y":296,"state":"ground","health":5,"items":["booties","floss","glider","raft"],"rescued":[],"levelComplete":false,"frame":248}}

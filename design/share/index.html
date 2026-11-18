@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Cricket Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Nunito:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Plan: a storybook on cold-press paper. Paper and sepia ink come from the game's own palette;
+     indigo night and nightlight gold are the Bedroom's colors. One column of reading, wide pictures, tables for the facts. */
+  :root {
+    --paper: #F4EBDD;
+    --paper-deep: #EADCC6;
+    --ink: #3F3124;
+    --ink-soft: #6E5A47;
+    --night: #2E3A66;
+    --gold: #C9952F;
+    --rule: #D8C7AE;
+    --card: #FBF6EE;
+    --display: "Gochi Hand", "Comic Sans MS", cursive;
+    --body: "Nunito", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1C2033; --paper-deep: #252A42; --ink: #EDE3D2; --ink-soft: #B9AC98;
+      --night: #9FB1E8; --gold: #E8B85A; --rule: #3A4062; --card: #232842;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1C2033; --paper-deep: #252A42; --ink: #EDE3D2; --ink-soft: #B9AC98;
+    --night: #9FB1E8; --gold: #E8B85A; --rule: #3A4062; --card: #232842;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 17px/1.6 var(--body);
+  }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: var(--night); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .prose { max-width: 68ch; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.1; text-wrap: balance; color: var(--night); margin: 0; }
+  h1 { font-size: clamp(56px, 10vw, 104px); }
+  h2 { font-size: clamp(34px, 5vw, 46px); margin-bottom: 14px; }
+  h3 { font-size: 27px; margin: 26px 0 8px; }
+  p { margin: 0 0 14px; }
+  .tag { font-size: 20px; color: var(--ink-soft); font-style: italic; margin-top: 6px; }
+
+  header.hero { position: relative; }
+  .hero figure { margin: 0; }
+  .hero img { width: 100%; border-radius: 0 0 6px 6px; }
+  .hero .title-block { padding: 26px 0 8px; }
+  .credit { font-size: 15px; color: var(--ink-soft); }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 14px 0 6px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin: 22px 0 10px; font-size: 15px; }
+  nav.toc a { text-decoration: none; font-weight: 600; }
+
+  section { padding: 38px 0 10px; border-bottom: 1px dashed var(--rule); }
+  section:last-of-type { border-bottom: 0; }
+
+  .two { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: start; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+  figure.pic { margin: 0; }
+  figure.pic img { border-radius: 4px; }
+  figure.pic figcaption { font-size: 14px; color: var(--ink-soft); padding-top: 6px; font-style: italic; }
+  .sprite { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; }
+
+  .checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .checks li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+  .checks li::before { content: "\2713"; width: 20px; height: 20px; margin-top: 3px; border-radius: 50%; background: var(--gold); color: var(--paper); font-weight: 800; font-size: 13px; line-height: 20px; text-align: center; }
+  .checks q { font-weight: 700; quotes: "“" "”"; }
+  .loose { font-size: 13px; color: var(--ink-soft); border: 1px solid var(--rule); border-radius: 10px; padding: 0 7px; margin-left: 4px; white-space: nowrap; }
+
+  .tbl { overflow-x: auto; margin: 10px 0 18px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-weight: 800; color: var(--night); background: var(--paper-deep); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .stat { display: inline-flex; gap: 2px; vertical-align: middle; }
+  .stat i { width: 8px; height: 10px; border-radius: 2px; background: var(--rule); }
+  .stat i.on { background: var(--gold); }
+  .statcell { display: grid; grid-template-columns: 3.2em auto; gap: 2px 6px; font-size: 13px; align-items: center; white-space: nowrap; }
+
+  .sw { display: inline-flex; gap: 3px; }
+  .sw b { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); display: inline-block; }
+
+  ol.fights { padding-left: 1.3em; margin: 0; display: grid; gap: 12px; }
+  ol.fights li::marker { font-family: var(--display); color: var(--gold); font-size: 22px; }
+  ol.fights strong { color: var(--night); }
+
+  .house { display: grid; gap: 6px; font-size: 14px; margin: 12px 0 20px; }
+  .floor { display: grid; grid-template-columns: 120px 1fr; gap: 8px; align-items: stretch; }
+  .floor .lbl { font-family: var(--display); font-size: 21px; color: var(--ink-soft); align-self: center; }
+  .rooms { display: flex; flex-wrap: wrap; gap: 6px; }
+  .room { background: var(--card); border: 1.5px solid var(--ink-soft); border-radius: 4px; padding: 8px 10px; min-width: 110px; flex: 1 1 110px; }
+  .room b { display: block; color: var(--night); }
+  .room small { color: var(--ink-soft); }
+  .room.hub { border-color: var(--gold); border-width: 2.5px; }
+  @media (max-width: 560px) { .floor { grid-template-columns: 1fr; } }
+
+  .note { background: var(--card); border-left: 4px solid var(--gold); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 14px 0; }
+  .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 12px 0; }
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+  .card h4 { margin: 0 0 6px; font-size: 17px; color: var(--night); }
+  .card p { margin: 0; font-size: 15px; }
+  footer { padding: 30px 0 50px; font-size: 14px; color: var(--ink-soft); }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+  .crew { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin: 16px 0 8px; }
+  .mate { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px 16px; display: grid; gap: 8px; align-content: start; }
+  .mate .art { height: 190px; display: flex; align-items: center; justify-content: center; }
+  .mate .art img { max-height: 190px; width: auto; }
+  .mate h3 { margin: 0; font-size: 30px; }
+  .mate .sp { font-size: 14px; color: var(--ink-soft); font-style: italic; margin-top: -4px; }
+  .mate .who { font-size: 15px; margin: 0; }
+  .mate .meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 13.5px; align-items: center; }
+  .mate .meta dt { color: var(--ink-soft); }
+  .mate .meta dd { margin: 0; }
+  .mate .line { margin: 0; font-style: italic; color: var(--night); font-size: 15px; }
+  .mate.small .art { height: 130px; }
+  .mate.small .art img { max-height: 130px; }
+  .mate.small h3 { font-size: 24px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <figure><img src="img/title.webp" width="1600" height="893" alt="Mock title art: a huge, smiling leopard gecko looms out of the dark over a small tan cricket standing on a moonlit floorboard."></figure>
+  <div class="wrap title-block">
+    <h1>House Cricket</h1>
+    <p class="tag">Bought as gecko food. Escaped. Coming back for everyone.</p>
+    <p class="credit">An idea by Rich Conlan · game design for review · a watercolor exploration game for web, phone and controller</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" aria-label="Sections">
+    <a href="#pitch">Pitch</a><a href="#asked">What you asked for</a><a href="#story">Story</a><a href="#play">How it plays</a><a href="#house">The house</a><a href="#crickets">The crickets</a><a href="#geckos">The geckos</a><a href="#notcrickets">Not-Crickets</a><a href="#enemies">Enemies</a><a href="#lair">Dragon's Lair</a><a href="#carrier">The Carrier</a><a href="#look">Look and sound</a><a href="#controls">Controls</a><a href="#effort">Size of the job</a><a href="#feedback">What to comment on</a>
+  </nav>
+
+  <section id="pitch">
+    <div class="prose">
+      <h2>The pitch</h2>
+      <p>You are <strong>Pip</strong>, a house cricket bought from a pet store to feed a leopard gecko. On the night you escape the tank, the feeder cup tips over and your cupmates scatter through the house. Ten of them are caught in ten rooms, each guarded by a big, polite, very hungry gecko.</p>
+      <p>Explore a hand-painted watercolor house as one connected map. Follow each trapped cricket's <em>real</em> chirp, which gets louder as you get closer. Find household items that let you reach new places. Outwit each gecko without ever hurting it. Every friend you save moves into the <strong>Cricket Carrier</strong>, which grows from a bare plastic box into a little cricket town. And remember: almost everything in this house that chirps is <em>not</em> a cricket.</p>
+      <p>It's a <strong>large</strong> game: 10 zones and about 70 rooms. The main path takes about an hour and a half, and finding everything takes 2 to 3 hours. It runs in a web browser on computers and phones (held sideways), and plays start to finish with a PS5 or other controller.</p>
+    </div>
+  </section>
+
+  <section id="asked">
+    <h2>What you asked for, and where it is</h2>
+    <ul class="checks prose">
+      <li><span><q>probably called House Cricket</q>: it's called <strong>House Cricket</strong>.</span></li>
+      <li><span><q>bought for feeding a gecko, but it escaped! We def need an opening to show that</q>: three painted panels, then you take control as the feeding tongs come down, in a 6-step playable escape from Duchess's tank.</span></li>
+      <li><span><q>a Metroidvania style game … rescuing your fellow crickets</q>: one connected house, 9 items that open new paths, and secrets worth coming back for.</span></li>
+      <li><span><q>say, 10 zones, each with a different style … rooms of the house</q> <span class="loose">loose</span>: 10 rooms, each with its own palette, music, enemies and new move.</span></li>
+      <li><span><q>a "Boss Gecko" fight … save a different cricket</q>: 10 gecko species, 10 three-phase fights, 10 different crickets to free.</span></li>
+      <li><span><q>research real crickets and match their chirps properly</q>: every chirp is synthesized from measurements of real cricket songs: the pitch, pulses and rhythm of each species (see <a href="#look">Look and sound</a>).</span></li>
+      <li><span><q>hear the cricket chirping, louder/softer to guide you</q>: the beacon. Its volume follows your distance along the path, it pans left and right, and you can stop to <strong>Listen</strong>, or chirp to call and hear the answer.</span></li>
+      <li><span><q>need some items to get to some areas … build a map</q>: Tape Booties, Floss Line, Bottle-Cap Raft and 6 more, plus an auto-drawn dollhouse map.</span></li>
+      <li><span><q>isn't about you hurting the gecko … avoiding, stunning, distracting, putting it to sleep</q> <span class="loose">loose</span>: avoid, hide, distract, lure with fruit, put to sleep, bonk with a pillow, hide and seek, chase, dazzle, and a lullaby. Nobody is hurt.</span></li>
+      <li><span><q>swap your player to any saved crickets … slightly different stats</q> <span class="loose">loose</span>: 11 playable crickets, each with Speed, Jump, Chirp, Weight and one perk.</span></li>
+      <li><span><q>The art should all lean water-color</q>: soft washes, paper grain, sepia ink, throughout.</span></li>
+      <li><span><q>The Gecko should be scary but friendly</q>: huge, toothy and polite. Each one warns you before it strikes, and is a good sport after.</span></li>
+      <li><span><q>a "Cricket Carrier" … gets nicer as you get more, like the castle build-out in Suikoden</q>: 23 arrivals, each adding something you can see (and hear).</span></li>
+      <li><span><q>other crickets/insects can join you</q> <span class="loose">loose</span>: Hump the camel cricket joins the playable crew, and 8 insect and critter recruits run the Carrier's shops and services.</span></li>
+      <li><span><q>a range of enemies, maybe other insects</q> <span class="loose">loose</span>: 16 household critters, from ants to a house centipede and a dust bunny. They're bonked, never killed.</span></li>
+      <li><span><q>a plot/joke/puzzle around a bat, a tree frog, a chimney sparrow …</q>: the <strong>Not-Crickets</strong>, a running joke with puzzles attached (see <a href="#notcrickets">below</a>).</span></li>
+      <li><span><code>--gamepad</code>: plays from the title screen to the credits on a PS5 controller, with ✕ ○ □ △ shown on screen.</span></li>
+    </ul>
+  </section>
+
+  <section id="story">
+    <div class="two">
+      <div class="prose">
+        <h2>The story</h2>
+        <p><em>"Every Saturday, the pet store sells crickets by the cup. This cup was for Duchess. Pip had other plans."</em></p>
+        <p>The game opens with three quick panels: the pet-store shelf, the car ride, and the kid's bedroom with Duchess the leopard gecko in her tank. Then you take control. Dodge the tongs inside the cup, leap out, and run past a half-asleep Duchess, who teaches you the tell every gecko shares: <strong>the tail tip wiggles, with a soft rattle, just before a strike</strong>. Climb the tank decor and squeeze out through the lid. Your leap knocks the cup over, and everyone scatters into the dark.</p>
+        <p>Right away you chirp for the first time, and someone answers. Stripe, your first friend to rescue, is out there.</p>
+        <p>The ending: you've sung giant Nana to sleep in the attic. The kid finds the Carrier full of crickets, and the geckos get fruit-mix gecko food instead (a real thing that crested geckos love). The Carrier, now a little cricket town, goes onto the sunny windowsill, and the crickets choose to stay, singing.</p>
+        <p>The tone is gentle humor, no cruelty, and nobody gets eaten on screen. The kid is only ever shown as hands, a sleeve and sneakers.</p>
+      </div>
+      <figure class="pic"><img src="img/story-tongs.webp" width="1400" height="781" alt="Mock opening panel: feeding tongs held by a child's hand lower toward a paper cup of crickets; one tan cricket peers over the rim in alarm while a leopard gecko watches, smiling, from a log."><figcaption>Mock picture: the moment control begins.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="play">
+    <div class="prose">
+      <h2>How it plays</h2>
+      <p><strong>Three cricket verbs: Chirp, Jump, Hide.</strong> Chirp to call, stun and find. Jump everywhere. Hide in crack-sized spaces nothing bigger can reach.</p>
+      <p><strong>Moment to moment:</strong> run, hop, wall-jump and swing through a room. Kick a bug out of the way. Stop, raise your front legs to <strong>Listen</strong> (crickets really do hear through their legs) and see which way the chirp is coming from.</p>
+      <p><strong>A zone, about 10 to 15 minutes:</strong> enter a new room of the house. Follow the trapped cricket's call: it first carries through a vent or crack beside the zone's item, then leads on to the gecko's lair. Find the item, outwit the gecko, free the cricket, and pop home to see the Carrier grow.</p>
+      <p><strong>Why you keep going:</strong> each new item opens secrets in rooms you've already seen. The Carrier's empty spots show who's still missing. The attic only opens once all nine other crickets are home, so the finale is always the whole chorus.</p>
+      <div class="note">The two things the game lives or dies by: hopping should feel springy and precise, like a cricket landing with weight, and following a chirp should feel like real detective work by ear. The beacon never goes silent and has an on-screen ripple option for playing with the sound off.</div>
+      <h3>Hide</h3>
+      <p>Crickets fit where nothing else does. Press up beside a baseboard crack, a bottle cap, a sock fold or a gap between book spines to tuck in. Enemies and geckos can't see or reach you there, though chirping gives you away to anything that hunts by ear. A few things <strong>can't be beaten at all</strong>: plodding darkling beetles and the robot vacuum. For those you hide, let them pass, and go on. Sneak rooms are kept rare (one or two per zone at most, never a timed chase), and hiding shows up in a few boss fights too.</p>
+      <h3>Following the chirp, your way</h3>
+      <p>A small <strong>chirp indicator</strong> at the screen's edge points toward the trapped cricket and pulses with each chirp. It's on by default. The <strong>Beacon chirps</strong> setting chooses whether the cricket sings <em>Always</em>, only <em>When I call</em> (it answers your own Chirp button), or is <em>Off</em> (the indicator alone). The beacon has its own volume slider, and your own Chirp button always works and always gets an answer.</p>
+      <h3>Forgiving by design</h3>
+      <p>A fall costs one seed-heart and puts you back on the last solid ground. There are no lives and no game over. Boss fights restart at the current phase, not the start. An optional Gentle Mode halves damage and slows the gecko tells.</p>
+    </div>
+  </section>
+
+  <section id="house">
+    <h2>The house</h2>
+    <p class="prose">One connected map, drawn in the pause menu as a cut-away dollhouse. Rooms fill in with watercolor as you visit them.</p>
+    <div class="house" role="img" aria-label="Map of the house: attic at the top; upstairs bedroom with the Carrier, hall, bathroom, study; downstairs pantry, kitchen, living room, sunroom; laundry below; basement at the bottom; a chimney links living room, basement and attic.">
+      <div class="floor"><span class="lbl">Top</span><div class="rooms"><div class="room"><b>10 · Attic</b><small>via the chimney; opens when 9 friends are home</small></div></div></div>
+      <div class="floor"><span class="lbl">Upstairs</span><div class="rooms"><div class="room hub"><b>1 · Bedroom</b><small>start · the Carrier lives here</small></div><div class="room"><b>Hall</b><small>the smoke alarm</small></div><div class="room"><b>2 · Bathroom</b><small>steam and floss</small></div><div class="room"><b>7 · Study</b><small>books and the beacon maze</small></div></div></div>
+      <div class="floor"><span class="lbl">Downstairs</span><div class="rooms"><div class="room"><b>4 · Pantry</b><small>jars and syrup</small></div><div class="room"><b>3 · Kitchen</b><small>sink and stove</small></div><div class="room"><b>6 · Living room</b><small>sofa, piano, fireplace</small></div><div class="room"><b>8 · Sunroom</b><small>plants and mist</small></div></div></div>
+      <div class="floor"><span class="lbl">Below</span><div class="rooms"><div class="room"><b>5 · Laundry</b><small>dryer updrafts</small></div><div class="room"><b>9 · Basement</b><small>dark; the chimney's base</small></div></div></div>
+    </div>
+
+    <h3>The ten zones</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>#</th><th>Zone</th><th>Palette</th><th>What's new</th><th>New enemies</th><th>The sound that fools you</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>Bedroom</td><td><span class="sw"><b style="background:#3B4A7A"></b><b style="background:#F2C46D"></b><b style="background:#C8564B"></b><b style="background:#7C98C4"></b></span></td><td>wall-jump, Listen, the Carrier</td><td>ants, dust mites</td><td>the hallway smoke alarm</td></tr>
+        <tr><td class="num">2</td><td>Bathroom</td><td><span class="sw"><b style="background:#8CC9C4"></b><b style="background:#E9F1EE"></b><b style="background:#A9B8C2"></b><b style="background:#4F7F86"></b></span></td><td>floss swing, steam lifts</td><td>silverfish, mosquito</td><td>a chirping gecko (it's a trap)</td></tr>
+        <tr><td class="num">3</td><td>Kitchen</td><td><span class="sw"><b style="background:#F1D27A"></b><b style="background:#C27A45"></b><b style="background:#D0614A"></b><b style="background:#8EA67A"></b></span></td><td>water and the raft</td><td>cockroach, fruit flies</td><td>a creaky fridge</td></tr>
+        <tr><td class="num">4</td><td>Pantry</td><td><span class="sw"><b style="background:#C9A57A"></b><b style="background:#D99A3E"></b><b style="background:#EFE6D5"></b><b style="background:#7A5636"></b></span></td><td>rubber-band super-jump, sticky syrup</td><td>weevils, ant soldiers</td><td>the twist: the odd chirp is a real tree cricket</td></tr>
+        <tr><td class="num">5</td><td>Laundry</td><td><span class="sw"><b style="background:#B7A6D3"></b><b style="background:#C9C3CC"></b><b style="background:#A9C8E0"></b><b style="background:#6F7487"></b></span></td><td>glider, dryer updrafts, floods</td><td>moths, earwigs</td><td>the smoke alarm, for real</td></tr>
+        <tr><td class="num">6</td><td>Living room</td><td><span class="sw"><b style="background:#D48A8A"></b><b style="background:#8C8F55"></b><b style="background:#E8964A"></b><b style="background:#6E4A5E"></b></span></td><td>ground-pound, cushions, piano keys</td><td>dust bunny, stink bug</td><td>a squeaky dog toy</td></tr>
+        <tr><td class="num">7</td><td>Study</td><td><span class="sw"><b style="background:#A07850"></b><b style="background:#4E7A55"></b><b style="background:#E7D7B5"></b><b style="background:#8A3B32"></b></span></td><td>the beacon maze: pick the true chirp by its rhythm</td><td>jumping spider, bookworm</td><td>a hinge, the alarm, a tree frog</td></tr>
+        <tr><td class="num">8</td><td>Sunroom</td><td><span class="sw"><b style="background:#9CC97A"></b><b style="background:#5E9A52"></b><b style="background:#DDEBE3"></b><b style="background:#C77B56"></b></span></td><td>plant canopy, misters, soft soil</td><td>wasp, aphid herds</td><td>Peeper the tree frog</td></tr>
+        <tr><td class="num">9</td><td>Basement</td><td><span class="sw"><b style="background:#4F5B6E"></b><b style="background:#E07A3A"></b><b style="background:#B9BDC4"></b><b style="background:#26303D"></b></span></td><td>darkness and your glow bead</td><td>house centipede, cellar spider</td><td>Soot the chimney swift</td></tr>
+        <tr><td class="num">10</td><td>Attic</td><td><span class="sw"><b style="background:#9C7E6E"></b><b style="background:#C9D6E8"></b><b style="background:#6B5240"></b><b style="background:#4D6E70"></b></span></td><td>loud zones, everything combined</td><td>all of them, mixed</td><td>Velvet the bat</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>The items</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Item</th><th>Found in</th><th>Lets you</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tape Booties</strong> (double-sided tape)</td><td>Bedroom craft desk</td><td>cling to walls and wall-jump</td></tr>
+        <tr><td><strong>Floss Line</strong></td><td>Bathroom</td><td>swing from pins, hooks and drawer pulls</td></tr>
+        <tr><td><strong>Bottle-Cap Raft</strong></td><td>Kitchen</td><td>float on water and ride currents</td></tr>
+        <tr><td><strong>Rubber Band</strong></td><td>Pantry</td><td>charge a super-jump</td></tr>
+        <tr><td><strong>Dryer-Sheet Glider</strong></td><td>Laundry</td><td>glide</td></tr>
+        <tr><td><strong>Thimble Helmet</strong></td><td>Living room sewing basket</td><td>ground-pound through cereal walls and plaster</td></tr>
+        <tr><td><strong>Glow Bead</strong></td><td>Study</td><td>light dark rooms; flash to dazzle</td></tr>
+        <tr><td><strong>Cotton Earplugs</strong></td><td>Sunroom seed tray</td><td>cross loud zones without being dazed (loud noise stuns a cricket)</td></tr>
+        <tr><td><strong>Swift Feather</strong></td><td>from Soot, at the chimney's base</td><td>a second flutter in the air, to climb the chimney</td></tr>
+      </tbody>
+    </table></div>
+    <p class="prose">The first three zones run in order as the tutorial. After the Kitchen you choose the Pantry or the Laundry first, and the Living Room has two ways in.</p>
+  </section>
+
+  <section id="crickets">
+    <h2>The crickets</h2>
+    <div class="prose">
+      <p>Every rescued cricket is playable. You travel with a <strong>trio</strong> and swap between them at any time, even mid-fight. Stats run from 1 to 5. Perks only open optional secrets, so swapping is always a choice, never a chore.</p>
+      <p>Each one is a <strong>real species</strong>, drawn with its real shape and colors and given its real song. Only male crickets sing, so Pip is male. Hump the camel cricket is wingless and really is silent, so he drums instead. Mote really is that small, and Duo really is that big.</p>
+    </div>
+    <div class="crew" id="crew"></div>
+  </section>
+
+  <section id="geckos">
+    <h2>The geckos</h2>
+    <p class="prose"><strong>Scary but friendly.</strong> Each one is nearly a screen long, with glittering eyes and a mouth full of manners, and is sincerely sorry that you look delicious. Every one warns you the same way before it strikes: the tail tip wiggles, with a soft rattle (real gecko hunting behavior). Win, and they're good sports ("Fair's fair, little one"); afterwards you'll find them dozing around the house. Most geckos have no eyelids, so they never blink and lick their eyes clean instead. <strong>Lashes</strong> does it all through every conversation.</p>
+    <div class="crew" id="geckolist"></div>
+    <h3>The ten fights</h3>
+    <ol class="fights">
+      <li><strong>Duchess, leopard gecko (Bedroom): avoid.</strong> Make her lunge into the sand three times. While her snout is stuck, run up her back to free Stripe.</li>
+      <li><strong>Chikchak, house gecko (Bathroom): stealth.</strong> She chirps to lure you. Hide in the steam clouds and the grout cracks, turn three faucets to flood her ledge, then swing to Katy.</li>
+      <li><strong>Big Tok, tokay (Kitchen): distract.</strong> Jump his "TO-KAY!" shockwaves. Kick a cork, a spoon and a sponge for him to chomp, then raft to Duo while his jaw is busy.</li>
+      <li><strong>Lashes, crested gecko (Pantry): lure with fruit.</strong> Drop a grape, jam and a banana in his path and he stops to lick them. Every time he licks his eye, he isn't looking. Chirp the fruit flies away.</li>
+      <li><strong>Peridot, giant day gecko (Laundry): put her to sleep.</strong> Day geckos doze in the dark. Glide to three light pull-chains until she naps, and find Hump under the smoke alarm.</li>
+      <li><strong>Gargy, gargoyle gecko (Living room): stun.</strong> Ground-pound the cushions to bounce a throw pillow into him. Three soft bonks and he sulks off.</li>
+      <li><strong>Mossy, leaf-tailed gecko (Study): hide and seek.</strong> He camouflages among the books. Chirp to make his eyes shine back, then tag him during the glint.</li>
+      <li><strong>Kite, flying gecko (Sunroom): chase.</strong> He glides off with Digby's leaf. Race him through the canopy and chirp to startle him lower.</li>
+      <li><strong>Ember, cave gecko (Basement): dazzle.</strong> She hunts by sound in the dark, so hide and stay silent. Flash your glow bead when her red eyes come close.</li>
+      <li><strong>Nana, giant gecko (Attic): the lullaby.</strong> Duck into rafter gaps from her tail sweeps and light three music stones. Match each stone with a low, middle or high cricket voice. Then everyone you've rescued sings her to sleep together, and Chip, Pip's cupmate, is free.</li>
+    </ol>
+  </section>
+
+  <section id="notcrickets">
+    <h2>The Not-Crickets</h2>
+    <div class="two">
+      <div class="prose">
+        <p>The running joke you asked for. Each of these is first heard as a <strong>false beacon</strong>, a chirp you follow thinking it's a friend, and each one ends with "I'm <em>not</em> a cricket!" Then each helps you, moves into the Carrier, and sings in the finale.</p>
+        <p>The puzzle side: <strong>Listen</strong> draws the sound's rhythm as a strip of pulses. A real cricket is short, even pulse groups. A smoke alarm is one beep and a long wait. A tree frog is one rising peep. A swift is a messy rattle. The Study's beacon maze depends on telling them apart.</p>
+        <p class="credit">About "chimney sparrow": the bird that nests in chimneys and chitters is the chimney swift. Her old folk names include chimney swallow and even chimney bat, so being called a sparrow (and now a cricket) is her running complaint.</p>
+      </div>
+      <div class="crew" id="notlist" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin:0"></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Who</th><th>Where</th><th>Sounds like</th><th>The joke</th><th>Then</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Beep</strong>, the smoke alarm</td><td>Hallway, Laundry</td><td>one high chirp, then a long wait</td><td>The thing people most often mistake for a cricket. It's a tired battery.</td><td>Leads you to Hump, a silent camel cricket who sat under it so someone would come</td></tr>
+        <tr><td><strong>Chikchak</strong></td><td>Bathroom</td><td>6–9 quick "chik-chak"s</td><td>A gecko that chirps (real house geckos do), so the beacon walks you into her lair</td><td>She's the zone's boss</td></tr>
+        <tr><td><strong>Peeper</strong>, a spring peeper tree frog</td><td>Sunroom plant pot</td><td>a clear rising "peep" once a second</td><td>He sings to impress frogs, and is very hurt</td><td>A chirp-off rhythm puzzle, then a lily pond in the Carrier</td></tr>
+        <tr><td><strong>Soot</strong>, a chimney swift</td><td>the chimney</td><td>the rattling chitter of swift chicks</td><td>"Chimney <em>sparrow</em>? <em>Swallow</em>? <em>Bat</em>? Now <em>cricket</em>?"</td><td>Gives you the Swift Feather to climb the chimney</td></tr>
+        <tr><td><strong>Velvet</strong>, a big brown bat</td><td>Attic rafters</td><td>squeaky social chitter</td><td>Not blind, and not a cricket</td><td>Echolocates the whole house and reveals every secret on the map</td></tr>
+        <tr><td>A squeaky toy, the dryer, a door hinge</td><td>here and there</td><td>squeaks</td><td>one-line gags</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="enemies">
+    <h2>The enemies</h2>
+    <p class="prose">The house is full of critters that get in your way. Kick or chirp them and they flip over, scurry off and come back later; nobody gets squashed. Each room brings one or two new ones. (The friendly ones are the exceptions: Page is the one silverfish who reads instead of nibbling, Sgt. Crumb is an ant who quit, and Lumen is a big fuzzy moth, not a clothes moth.)</p>
+    <div class="crew" id="foes" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))"></div>
+    <h3>Can't be beaten: hide and let them pass</h3>
+    <div class="crew" id="hazards" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+  </section>
+
+  <section id="lair">
+    <h2>The Dragon's Lair</h2>
+    <div class="two">
+      <figure class="pic"><img src="img/dragons-lair.webp" width="1400" height="781" alt="Mock painting: inside a glass vivarium under a hot orange lamp, a glittering hoard of buttons, bottle caps, coins, marbles, thimbles and candy wrappers. An enormous bearded dragon looms in from the right, only partly in frame, while a tiny cricket peeks from behind a bottle cap."><figcaption>The Dragon's Lair (mock). He doesn't fit in the picture, and he won't fit on the screen either.</figcaption></figure>
+      <div class="prose">
+        <p>Behind the basement furnace, an old glass vivarium glows under a hot basking lamp. Inside is a <strong>hoard</strong>: every button, bottle cap, coin, marble and candy wrapper the house ever lost. Its keeper is <strong>Sir Bartholomew</strong>, a bearded dragon. He is <em>not</em> a gecko, and he takes that very seriously.</p>
+        <p>He's far too big for the screen. You only ever see parts of him: a golden eye in the gloom, a clawed foot, the spiky beard turning black when he spots you. You skitter between the piles and hide under bottle caps while he head-bobs and searches. Chirping gives you away.</p>
+        <p>Reach the top of the hoard, stand in plain view, and <strong>wave</strong>. That slow arm-wave is how real bearded dragons say "I'm no threat." He stops, waves back, and his beard pales. <em>"…Nobody ever waves."</em></p>
+        <p>He gives you the <strong>Cellophane Cloak</strong>, a crinkly clear candy wrapper from the hoard. Wear it to turn nearly invisible for a few seconds, enough to slip past the beetles and the vacuum in the open. It's optional, and it opens shortcuts and secrets. (You suggested an invisibility ring. The wrapper does the same job at cricket scale, without borrowing a famous story's ring.) He can't fit in the Carrier, so he sends a gift: a button throne and a marble.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="carrier">
+    <h2>The Cricket Carrier</h2>
+    <div class="two">
+      <figure class="pic"><img src="img/carrier.webp" width="1400" height="781" alt="Mock painting: a clear plastic cricket keeper on a bedroom floor at night, turned into a tiny town with egg-crate apartments with lit windows, a moth lamp, a shop stall, cotton-ball hammocks, a jar-lid pond and a matchbox library."><figcaption>The Carrier near the end of the game (mock).</figcaption></figure>
+      <div class="prose">
+        <p>The pet-store cricket keeper the kid left on the bedroom floor becomes home. It changes in four big stages: a bare box, then moss and a second level, then string lights and a ladder, then rooftops and a garden. <strong>Every one of the 23 arrivals adds something you can see.</strong></p>
+        <p>Each rescued cricket brings a piece: Stripe's chalk running track, Rin's bamboo bell, Hump's bottle-cap drum. Each cricket's song also joins the Carrier's music, so home sounds fuller with every rescue. At the ninth rescue they sing together for the first time, and the sound shakes open the attic.</p>
+        <p>Every save crack takes you home from the very start. After each rescue, the game offers to take you there to watch the newcomer move in.</p>
+      </div>
+    </div>
+    <h3>Optional recruits (the Suikoden part)</h3>
+    <p class="prose">Eight critters you find by exploring. Each one moves in and opens something new in the Carrier.</p>
+    <div class="crew" id="recruits"></div>
+  </section>
+
+  <section id="look">
+    <h2>Look and sound</h2>
+    <div class="two">
+      <div class="prose">
+        <p><strong>Art:</strong> soft storybook watercolor with visible paper grain, loose washes that bleed at the edges, and sepia ink on the characters. Each room has its own four-color palette (above). The backgrounds stay pale and hazy, so the platforms, always the darkest shapes, never get confused with scenery.</p>
+        <p>Everything shown here is a real early picture made for this game. Pip is the reference for every other character, and the bedroom painting is the reference for every other room, so it all looks like one game.</p>
+        <p><strong>Music:</strong> small chamber instruments, a different mood per room. Felt piano and harp for the bedroom, bouncy bassoon for the kitchen, low drones and drips for the basement. Melodies stay low so they never mask a chirp.</p>
+      </div>
+      <figure class="pic"><img src="img/bedroom.webp" width="1400" height="781" alt="Mock background: a child's bedroom at night seen from floor level, under the bed, with a crescent nightlight, a sock, a toy block and a glowing gecko tank on a dresser."><figcaption>The bedroom as a cricket sees it: the first room, and the reference for every other one (mock).</figcaption></figure>
+    </div>
+    <h3>The chirps, from research</h3>
+    <p class="prose">Real crickets sing by rubbing a scraper on one wing along a toothed file on the other, and each wing closing makes one pulse. The game builds every song from these real figures, so each friend sounds like its species:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Voice</th><th>Pitch</th><th>Pattern</th></tr></thead>
+      <tbody>
+        <tr><td>House cricket (Pip, Chip)</td><td class="num">4.8 kHz</td><td>2–3 pulses of 18 ms, about 45 ms apart; faster when warm</td></tr>
+        <tr><td>Banded cricket (Stripe)</td><td class="num">6 kHz</td><td>quick two-pulse chirps</td></tr>
+        <tr><td>Two-spotted cricket (Duo)</td><td class="num">4.6 kHz</td><td>4–5 pulses, 3–4 chirps a second</td></tr>
+        <tr><td>Snowy tree cricket (Frost)</td><td class="num">3 kHz</td><td>a steady, mellow "treet". The "thermometer cricket": count its chirps in 15 seconds, add 40, and you get °F (Dolbear's law, a real 1897 rule)</td></tr>
+        <tr><td>Katydid (Katy)</td><td class="num">3 kHz</td><td>a rasping "ka-ty-did"</td></tr>
+        <tr><td>Mole cricket (Digby)</td><td class="num">2.5 kHz</td><td>a low droning trill, made louder by its burrow</td></tr>
+        <tr><td>Ground cricket (Mote)</td><td class="num">7.5 kHz</td><td>a faint, very high trill</td></tr>
+        <tr><td>Bell cricket (Rin)</td><td class="num">≈ 4 kHz</td><td>a ringing "ri-i-in"</td></tr>
+        <tr><td>Camel cricket (Hump)</td><td class="num">—</td><td>wingless and silent</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="controls">
+    <h2>Controls</h2>
+    <p class="prose">Keyboard, touch (phone held sideways) and controller all play the whole game. On a controller, the game shows ✕ ○ □ △ for PlayStation, or A B X Y for others, switching the moment you touch the keyboard.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Action</th><th>Keyboard</th><th>Controller</th><th>Touch</th></tr></thead>
+      <tbody>
+        <tr><td>Move</td><td>← → or A D</td><td>left stick / d-pad</td><td>floating stick, left thumb</td></tr>
+        <tr><td>Jump (hold higher; press again in the air to flutter; hold while falling to glide)</td><td>Space / Z</td><td>✕</td><td>big Jump button, right corner</td></tr>
+        <tr><td>Use item (swing, super-jump, glow)</td><td>V / I</td><td>R2</td><td>beside Jump</td></tr>
+        <tr><td>Chirp</td><td>C / K</td><td>△</td><td>above Jump</td></tr>
+        <tr><td>Kick</td><td>X / J</td><td>□</td><td>above Use</td></tr>
+        <tr><td>Listen (hold)</td><td>B / L</td><td>○</td><td>ear button</td></tr>
+        <tr><td>Hide (next to a hiding spot)</td><td>↑ / W</td><td>stick up</td><td>stick up</td></tr>
+        <tr><td>Swap cricket</td><td>Q / E</td><td>L1 / R1</td><td>tap a portrait</td></tr>
+        <tr><td>Map · Pause · Mute</td><td>Tab · Esc · M</td><td>Create · Options</td><td>icons, top right</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="effort">
+    <div class="prose">
+      <h2>Size of the job</h2>
+      <p>A large game. About <strong>70 rooms in 10 zones</strong>, plus the tank, the Carrier, the hall, the stairwell and the chimney.</p>
+      <ul>
+        <li><strong>Characters:</strong> 11 playable crickets, 10 gecko fights of 3 phases each, an optional bearded-dragon fight, 18 kinds of enemy plus 2 you can't beat, 4 Not-Crickets and 8 recruits. Almost all of them talk.</li>
+        <li><strong>Art:</strong> about 200 pictures in all, mostly small sprites and props, and 8 story panels. Pip's movements are animated, and every cricket gets a sheet of poses.</li>
+        <li><strong>Sound:</strong> 14 music tracks, about 22 recorded sound effects, and synthesized songs for every cricket and every sound that fools you.</li>
+      </ul>
+      <p><strong>The hardest parts:</strong></p>
+      <ul>
+        <li>70 rooms that are fun and correctly gated. Automatic checks prove every route works.</li>
+        <li>Ten distinct boss fights.</li>
+        <li>Movement and animation that feel great: chirp, jump and hide are the heart of it, and every loop gets reworked until it reads at small size.</li>
+        <li>Ten gecko species that look like one family.</li>
+        <li>A chirp beacon that stays clear on phone speakers.</li>
+      </ul>
+      <p>It fits within the budget set for art and sound, with room for retries.</p>
+    </div>
+  </section>
+
+  <section id="feedback">
+    <div class="prose">
+      <h2>What would help most</h2>
+      <ul>
+        <li>Is the <strong>look</strong> right? Every character and enemy on this page is a mock picture, and together they set the style for the rest of the game.</li><li>Does hiding feel like the right amount? Should the Dragon's Lair be optional, or part of the main path?</li><li>Does each cricket feel like its <strong>own character</strong>? Who's your favorite?</li>
+        <li>Do the <strong>gecko fights</strong> sound fun, and gentle enough?</li>
+        <li>Are the <strong>Not-Crickets</strong> funny? Any other sound-alikes you'd add (a squeaky shoe, a phone on vibrate, a wind-up toy)?</li>
+        <li>Names: Pip, Chip, Duchess, Big Tok, Nana, and the rest. Any you'd change?</li>
+        <li>Is the size right: 10 zones, about 2 to 3 hours?</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">House Cricket · design for review, before building · an idea by Rich Conlan · made with gamegen. Pictures are early mockups.</footer>
+
+<script>
+  // name, species, song, [speed, jump, chirp, weight], perk, personality, art scale
+  const C = [ // + says
+    ["Pip","House cricket","4.8 kHz, 2–3 pulses",[3,3,3,3],"Listen hears the beacon twice as far","The hero. Earnest, brave, and a little guilty that his escape spilled the cup.",1,"I\u2019m coming back for everyone. That\u2019s the plan. That\u2019s the whole plan."],
+    ["Stripe","Banded cricket","6 kHz, quick two-pulse chirps",[5,3,2,2],"Dash across crumbling floors","A small, flat sprinter in crisp stripes. Always already halfway there.",0.85,"Already here! …Where are we going?"],
+    ["Katy","True katydid","3 kHz \u201cka-ty-did\u201d",[3,3,3,2],"Longer glide","A cricket cousin with leaf-shaped wings, and very proud of it.",1,"Katy-DID. Cousin, not a copy."],
+    ["Duo","Two-spotted cricket","4.6 kHz, 4–5 pulses",[2,2,4,5],"Shove heavy dice and spools","Big, glossy and black, with two yellow spots. A gentle bruiser.",1.1,"I\u2019ll carry it. I\u2019ll carry you too, if you\u2019re tired."],
+    ["Frost","Snowy tree cricket","3 kHz steady \u201ctreet\u201d",[3,4,2,1],"A living thermometer: opens thermostat locks","Pale and calm. Count her chirps and you know the temperature (Dolbear\u2019s law).",1,"It\u2019s sixty-eight degrees in here. You\u2019re welcome."],
+    ["Hump","Camel cricket","silent: he drums instead",[3,5,0,3],"Huge leap from a crouch","Wingless and humpbacked, with endless legs. Shy, sweet, and never without a toothpick drumstick.",1,"(taps twice on his bottle cap, beaming)"],
+    ["Jam","Jamaican field cricket","4.5 kHz, 3 pulses",[5,3,3,3],"Runs up walls","Caramel-brown and full of bounce. Waves at everyone.",1,"Hey! Hi! Hello! Up the wall? Up the wall!"],
+    ["Rin","Bell cricket","a ringing \u201cri-i-in\u201d",[2,3,5,2],"Lullaby: stuns last 3\u00d7 longer","Glossy black with glassy singing wings. Sings with her eyes closed.",0.95,"Hush. Listen. …There. Did you hear the house breathe?"],
+    ["Digby","Mole cricket","2.5 kHz low drone",[2,2,4,4],"Digs through soft soil","Velvety, sleepy, with shovels for hands. Short antennae, as real mole crickets have.",1,"Five more minutes. In the dirt. It\u2019s warm."],
+    ["Mote","Ground cricket","7.5 kHz faint trill",[4,3,1,1],"Tiny: slips through cracks","Tiny, fuzzy, and absolutely fearless about it.",0.55,"Small? I\u2019m the exact right size for this crack, thank you."],
+    ["Chip","House cricket, Pip\u2019s cupmate","4.9 kHz, 3 pulses",[3,3,3,3],"Duet: opens harmony doors","Pip\u2019s best friend from the cup, the last one rescued. Named for the chip in his wing.",1,"You came back. I told them you would."]
+  ];
+  const names = ["Speed","Jump","Chirp","Weight"];
+  const bars = n => '<span class="stat" aria-hidden="true">' + [1,2,3,4,5].map(i => '<i' + (i <= n ? ' class="on"' : '') + '></i>').join('') + '</span>';
+  document.getElementById('crew').innerHTML = C.map(([n, sp, song, st, perk, who, sc, line]) =>
+    '<article class="mate"><div class="art"><img src="img/crickets/' + n.toLowerCase() + '.webp" alt="Mock picture of ' + n + ', a ' + sp.toLowerCase() + '" style="max-height:' + Math.round(190*sc) + 'px;max-width:' + Math.round(100*sc) + '%"></div>' +
+    '<h3>' + n + '</h3><div class="sp">' + sp + '</div><p class="who">' + who + '</p><p class="line">\u201c' + line + '\u201d</p>' +
+    '<dl class="meta"><dt>Song</dt><dd>' + song + '</dd><dt>Perk</dt><dd>' + perk + '</dd>' +
+    names.map((k, i) => '<dt>' + k + '</dt><dd aria-label="' + k + ' ' + st[i] + ' of 5">' + bars(st[i]) + '</dd>').join('') + '</dl></article>').join('');
+
+  const card = (img, name, sub, who, line, extra, small) =>
+    '<article class="mate' + (small ? ' small' : '') + '"><div class="art"><img src="' + img + '" alt="Mock picture of ' + name + '"></div>' +
+    '<h3>' + name + '</h3>' + (sub ? '<div class="sp">' + sub + '</div>' : '') + (who ? '<p class="who">' + who + '</p>' : '') +
+    (line ? '<p class="line">\u201c' + line + '\u201d</p>' : '') + (extra || '') + '</article>';
+  const G = [
+    ["duchess","Duchess","Leopard gecko · Bedroom","Grand, sleepy and smiling. Pip was bought for her.","Oh, little one. You were supposed to be a snack. How terribly inconvenient for us both."],
+    ["chikchak","Chikchak","Common house gecko · Bathroom","A sly trickster who chirps like a cricket to lure you in.","Chik-chak! Oh, were you following that? How sweet."],
+    ["bigtok","Big Tok","Tokay gecko · Kitchen","LOUD. Bites anything that moves.","TO-KAY! …Sorry. That's just how I say hello. TO-KAY!"],
+    ["lashes","Lashes","Crested gecko · Pantry","A gourmand who loves fruit, and licks his own eyeball between every sentence.","*slurp* Pardon me. *slurp* You smell faintly of apricot."],
+    ["peridot","Peridot","Giant day gecko · Laundry","A bright-green fitness nut who wilts in the dark.","Lights ON! Nobody naps on MY watch! …Is it getting dark in here?"],
+    ["gargy","Gargy","Gargoyle gecko · Living room","A grumpy couch potato.","Ugh. Move. You're blocking the remote."],
+    ["mossy","Mossy","Leaf-tailed gecko · Study","A cheerful hide-and-seek champion who looks exactly like bark.","Ready or not! …You'll never find me. I'm the wallpaper now."],
+    ["kite","Kite","Flying gecko · Sunroom","A show-off with skin-flap wings.","Watch THIS. No, watch. Are you watching?"],
+    ["ember","Ember","Cave gecko · Basement","Shy, red-eyed, and hunts in the dark by sound.","Please don't shine that at me. I'm sensitive."],
+    ["nana","Nana","New Caledonian giant gecko · Attic","Ancient, enormous and grandmotherly. The biggest gecko alive.","Come closer, dear. My eyes aren't what they were. My teeth are, though."]
+  ];
+  document.getElementById('geckolist').innerHTML = G.map(g => card('img/cast/' + g[0] + '.webp', g[1], g[2], g[3], g[4])).join('');
+  const N = [
+    ["beep","Beep","The smoke alarm","Everyone thinks it's a cricket. It's a battery, and it's very tired.","…beep. (I'm not a cricket. I'm so tired.)"],
+    ["peeper","Peeper","Spring peeper tree frog","Sings to impress frogs; deeply hurt.","PEEP. That was a love song. For FROGS."],
+    ["soot","Soot","Chimney swift","Fed up with every wrong name.","Chimney sparrow? Swallow? Bat? Now CRICKET? I'm a SWIFT."],
+    ["velvet","Velvet","Big brown bat","Not blind. Not a cricket. Not impressed.","Bats aren't blind, sweetie. I saw you mistake me for a cricket."]
+  ];
+  document.getElementById('notlist').innerHTML = N.map(g => card('img/cast/' + g[0] + '.webp', g[1], g[2], g[3], g[4], '', true)).join('');
+  const R = [
+    ["rolo","Rolo","Pill bug · the Crumb Shop","Crumbs for crumbs! Fair trades, round prices."],
+    ["page","Page","Silverfish · the Library and Sound Book","Shh. Every sound in this house is in here. Alphabetized."],
+    ["lumen","Lumen","Moth · the Lamp and map table","Oh… is that a light? Sorry. Hello. Is that a light?"],
+    ["dot","Dot","Ladybug · the Clinic","Hold still. Seed-hearts don't patch themselves."],
+    ["weft","Weft","Jumping spider · hammocks and map stitches","I'll stitch you a note on the map. Two stitches. Maybe a bow."],
+    ["crumb","Sgt. Crumb","Ant who quit the army · the Trainer","Forty days hauling crumbs for the colony. Now I haul 'em for ME."],
+    ["glim","Glim","Firefly · night lights and the Stage","Every song you've ever heard, I can play it back! Glowingly!"],
+    ["shelly","Shelly","Snail · the Post (fast travel)","Fast travel. Well. Travel."]
+  ];
+  document.getElementById('recruits').innerHTML = R.map(g => card('img/cast/' + g[0] + '.webp', g[1], g[2], '', g[3], '', true)).join('');
+  const F = [
+    ["ant","Ant","patrols a ledge"],["mites","Dust mites","drift in a puff; chirp scatters them"],["silverfish","Silverfish","darts along floors"],
+    ["mosquito","Mosquito","hovers, then dives"],["cockroach","Cockroach","scuttles, then flies when startled"],["fruitflies","Fruit fly swarm","a cloud that blocks the path"],
+    ["weevil","Weevil","rolls grains of rice at you"],["antsoldier","Ant soldier","winds up, then charges"],["clothesmoth","Clothes moth","drawn to light; lure it away"],
+    ["earwig","Earwig","pincers block a corridor"],["dustbunny","Dust bunny","rolls downhill and grows"],["stinkbug","Stink bug","leaves a stink cloud"],
+    ["booklouse","Booklouse","crowds narrow shelf gaps"],["wolfspider","Wolf spider","watches, then pounces"],["wasp","Paper wasp","hovers, then dives in a line"],
+    ["aphid","Aphid herd","harmless; use them as springs"],["centipede","House centipede","very fast along walls"],["cellarspider","Cellar spider","drops on a silk line"]
+  ];
+  document.getElementById('foes').innerHTML = F.map(g => card('img/enemies/' + g[0] + '.webp', g[1], g[2], '', '', '', true)).join('');
+  const H = [
+    ["beetle","Darkling beetles","Bedroom to Attic","Plod along fixed routes, oblivious to kicks and chirps. Mealworms are the <em>other</em> gecko food, and these are the mealworms, grown up."],
+    ["vacuum","The robot vacuum","Living room and Hall","Sweeps a loop, loud enough to daze a cricket. If it catches you, you're back at the room's start."]
+  ];
+  document.getElementById('hazards').innerHTML = H.map(g => card('img/enemies/' + g[0] + '.webp', g[1], g[2], g[3], '', '', true)).join('');
+</script>
+</body>
+</html>

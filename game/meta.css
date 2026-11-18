@@ -316,3 +316,11 @@ gh-feedback::part(backdrop) { background: rgba(20,16,14,.55); }
   .panel-pause .btn-row { margin-top: 6px; }
   .tab-key { font-size: .75em; }
 }
+/* [publish] small links on the title screen only: gallery lower-left, GitHub lower-right */
+.title-links { position: absolute; inset: auto 0 0 0; height: 0; pointer-events: none; z-index: 5; }
+.title-art[hidden] ~ .title-links, body:not(.title-ready) .title-links { display: none; }
+.title-links .tl { position: absolute; bottom: calc(10px + env(safe-area-inset-bottom)); pointer-events: auto; font: 15px/1.2 "Patrick Hand", "Nunito", sans-serif; color: rgba(244,235,221,.62); text-decoration: none; padding: 6px 8px; border-radius: 8px; letter-spacing: .02em; }
+.title-links .tl:hover, .title-links .tl:focus-visible { color: #F4EBDD; background: rgba(20,16,14,.35); outline: none; }
+.title-links .tl-gallery { left: calc(10px + env(safe-area-inset-left)); }
+.title-links .tl-github { right: calc(10px + env(safe-area-inset-right)); }
+@media (max-height: 500px) { .title-links .tl { font-size: 13px; padding: 4px 6px; bottom: calc(4px + env(safe-area-inset-bottom)); } }

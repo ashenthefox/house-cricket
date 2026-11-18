@@ -1,0 +1,4 @@
+{"name":"zone-lair-path","start":{"room":"lair-gap","x":1,"y":15,"items":["booties","floss","raft","glider","thimble","glow"],"party":["pip"]},"frames":347,"events":[[10,"ArrowRight","down"],
+[238,"ArrowRight","up"],
+[241,"ArrowRight","down"],
+[317,"ArrowRight","up"]],"expect":{"room":"dragon-lair","levelComplete":false,"items":["booties","floss","raft","glider","thimble","glow"]},"endState":{"room":"dragon-lair","x":51,"y":1336,"state":"ground","health":5,"items":["booties","floss","glider","glow","raft","thimble"],"rescued":[],"levelComplete":false,"frame":341}}

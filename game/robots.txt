@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://zeveck.github.io/house-cricket/sitemap.xml
+Sitemap: https://housecricket.synapticnoise.com/sitemap.xml

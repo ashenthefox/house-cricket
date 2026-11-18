@@ -6,19 +6,19 @@
 <meta name="theme-color" content="#2A201A">
 <title>House Cricket: a watercolor cricket platformer</title>
 <meta name="description" content="Bought as gecko food. Escaped. Coming back for everyone. A cozy watercolor Metroidvania about a house cricket rescuing his friends.">
-<link rel="canonical" href="https://zeveck.github.io/house-cricket/">
-<meta property="og:url" content="https://zeveck.github.io/house-cricket/">
+<link rel="canonical" href="https://housecricket.synapticnoise.com/">
+<meta property="og:url" content="https://housecricket.synapticnoise.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="House Cricket: a watercolor cricket platformer">
 <meta property="og:description" content="Bought as gecko food. Escaped. Coming back for everyone. A cozy watercolor Metroidvania about a house cricket rescuing his friends.">
-<meta property="og:image" content="https://zeveck.github.io/house-cricket/social-card.jpg">
+<meta property="og:image" content="https://housecricket.synapticnoise.com/social-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Pip the house cricket on a floorboard, under the chin of a smiling leopard gecko">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="House Cricket: a watercolor cricket platformer">
 <meta name="twitter:description" content="Bought as gecko food. Escaped. Coming back for everyone.">
-<meta name="twitter:image" content="https://zeveck.github.io/house-cricket/social-card.jpg">
+<meta name="twitter:image" content="https://housecricket.synapticnoise.com/social-card.jpg">
 <meta name="twitter:image:alt" content="Pip the house cricket on a floorboard, under the chin of a smiling leopard gecko">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -48,7 +48,7 @@
 <main id="stage">
   <canvas id="view" aria-label="House Cricket"></canvas>
   <!-- [final-S] the title is plain HTML, up before any game code loads; ui.js adopts these nodes as they are (no flash) -->
-  <div id="overlay"><div class="title-art" data-boot></div><div class="menus" data-boot><div class="panel panel-press panel-title" data-screen="press" role="dialog" aria-modal="true" aria-labelledby="h-press" data-boot><h1 id="h-press">House Cricket</h1><p class="sub">Bought as gecko food. Escaped. Coming back for everyone.</p><p class="note">Press any key or button</p></div></div></div>
+  <div id="overlay"><div class="title-art" data-boot></div><div class="menus" data-boot><div class="panel panel-press panel-title" data-screen="press" role="dialog" aria-modal="true" aria-labelledby="h-press" data-boot><h1 id="h-press">House Cricket</h1><p class="sub">Bought as gecko food. Escaped. Coming back for everyone.</p><p class="note">Press any key or button</p></div></div><div class="title-links"><a class="tl tl-gallery" href="https://synapticnoise.com/" title="More games at synapticnoise.com">synapticnoise.com</a><a class="tl tl-github" href="https://github.com/zeveck/house-cricket" target="_blank" rel="noopener" title="House Cricket on GitHub: how it was made">GitHub</a></div></div>
 </main>
 <script>
   // [final-S] First load: size the stage like main.js does, wait for the title painting and the two
@@ -96,5 +96,6 @@
     navigator.serviceWorker.register('sw.js');
   }
 </script>
+<script>/* [publish] title links open without starting the game */document.querySelectorAll(".title-links a").forEach(function(a){["pointerdown","mousedown","touchstart","keydown"].forEach(function(t){a.addEventListener(t,function(e){e.stopPropagation();},{passive:true});});});</script>
 </body>
 </html>

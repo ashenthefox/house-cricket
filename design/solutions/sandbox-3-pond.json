@@ -1,0 +1,12 @@
+{"name":"sandbox-3-pond","start":{"room":"sb-pond","x":1,"y":13,"items":["booties","floss"]},"frames":824,"events":[[5,"ArrowRight","down"],
+[29,"ArrowRight","up"],
+[74,"ArrowRight","down"],
+[249,"KeyZ","down"],
+[257,"KeyZ","up"],
+[386,"ArrowRight","up"],
+[392,"KeyV","down"],
+[412,"ArrowRight","down"],
+[412,"KeyV","up"],
+[540,"KeyZ","down"],
+[785,"KeyZ","up"],
+[794,"ArrowRight","up"]],"expect":{"room":"sb-cellar","levelComplete":false,"items":["booties","floss","raft","band","glider"]},"endState":{"room":"sb-cellar","x":-9.8,"y":376,"state":"ground","health":5,"items":["band","booties","floss","glider","raft"],"rescued":[],"levelComplete":false,"frame":698}}

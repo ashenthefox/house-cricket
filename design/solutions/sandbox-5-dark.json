@@ -1,0 +1,10 @@
+{"name":"sandbox-5-dark","start":{"room":"sb-dark","x":0,"y":15,"items":["booties","floss","raft","band","glider","thimble","earplugs","glow"]},"frames":353,"events":[[5,"ArrowRight","down"],
+[101,"KeyC","down"],
+[104,"KeyC","up"],
+[225,"ArrowRight","up"],
+[237,"KeyZ","down"],
+[259,"KeyZ","up"],
+[260,"ArrowRight","down"],
+[260,"KeyZ","down"],
+[270,"KeyZ","up"],
+[323,"ArrowRight","up"]],"expect":{"room":"sb-dark","levelComplete":true,"items":["booties","floss","raft","band","glider","thimble","earplugs","glow","feather"]},"endState":{"room":"sb-dark","x":1047.4,"y":416,"state":"ground","health":5,"items":["band","booties","earplugs","feather","floss","glider","glow","raft","thimble"],"rescued":["stripe"],"levelComplete":true,"frame":313}}

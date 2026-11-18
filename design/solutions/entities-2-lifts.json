@@ -1,0 +1,6 @@
+{"name":"entities-2-lifts","start":{"room":"et-lifts","x":1,"y":15,"items":[]},"frames":399,"events":[[10,"ArrowRight","down"],
+[39,"ArrowRight","up"],
+[107,"ArrowRight","down"],
+[239,"KeyZ","down"],
+[251,"KeyZ","up"],
+[369,"ArrowRight","up"]],"expect":{"room":"et-terrain","levelComplete":false,"items":[]},"endState":{"room":"et-terrain","x":-6.9,"y":616,"state":"ground","health":5,"items":[],"rescued":[],"levelComplete":false,"frame":393}}

@@ -1,0 +1,4 @@
+{"name":"link-stairs-glide","start":{"room":"stair-landing","x":30,"y":23,"items":["booties","floss","raft","glider"],"party":["duo"]},"frames":462,"events":[[20,"ArrowRight","down"],
+[150,"KeyZ","down"],
+[418,"ArrowRight","up"],
+[418,"KeyZ","up"]],"expect":{"room":"stu-door","levelComplete":false,"items":["booties","floss","raft","glider"]},"endState":{"room":"stu-door","x":22.7,"y":456,"state":"ground","health":5,"items":["booties","floss","glider","raft"],"rescued":[],"levelComplete":false,"frame":456}}
