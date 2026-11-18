@@ -1,0 +1,16 @@
+{
+  "name": "House Cricket",
+  "short_name": "House Cricket",
+  "description": "Bought as gecko food. Escaped. Coming back for everyone. A cozy watercolor Metroidvania about a house cricket rescuing his friends.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#2A201A",
+  "theme_color": "#2A201A",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

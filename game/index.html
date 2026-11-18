@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2A201A">
+<title>House Cricket: a watercolor cricket platformer</title>
+<meta name="description" content="Bought as gecko food. Escaped. Coming back for everyone. A cozy watercolor Metroidvania about a house cricket rescuing his friends.">
+<link rel="canonical" href="https://zeveck.github.io/house-cricket/">
+<meta property="og:url" content="https://zeveck.github.io/house-cricket/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="House Cricket: a watercolor cricket platformer">
+<meta property="og:description" content="Bought as gecko food. Escaped. Coming back for everyone. A cozy watercolor Metroidvania about a house cricket rescuing his friends.">
+<meta property="og:image" content="https://zeveck.github.io/house-cricket/social-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pip the house cricket on a floorboard, under the chin of a smiling leopard gecko">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="House Cricket: a watercolor cricket platformer">
+<meta name="twitter:description" content="Bought as gecko food. Escaped. Coming back for everyone.">
+<meta name="twitter:image" content="https://zeveck.github.io/house-cricket/social-card.jpg">
+<meta name="twitter:image:alt" content="Pip the house cricket on a floorboard, under the chin of a smiling leopard gecko">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="House Cricket">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="fonts/patrick-hand-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/title.webp" as="image" fetchpriority="high">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="meta.css">
+<script>
+  // Report a bug: Ctrl+Shift+F from anywhere (set up before the game, so a game error can't stop it).
+  addEventListener('keydown', (e) => {
+    if (!e.ctrlKey || !e.shiftKey || e.altKey || e.metaKey || e.code !== 'KeyF') return;
+    const fb = document.getElementById('report');
+    if (!fb?.getAttribute('repo') || fb.isOpen) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    try { window.reportShortcut?.(); } catch {}
+    fb.open();
+  }, true);
+</script>
+</head>
+<body>
+<main id="stage">
+  <canvas id="view" aria-label="House Cricket"></canvas>
+  <!-- [final-S] the title is plain HTML, up before any game code loads; ui.js adopts these nodes as they are (no flash) -->
+  <div id="overlay"><div class="title-art" data-boot></div><div class="menus" data-boot><div class="panel panel-press panel-title" data-screen="press" role="dialog" aria-modal="true" aria-labelledby="h-press" data-boot><h1 id="h-press">House Cricket</h1><p class="sub">Bought as gecko food. Escaped. Coming back for everyone.</p><p class="note">Press any key or button</p></div></div></div>
+</main>
+<script>
+  // [final-S] First load: size the stage like main.js does, wait for the title painting and the two
+  // fonts, show the title, and only then load the game (src/main.js and everything it imports).
+  (function () {
+    var stage = document.getElementById('stage');
+    function fit() {
+      // [final-2] main.js resize()'s rule: a touch screen wider than 16:9 is filled edge to edge
+      var vw = innerWidth, vh = innerHeight, fill = matchMedia('(pointer: coarse)').matches && vw / vh > 16 / 9;
+      var w = fill ? vw : Math.min(vw, vh * 16 / 9), hh = fill ? vh : w * 9 / 16;
+      stage.style.width = w + 'px'; stage.style.height = hh + 'px';
+      stage.style.setProperty('--ui', Math.max(0.75, Math.min(1.4, hh / 600)).toFixed(3));
+    }
+    fit(); addEventListener('resize', fit);
+    window.__bootFit = fit;
+    if (matchMedia('(pointer: coarse)').matches) document.querySelector('.panel-press[data-boot] .note').textContent = 'Tap to start';
+    // a press on the title before the game has loaded still counts
+    function pressed(e) {
+      if (e.type === 'keydown' && (e.ctrlKey || e.metaKey || e.altKey)) return;
+      window.__bootPressed = true;
+      var n = document.querySelector('.panel-press[data-boot] .note'); if (n) n.textContent = 'Loading...';
+    }
+    addEventListener('keydown', pressed); addEventListener('pointerdown', pressed);
+    window.__bootDone = function () { removeEventListener('keydown', pressed); removeEventListener('pointerdown', pressed); removeEventListener('resize', fit); };
+    var started = false;
+    function start() {
+      if (started) return; started = true;
+      document.body.classList.add('title-ready');
+      setTimeout(function () {
+        import('./src/main.js').then(function () { return import('./vendor/gh-feedback.js'); }).catch(function (e) { console.error(e); });
+      }, 400);
+    }
+    var im = new Image(); im.src = 'assets/title.webp';
+    var art = im.decode ? im.decode() : new Promise(function (ok) { im.onload = ok; im.onerror = ok; });
+    var fonts = document.fonts ? Promise.all([document.fonts.load('1em "Patrick Hand"'), document.fonts.load('800 1em Nunito'), document.fonts.load('700 1em Nunito')]) : Promise.resolve();
+    Promise.all([art, fonts]).then(start, start);
+    setTimeout(start, 8000);
+  })();
+</script>
+<gh-feedback id="report" trigger="none" repo="zeveck/house-cricket" template="bug.yml"
+  types="bug,feature" theme="dark" color="#E8B85A" popup-color="#B0702A"></gh-feedback>
+<script>
+  const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if ('serviceWorker' in navigator && (!local || new URLSearchParams(location.search).has('sw'))) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>

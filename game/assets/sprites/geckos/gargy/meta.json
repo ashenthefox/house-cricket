@@ -1,0 +1,79 @@
+{
+ "frame": "wide",
+ "size": [
+  1499,
+  597
+ ],
+ "overlap": 12,
+ "frames": {
+  "strike": {
+   "file": "strike.png",
+   "at": [
+    -116,
+    116
+   ],
+   "pivot": [
+    965,
+    291
+   ],
+   "scale": 0.87
+  },
+  "sleep": {
+   "file": "sleep.png",
+   "at": [
+    6,
+    302
+   ],
+   "pivot": [
+    965,
+    482
+   ],
+   "scale": 0.741
+  }
+ },
+ "tailBox": [
+  953,
+  191,
+  1493,
+  401
+ ],
+ "tailAxis": "x",
+ "pivot": [
+  965,
+  298
+ ],
+ "legs": [
+  {
+   "name": "front",
+   "file": "legs-front.png",
+   "box": [
+    314,
+    418,
+    531,
+    591
+   ],
+   "pivot": [
+    450,
+    440
+   ]
+  },
+  {
+   "name": "back",
+   "file": "legs-back.png",
+   "box": [
+    845,
+    401,
+    1085,
+    577
+   ],
+   "pivot": [
+    910,
+    435
+   ]
+  }
+ ],
+ "eye": [
+  205,
+  160
+ ]
+}

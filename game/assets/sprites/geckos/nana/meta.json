@@ -1,0 +1,50 @@
+{
+ "frame": "tall",
+ "size": [
+  781,
+  1490
+ ],
+ "overlap": 12,
+ "frames": {
+  "strike": {
+   "file": "strike.png",
+   "at": [
+    6,
+    215
+   ],
+   "pivot": [
+    597,
+    1120
+   ],
+   "scale": 0.838
+  },
+  "sleep": {
+   "file": "sleep.png",
+   "at": [
+    88,
+    6
+   ],
+   "pivot": [
+    528,
+    1120
+   ],
+   "scale": 0.756
+  }
+ },
+ "tailBox": [
+  445,
+  1108,
+  757,
+  1484
+ ],
+ "tailAxis": "y",
+ "pivot": [
+  613,
+  1120
+ ],
+ "legs": [],
+ "eye": [
+  360,
+  175
+ ]
+}

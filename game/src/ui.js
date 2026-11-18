@@ -1,0 +1,432 @@
+// DOM HUD, menus and cards (minimal for milestone 1): title -> play, pause, a HUD with
+// hearts, the chirp meter and the trio, prompts with key caps / pad glyphs, toasts, item cards.
+// One focus model: arrows/WASD/stick/d-pad move focus, confirm presses, back closes; mouse
+// and touch click directly.
+import { CRICKETS } from '../data/crickets.js';
+import { ITEMS } from '../data/items.js';
+import * as S from './sprites.js';
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const h = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  for (const kid of kids) if (kid != null) e.append(kid);
+  return e;
+};
+
+const ICON = {
+  heart: '<svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 21C5 15 1 11.5 1 7a5.5 5.5 0 0 1 11-1 5.5 5.5 0 0 1 11 1c0 4.5-4 8-11 14z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5"/><rect x="14" y="4" width="4" height="16" rx="1.5"/></svg>',
+  map: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="2"/></svg>',
+  speaker: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8c1.5 1.2 1.5 6.8 0 8M19 5c3 2.5 3 11.5 0 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  speakerOff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  cross: '<svg viewBox="0 0 20 20" aria-label="cross"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  circle: '<svg viewBox="0 0 20 20" aria-label="circle"><circle cx="10" cy="10" r="5.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
+  square: '<svg viewBox="0 0 20 20" aria-label="square"><rect x="4.5" y="4.5" width="11" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
+  triangle: '<svg viewBox="0 0 20 20" aria-label="triangle"><path d="M10 4l6.5 11h-13z" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>',
+};
+
+export class UI {
+  constructor(root, input) {
+    this.root = root; this.input = input;
+    this.screen = null; this.handlers = {};
+    this.focusIdx = 0; this.repeat = { dir: 0, t: 0 };
+    this.build();
+  }
+  build() {
+    const r = this.root;
+    this.hud = h('div', { class: 'hud', hidden: '' });
+    this.hearts = h('div', { class: 'hearts', 'aria-label': 'health' });
+    this.meter = h('div', { class: 'chirp-meter', 'aria-label': 'chirp meter' });
+    this.trio = h('div', { class: 'trio' });
+    const left = h('div', { class: 'hud-left' }, h('div', { class: 'hud-row' }, this.hearts), h('div', { class: 'hud-row' }, this.meter), this.trio);
+    this.btnMute = h('button', { class: 'icon-btn', 'aria-label': 'mute', title: 'Mute (M)', onclick: () => this.handlers.mute?.() });
+    this.btnMap = h('button', { class: 'icon-btn', 'aria-label': 'map', title: 'Map (Tab)', onclick: () => this.handlers.map?.() });
+    this.btnPause = h('button', { class: 'icon-btn', 'aria-label': 'pause', title: 'Pause (Esc)', onclick: () => this.handlers.pause?.() });
+    this.btnMap.innerHTML = ICON.map; this.btnPause.innerHTML = ICON.pause;
+    // meta HUD: crumbs counter (top-right), Frost's thermometer, the chirp indicator (screen edge)
+    this.crumbs = h('div', { class: 'crumbs', 'aria-label': 'crumbs' });
+    this.crumbs.append(h('span', { class: 'crumb-icon' }), h('span', { class: 'crumb-n', text: '0' }));
+    this.thermo = h('div', { class: 'thermo', hidden: '' }, h('span', { class: 'thermo-tube' }, h('span', { class: 'thermo-fill' })), h('span', { class: 'thermo-read', text: '70°F' }));
+    // [final-S] the chirp indicator: an ear with sound waves that pulse with each beacon chirp and grow with loudness
+    this.indicator = h('div', { class: 'chirp-ind', id: 'chirp-indicator', hidden: '', 'aria-hidden': 'true' });
+    this.indicator.innerHTML = '<span class="ci-ring"></span><svg viewBox="-32 -32 64 64" class="ci-svg">'
+      + '<g class="ci-waves"><path class="w1" d="M19.5 -11.3 A22.5 22.5 0 0 1 19.5 11.3"/><path class="w2" d="M24.2 -14 A28 28 0 0 1 24.2 14"/><path class="w3" d="M28.6 -16.5 A33 33 0 0 1 28.6 16.5"/></g>'
+      + '<circle class="ci-disc" r="16"/>'
+      + '<path class="ci-ear" d="M0.5 -11.5 C7.5 -11.5 10.5 -6 9.5 -1 C8.8 2.5 6 3.8 5 6.5 C3.8 10 1.5 12 -1.5 11.5 C-4 11 -4.5 8.5 -6.5 6.5 C-9.5 3 -9.5 -11.5 0.5 -11.5 Z"/>'
+      + '<path class="ci-curl" d="M-3.5 -2 C-3.5 -7.5 5 -7.5 5 -2.5 C5 0.5 2 0.8 1.5 3.5 M-1 -1.5 C-1 -3.5 2 -3.5 2 -1.5"/></svg>';
+    this.ripples = h('div', { class: 'beacon-ripples', 'aria-hidden': 'true' });
+    this.strip = h('canvas', { class: 'beacon-strip', hidden: '', 'aria-hidden': 'true', width: '300', height: '44' });
+    const right = h('div', { class: 'hud-right' }, this.crumbs, this.btnMute, this.btnMap, this.btnPause);
+    this.prompt = h('div', { class: 'prompt', hidden: '' });
+    this.hint = h('div', { class: 'hint', hidden: '' });
+    this.listen = h('div', { class: 'listen', hidden: '' }, h('div', { class: 'listen-arrow' }));
+    this.toastBox = h('div', { class: 'toasts', 'aria-live': 'polite' });
+    this.card = h('div', { class: 'item-card', hidden: '' });
+    this.prompt.addEventListener('click', () => this.handlers.promptTap?.());
+    this.hud.append(this.ripples, left, right, this.thermo, this.indicator, this.strip, this.prompt, this.hint, this.listen, this.toastBox, this.card);
+    // [final-S] index.html shows the title before the game loads: adopt its nodes where they are (moving them would restart the fade/animations)
+    const bootArt = r.querySelector(':scope > .title-art[data-boot]'), bootMenus = r.querySelector(':scope > .menus[data-boot]');
+    this.menus = bootMenus || h('div', { class: 'menus' });
+    this.rotate = h('div', { class: 'rotate-note' }, h('div', { class: 'rotate-icon' }), h('p', { text: 'Turn your phone sideways to play.' }));
+    this.titleArt = bootArt || h('div', { class: 'title-art', hidden: '' });
+    // [playtest] on a slow line the painting streamed in top-down under an already-shown title: decode it first, then fade the title in
+    { const im = new Image(); const ready = () => document.body.classList.add('title-ready'); im.src = 'assets/title.webp'; (im.decode ? im.decode() : Promise.reject()).then(ready, () => { im.onload = ready; im.onerror = ready; if (im.complete) ready(); }); setTimeout(ready, 15000); }
+    if (bootArt && bootMenus) { bootArt.removeAttribute('data-boot'); bootMenus.removeAttribute('data-boot'); r.insertBefore(this.hud, bootMenus); r.append(this.rotate); }
+    else r.append(this.titleArt, this.hud, this.menus, this.rotate);
+  }
+
+  // ---- menus ----
+  // items: [{label, action, disabled, kind, ...}]; opts: {title, sub, note, back, body, big,
+  //   tabs: [{id, label}], tab, onTab(id), class, foot}
+  // kinds: (default) button; 'toggle' {get, set}; 'slider' {get, set, min, max, step};
+  //   'choice' {get, set, options: [{v, label}]}. Left/Right adjust them; Enter toggles/cycles.
+  menu(name, items, opts = {}) {
+    // [final-S] the boot title (index.html) is this very panel: keep it, don't rebuild it
+    const boot = name === 'press' && this.menus.querySelector(':scope > .panel-press[data-boot]');
+    if (boot) {
+      boot.removeAttribute('data-boot'); if (opts.note) boot.querySelector('.note').textContent = opts.note;
+      this.menus.hidden = false; this.screen = name; this.onBack = opts.back || null; this.onTab = null; this.onKey = null; this.focusIdx = 0;
+      return boot;
+    }
+    this.menus.innerHTML = '';
+    this.onKey = null; // [final-S] a screen that wants raw keys (the stitch needle) sets it again after menu()
+    this.guard = 0; // [polish-T] meta-run handoff() sets it after menu()
+    const panel = h('div', { class: `panel panel-${name} ${opts.class || ''}`, 'data-screen': name, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': `h-${name}` });
+    if (opts.tabs) panel.append(this.tabBar(opts.tabs, opts.tab, opts.onTab));
+    if (opts.title) panel.append(h(opts.big ? 'h1' : 'h2', { id: `h-${name}`, text: opts.title }));
+    if (opts.sub) panel.append(h('p', { class: 'sub', text: opts.sub }));
+    if (opts.body) panel.append(opts.body);
+    if (items && items.length) {
+      const list = h('div', { class: 'menu-list' });
+      items.forEach((it) => list.append(this.item(it)));
+      panel.append(list);
+    }
+    if (opts.note) panel.append(h('p', { class: 'note', text: opts.note }));
+    if (opts.foot) panel.append(opts.foot);
+    this.menus.append(panel);
+    this.menus.hidden = false;
+    this.screen = name; this.onBack = opts.back || null;
+    this.onTab = opts.tabs ? (dir) => { const i = opts.tabs.findIndex((t) => t.id === opts.tab); const n = opts.tabs[(i + dir + opts.tabs.length) % opts.tabs.length]; if (n && opts.onTab) opts.onTab(n.id); } : null;
+    this.focusIdx = 0;
+    const want = opts.focus != null ? opts.focus : 0;
+    this.setFocus(typeof want === 'number' ? want : Math.max(0, this.buttons().findIndex((b) => b.dataset.id === want)));
+    return panel;
+  }
+  tabBar(tabs, current, onTab) {
+    const bar = h('div', { class: 'tabs', role: 'tablist' });
+    const keys = (this.input.scheme ? this.input.scheme() : this.input.last) !== 'touch'; // [polish-T] no Q/E chips on touch (tap the tabs)
+    if (keys) bar.append(h('span', { class: 'tab-key' }, this.cap('swapPrev')));
+    for (const t of tabs) {
+      const b = h('button', { class: 'tab' + (t.id === current ? ' on' : ''), role: 'tab', 'aria-selected': t.id === current ? 'true' : 'false', 'data-nofocus': '1', text: t.label });
+      b.addEventListener('click', () => onTab && onTab(t.id));
+      bar.append(b);
+    }
+    if (keys) bar.append(h('span', { class: 'tab-key' }, this.cap('swapNext'))); // [polish-T]
+    return bar;
+  }
+  // One focusable row.
+  item(it) {
+    const kind = it.kind || 'button';
+    const b = h('button', { class: `menu-btn kind-${kind} ${it.class || ''}` });
+    if (it.id) b.dataset.id = it.id;
+    if (it.disabled) b.disabled = true;
+    const label = h('span', { class: 'mb-label' });
+    if (it.icon) label.append(it.icon);
+    label.append(it.label);
+    b.append(label);
+    if (it.sub) b.append(h('span', { class: 'mb-sub', text: it.sub }));
+    const val = h('span', { class: 'mb-val' });
+    const show = () => {
+      if (kind === 'toggle') { val.textContent = it.get() ? 'On' : 'Off'; b.setAttribute('aria-pressed', it.get() ? 'true' : 'false'); }
+      else if (kind === 'slider') {
+        val.innerHTML = '';
+        const v = it.get(), max = it.max ?? 1, min = it.min ?? 0;
+        const bar = h('span', { class: 'slider' }); const fill = h('span', { class: 'slider-fill' });
+        fill.style.width = `${((v - min) / (max - min)) * 100}%`; bar.append(fill);
+        val.append(bar, h('span', { class: 'slider-num', text: String(Math.round(((v - min) / (max - min)) * 10)) }));
+      } else if (kind === 'choice') { const o = it.options.find((x) => x.v === it.get()) || it.options[0]; val.textContent = o.label; }
+    };
+    if (kind !== 'button') { b.append(val); show(); }
+    b._adjust = kind === 'button' ? null : (dir) => {
+      if (kind === 'toggle') it.set(!it.get());
+      else if (kind === 'slider') { const st = it.step ?? 0.1, max = it.max ?? 1, min = it.min ?? 0; it.set(Math.round(Math.max(min, Math.min(max, it.get() + dir * st)) * 100) / 100); }
+      else if (kind === 'choice') { const i = it.options.findIndex((x) => x.v === it.get()); it.set(it.options[(i + dir + it.options.length) % it.options.length].v); }
+      show();
+    };
+    b.addEventListener('click', (e) => {
+      if (it.disabled) return;
+      if (kind === 'slider') {
+        const r = val.getBoundingClientRect();
+        if (e.clientX && r.width && e.clientX >= r.left) { const fx = Math.max(0, Math.min(1, (e.clientX - r.left) / Math.max(1, r.width - 24))); const min = it.min ?? 0, max = it.max ?? 1, st = it.step ?? 0.1; it.set(Math.round((min + fx * (max - min)) / st) * st); show(); }
+        else b._adjust(1);
+        return;
+      }
+      if (b._adjust) { b._adjust(1); return; }
+      it.action && it.action();
+    });
+    b.addEventListener('pointerenter', () => { const i = this.buttons().indexOf(b); if (i >= 0 && i !== this.focusIdx) this.setFocus(i, true); });
+    return b;
+  }
+  closeMenu() { this.menus.innerHTML = ''; this.menus.hidden = true; this.screen = null; this.onBack = null; this.onTab = null; this.onAdjust = null; this.onKey = null; } // [final-S] onKey too
+  // Focusable elements of the open menu, in order: buttons and [data-focus] (not tabs, not hidden).
+  buttons() { return [...this.menus.querySelectorAll('button:not([disabled]):not([data-nofocus]), [data-focus]:not([disabled])')].filter((b) => b.offsetParent !== null || b === document.activeElement); }
+  setFocus(i, fromPointer) {
+    const bs = this.buttons();
+    if (!bs.length) return;
+    this.focusIdx = (i + bs.length) % bs.length;
+    bs.forEach((b, j) => b.classList.toggle('focus', j === this.focusIdx));
+    const el = bs[this.focusIdx];
+    try { el.focus({ preventScroll: true }); } catch { /* ignore */ }
+    if (!fromPointer) try { el.scrollIntoView({ block: 'nearest' }); } catch { /* ignore */ }
+    if (el._onFocus) el._onFocus();
+  }
+  focused() { return this.buttons()[this.focusIdx] || null; }
+  // Called every fixed update while a menu is open. Stick/d-pad/keys move the focus once,
+  // then repeat after 350 ms every ~120 ms. Left/Right adjust settings or move along a row.
+  menuInput(f) {
+    if (!this.screen) return;
+    if (this.guard > 0) { this.guard--; return; } // [polish-T] a card handed over from a dialog ignores input for its first 30 steps (0.5 s)
+    if (this.onKey && this.onKey(f)) return;          // a screen that wants raw input (map cursor)
+    const v = (f.held.down ? 1 : 0) - (f.held.up ? 1 : 0), hz = (f.held.right ? 1 : 0) - (f.held.left ? 1 : 0);
+    const pv = (f.pressed.down ? 1 : 0) - (f.pressed.up ? 1 : 0), ph = (f.pressed.right ? 1 : 0) - (f.pressed.left ? 1 : 0);
+    const go = (axis, d) => {
+      if (axis === 'v') { this.moveFocus(d, 'v'); return; }
+      const el = this.focused();
+      if (el && el._adjust) el._adjust(d);
+      else this.moveFocus(d, 'h');
+    };
+    if (pv) { go('v', pv); this.repeat = { dir: pv, axis: 'v', t: 0 }; }
+    else if (ph) { go('h', ph); this.repeat = { dir: ph, axis: 'h', t: 0 }; }
+    else {
+      const cur = this.repeat.axis === 'v' ? v : hz;
+      if (cur && cur === this.repeat.dir) { this.repeat.t++; if (this.repeat.t > 21 && (this.repeat.t - 21) % 7 === 0) go(this.repeat.axis, cur); }
+      else this.repeat = { dir: 0, axis: null, t: 0 };
+    }
+    if (!this.screen) return;
+    if (this.onTab && (f.pressed.swapPrev || f.pressed.swapNext)) { this.onTab(f.pressed.swapNext ? 1 : -1); return; }
+    if (f.pressed.confirm) { const b = this.focused(); if (b) { b.click(); return; } }
+    if (f.pressed.back && this.onBack) this.onBack();
+  }
+  // Vertical moves go by rows: buttons in a [data-row] container count as one row (left/right
+  // moves inside it). Without rows it's a plain list.
+  moveFocus(d, axis) {
+    const bs = this.buttons();
+    if (!bs.length) return;
+    const cur = bs[this.focusIdx];
+    const rowOf = (b) => b?.closest('[data-row]');
+    if (axis === 'h') {
+      const row = rowOf(cur);
+      if (!row) return;
+      const inRow = bs.filter((b) => rowOf(b) === row);
+      const j = inRow.indexOf(cur) + d;
+      if (j >= 0 && j < inRow.length) this.setFocus(bs.indexOf(inRow[j]));
+      return;
+    }
+    const row = rowOf(cur);
+    let i = this.focusIdx;
+    if (row) {
+      // leave the row: from its first (down: last) member onward
+      const inRow = bs.filter((b) => rowOf(b) === row);
+      i = bs.indexOf(d > 0 ? inRow[inRow.length - 1] : inRow[0]);
+      const col = inRow.indexOf(cur);
+      let n = (i + d + bs.length) % bs.length;
+      const nrow = rowOf(bs[n]);
+      if (nrow && nrow !== row) { const nIn = bs.filter((b) => rowOf(b) === nrow); n = bs.indexOf(nIn[Math.min(col, nIn.length - 1)]); }
+      this.setFocus(n);
+      return;
+    }
+    let n = (i + d + bs.length) % bs.length;
+    const nrow = rowOf(bs[n]);
+    if (nrow) { const nIn = bs.filter((b) => rowOf(b) === nrow); n = bs.indexOf(d > 0 ? nIn[0] : nIn[0]); }
+    this.setFocus(n);
+  }
+
+  // ---- HUD ----
+  showHUD(v) { this.hud.hidden = !v; }
+  showTitleArt(v) { this.titleArt.hidden = !v; }
+  updateHUD(game) {
+    const p = game.player;
+    const key = `${p.health}/${p.maxHealth}`;
+    if (this._hk !== key) {
+      this._hk = key; this.hearts.innerHTML = '';
+      for (let i = 0; i < p.maxHealth; i++) { const s = h('span', { class: 'heart' + (i < p.health ? '' : ' empty') }); s.innerHTML = ICON.heart; this.hearts.append(s); }
+    }
+    const mk = `${p.chirpMeter}:${p.stats.chp}`;
+    if (this._mk !== mk) {
+      this._mk = mk; this.meter.innerHTML = '';
+      this.meter.classList.toggle('silent', p.stats.chp === 0);
+      for (let i = 0; i < 3; i++) this.meter.append(h('span', { class: 'pip' + (i < p.chirpMeter ? ' full' : '') }));
+    }
+    const tk = `${p.trio.join(',')}:${p.active}:${p.queuedSwap}:${game.portraitGlow ? JSON.stringify(game.portraitGlow) : ''}`; // [builder D] portraitGlow
+    if (this._tk !== tk) {
+      this._tk = tk; this.trio.innerHTML = '';
+      p.trio.forEach((id, i) => {
+        const c = CRICKETS[id];
+        const b = h('button', { class: 'portrait' + (i === p.active ? ' active' : '') + (i === p.queuedSwap ? ' queued' : ''), 'aria-label': `swap to ${c.name}`, title: c.name });
+        const img = S.exists(`sprites/crickets/${id}/portrait.png`) ? h('img', { src: `assets/sprites/crickets/${id}/portrait.png`, alt: '' }) : null;
+        if (img) b.append(img); else { b.style.background = c.color; b.append(h('span', { text: c.name })); }
+        const glow = game.portraitGlow?.[id]; // [builder D] a boss can make portraits glow: game.portraitGlow = {id: colour}
+        if (glow) { b.style.borderColor = glow; b.style.boxShadow = `0 0 0 3px ${glow}, 0 0 18px 6px ${glow}`; }
+        b.addEventListener('click', () => this.handlers.swapTo?.(i));
+        this.trio.append(b);
+      });
+    }
+    this.btnMute.innerHTML = this.muted ? ICON.speakerOff : ICON.speaker;
+    // toasts
+    const tKey = game.toasts.map((t) => t.f + t.text).join('|') + this.capKey(); // [polish-T] caps follow the input in use
+    if (tKey !== this._toastKey) {
+      this._toastKey = tKey; this.toastBox.innerHTML = '';
+      for (const t of game.toasts.slice(-2)) { // [fixer] {action} tokens in toasts render as key caps too
+        const el = h('div', { class: 'toast' });
+        if (String(t.text).includes('{')) el.append(...this.richText(t.text)); else el.textContent = t.text;
+        this.toastBox.append(el);
+      }
+    }
+    // item card
+    if (game.card) {
+      const k = game.card.item + game.card.f;
+      if (this._ck !== k) {
+        this._ck = k; const it = ITEMS[game.card.item];
+        this.card.innerHTML = '';
+        this.card.append(h('div', { class: 'card-kicker', text: 'Found!' }), h('div', { class: 'card-name', text: it.name }), this.verbLine(game.card.item));
+        this.card.hidden = false;
+      }
+    } else if (!this.card.hidden) { this.card.hidden = true; this._ck = null; }
+    // signs (hint) and context prompts
+    this.updateHints(game);
+    // listen arrow
+    if (p.listening) {
+      const tgt = game.beaconTarget();
+      this.listen.hidden = !tgt;
+      if (tgt) { const a = Math.atan2(tgt.y - p.cy, tgt.x - p.cx); this.listen.firstChild.style.transform = `rotate(${a}rad) scale(${(1 + 0.18 * (this._beaconPulse || 0)).toFixed(3)})`; }
+    } else this.listen.hidden = true;
+  }
+  verbLine(item) {
+    const verbs = { booties: [['Press toward a wall in the air', null]], floss: [['Grab a hook', 'use']], raft: [['Float on water', null]], band: [['Hold to charge a super-jump', 'use']], glider: [['Hold while falling to glide', 'jump']], thimble: [['Ground-pound:', 'down'], ['+', 'jump']], glow: [['Light the dark; tap to flash', 'use']], earplugs: [['Walk through loud places', null]], feather: [['Press in the air to flutter', 'jump']] };
+    const p = h('div', { class: 'card-verb' });
+    for (const [text, action] of verbs[item] || [[ITEMS[item].verb, null]]) {
+      if (action) p.append(this.cap(action), ' ');
+      p.append(text + ' ');
+    }
+    return p;
+  }
+  // Text with {action} tokens -> nodes, the tokens drawn as key caps / pad glyphs.
+  richText(text) {
+    const out = [];
+    for (const part of pairTokens(text).split(/(\{[a-zA-Z]+\})/)) { // [polish-T] {left} {right} -> {move}, {swapPrev} {swapNext} -> {swap}
+      const m = part.match(/^\{([a-zA-Z]+)\}$/);
+      if (m) out.push(this.cap(m[1])); else if (part) out.push(document.createTextNode(part));
+    }
+    return out;
+  }
+  // A key cap or pad glyph for an action (never a bare letter).
+  cap(action) {
+    // [polish-T] the pairs: one chip on touch ("Stick", "Tap a face"), two caps on keys (← →, Q E) / the pad (L1 R1)
+    const sch = this.input.scheme ? this.input.scheme() : this.input.last;
+    if ((action === 'move' && sch === 'keyboard') || (action === 'swap' && sch !== 'touch')) {
+      const [a, b] = action === 'move' ? ['left', 'right'] : ['swapPrev', 'swapNext'];
+      return h('span', { class: 'cap-pair' }, this.cap(a), this.cap(b));
+    }
+    const l = this.input.label(action);
+    const e = h('span', { class: `cap cap-${l.kind}` });
+    if (l.kind === 'glyph') e.innerHTML = ICON[l.text]; else e.textContent = l.text;
+    return e;
+  }
+  capKey() { return (this.input.scheme ? this.input.scheme() : this.input.last) + this.input.layout + this.input.padFamily; } // [polish-T]
+  updateHints(game) {
+    const p = game.player;
+    let prompt = null;
+    for (const s of game.hideSpots || []) if ((!s.small || p.tiny) && Math.abs(s.x + s.w / 2 - p.cx) < s.w / 2 + 14 && Math.abs(s.y + s.h - (p.y + p.h)) < 12 && p.state === 'ground') prompt = ['up', 'Hide'];
+    for (const s of game.saves || []) if (Math.abs(s.x + 20 - p.cx) < 40 && Math.abs(s.y + 40 - (p.y + p.h)) < 40 && p.grounded) prompt = ['up', 'Save'];
+    if (p.state === 'hide') prompt = ['left', 'Move to leave'];
+    if (p.has('floss') && p.state !== 'swing') for (const k of game.hooks || []) if (Math.hypot(k.x - p.cx, k.y - p.cy) < 70) prompt = ['use', 'Grab'];
+    if (p.state === 'swing') prompt = ['jump', 'Fling'];
+    if (this.extraPrompt && !prompt) prompt = this.extraPrompt;   // meta: Carrier facilities, talkers, lair doors
+    const pk = prompt ? prompt.join(':') + this.capKey() : ''; // [polish-T]
+    if (pk !== this._pk) {
+      this._pk = pk; this.prompt.innerHTML = '';
+      if (prompt) { this.prompt.append(this.cap(prompt[0]), ' ', ...this.richText(prompt[1])); this.prompt.hidden = false; } else this.prompt.hidden = true; // [polish-T] richText
+    }
+    let sign = null;
+    for (const sg of game.signs || []) if (p.cx > sg.x - 20 && p.cx < sg.x + sg.w + 20 && Math.abs(p.cy - sg.y - 20) < 160) sign = sg.text;
+    // [polish-T] one tip per action at a time: a sign teaching the action the prompt asks for (the Bedroom's
+    // "{chirp} chirps..." under "Call out") waits until the prompt is gone
+    if (sign && prompt && sign.includes(`{${prompt[0]}}`)) sign = null;
+    const sk = sign ? sign + this.capKey() : null; // [polish-T]
+    if (sk !== this._sign) { this._sign = sk; this.hint.innerHTML = ''; if (sign) this.hint.append(...this.richText(sign)); this.hint.hidden = !sign; }
+  }
+}
+
+// ---- meta HUD (crumbs, Frost's thermometer, the chirp indicator) ----
+// info: {crumbs, temp (null unless Frost leads), indicator: {on, angle, strength, pulse} | null}
+UI.prototype.updateMetaHUD = function (info) {
+  const ck = String(info.crumbs);
+  if (this._crumbK !== ck) { this._crumbK = ck; this.crumbs.lastChild.textContent = ck; this.crumbs.classList.remove('bump'); void this.crumbs.offsetWidth; this.crumbs.classList.add('bump'); }
+  if (info.temp != null) {
+    this.thermo.hidden = false;
+    const tk = String(info.temp);
+    if (this._tempK !== tk) { this._tempK = tk; this.thermo.lastChild.textContent = `${info.temp}°F`; this.thermo.querySelector('.thermo-fill').style.height = `${Math.max(8, Math.min(100, (info.temp - 40) * 1.6))}%`; }
+  } else this.thermo.hidden = true;
+  const ind = info.indicator, bc = info.beacon;
+  this._beaconPulse = bc?.show ? bc.pulse || 0 : 0;
+  if (ind && ind.on) {
+    this.indicator.hidden = false;
+    // sit on an ellipse inside the screen edge, in the beacon's direction; the waves face the call
+    const a = ind.angle, rx = 45, ry = 38, pu = ind.pulseV ?? (ind.pulse ? 1 : 0), ld = ind.strength;
+    // [polish-V] never on the HUD or the thumb buttons (main.js measures them: this.avoid): slide in along the ray
+    let k = 1; const hw = (this._indW || 0.035) * 0.9, hh = (this._indH || 0.07) * 0.9; // half size (view fractions), waves included
+    const hit = (x, y) => (this.avoid || []).some((r) => x + hw > r.x0 - 0.01 && x - hw < r.x1 + 0.01 && y + hh > r.y0 - 0.01 && y - hh < r.y1 + 0.01); // [polish-V]
+    while (k > 0.25 && hit(0.5 + Math.cos(a) * rx * k / 100, 0.5 + Math.sin(a) * ry * k / 100)) k -= 0.05; // [polish-V]
+    this.indicator.style.left = `${50 + Math.cos(a) * rx * k}%`; this.indicator.style.top = `${50 + Math.sin(a) * ry * k}%`; // [polish-V] k
+    this.indicator.style.opacity = (0.75 + 0.25 * Math.max(ld, pu)).toFixed(2);
+    this.indicator.style.transform = `scale(${(0.9 + 0.5 * ld + 0.2 * pu).toFixed(3)})`;
+    this.indicator.style.setProperty('--pu', pu.toFixed(3));
+    this.indicator.querySelector('.ci-waves').setAttribute('transform', `rotate(${(a * 180 / Math.PI).toFixed(1)})`);
+    const ws = this.indicator.querySelectorAll('.ci-waves path');
+    ws.forEach((w, i) => { w.style.opacity = Math.max(0.3 - i * 0.08, Math.min(1, pu * 1.8 - i * 0.35)).toFixed(2); });
+    if (!this._indW && this.root.clientWidth) { this._indW = this.indicator.offsetWidth / this.root.clientWidth; this._indH = this.indicator.offsetHeight / this.root.clientHeight; } // [polish-V]
+    if (ind.chirpAt != null && ind.chirpAt !== this._indChirp) { this._indChirp = ind.chirpAt; const r = this.indicator.firstChild; r.classList.remove('go'); void r.offsetWidth; r.classList.add('go'); }
+  } else this.indicator.hidden = true;
+  // [final-S] the visual double (design: HUD, beacon): screen-edge ripples and the rhythm strip,
+  // while listening, for 4 s after a call, or always with "Always show beacon ripples"
+  const vis = !!(bc && bc.show && ((info.listening && bc.mode !== 'off') || bc.ripples || info.alwaysRipples)); // [final-2] Beacon chirps Off: Listen shows the ear and the arrow only (as "When I call": ripples after a call)
+  if (vis) {
+    if (bc.lastChirpFrame != null && bc.lastChirpFrame !== this._ripChirp && bc.frame - bc.lastChirpFrame < 20) {
+      this._ripChirp = bc.lastChirpFrame;
+      const x = Math.max(0, Math.min(100, 50 + bc.dx * 58)), y = Math.max(0, Math.min(100, 50 + bc.dy * 62));
+      const r = h('span', { class: 'ripple' });
+      r.style.left = `${x}%`; r.style.top = `${y}%`; r.style.setProperty('--rs', (0.65 + 0.6 * (bc.loudness || 0)).toFixed(2));
+      r.addEventListener('animationend', () => r.remove());
+      this.ripples.append(r);
+      while (this.ripples.childElementCount > 6) this.ripples.firstChild.remove();
+    }
+    this.drawStrip(bc);
+  } else if (!this.strip.hidden) { this.strip.hidden = true; }
+};
+// The rhythm strip: the last ~3 s of sound, newest at the right edge. The trapped cricket's
+// chirps are gold (taller when louder), anything else heard (decoys) grey: their rhythms differ.
+UI.prototype.drawStrip = function (bc) {
+  const c = this.strip; c.hidden = false;
+  const x = c.getContext('2d'), W = c.width, H = c.height, span = 180, f = bc.frame;
+  x.clearRect(0, 0, W, H);
+  x.fillStyle = 'rgba(42,32,26,.72)'; x.beginPath(); x.roundRect ? x.roundRect(1, 1, W - 2, H - 2, 12) : x.rect(1, 1, W - 2, H - 2); x.fill();
+  x.strokeStyle = 'rgba(244,235,221,.35)'; x.lineWidth = 2; x.stroke();
+  x.strokeStyle = 'rgba(244,235,221,.25)'; x.lineWidth = 1; x.beginPath(); x.moveTo(12, H / 2); x.lineTo(W - 12, H / 2); x.stroke();
+  const at = (fr) => W - 14 - ((f - fr) / span) * (W - 28);
+  for (const fr of bc.decoys || []) { if (f - fr > span || fr > f) continue; const px = at(fr); x.fillStyle = 'rgba(200,200,200,.75)'; x.fillRect(px - 2, H / 2 - 7, 4, 14); }
+  const hh = 10 + 10 * (bc.loudness || 0);
+  for (const fr of bc.history || []) {
+    if (f - fr > span || fr > f) continue;
+    const px = at(fr), k = Math.exp(-(f - fr) / 12);
+    x.fillStyle = `rgba(232,184,90,${(0.55 + 0.45 * k).toFixed(2)})`;
+    x.beginPath(); x.roundRect ? x.roundRect(px - 3, H / 2 - hh, 6, hh * 2, 3) : x.rect(px - 3, H / 2 - hh, 6, hh * 2); x.fill();
+  }
+  x.fillStyle = 'rgba(244,235,221,.9)'; x.fillRect(W - 14, 6, 2, H - 12); // now
+};
+// [polish-T] {left} {right} (with anything but words between) is one Move chip, {swapPrev} {swapNext} one Swap chip
+export function pairTokens(text) { return String(text).replace(/\{left\}\s*(?:\/|or)?\s*\{right\}/g, '{move}').replace(/\{swapPrev\}\s*(?:\/|or)?\s*\{swapNext\}/g, '{swap}'); }
+export { ICON };

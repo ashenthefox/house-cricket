@@ -1,0 +1,15 @@
+{
+ "note": "scale of each pose relative to base.png (1.0 = same scale; <1 means shrunk to fit the 256x160 canvas, draw it larger by 1/x if wanted)",
+ "scale": {
+  "leap": 0.954,
+  "cling": 0.965,
+  "hang": 0.833,
+  "glide": 1.0,
+  "pound": 1.0,
+  "listen": 1.0,
+  "hide": 1.0,
+  "peek": 1.0,
+  "run-a": 1.0,
+  "run-b": 1.0
+ }
+}
