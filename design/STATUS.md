@@ -14,6 +14,7 @@
 9. `--continue --art-sheet --budget $50 --gamepad --publish --feedback`
 10. `--publish`
 11. `--publish`
+12. #3: Ear indicator: click to dock/undock, double-click to toggle auto-chirp (https://github.com/zeveck/house-cricket/issues/3). `I should also be able to click the ear to "hide it" which should dock it near the other buttons and it can launch again when clicked again. Double clicking it should toggle whether I hear the autochirp?`
 ## Settings
 
 - Platform: both (default)
