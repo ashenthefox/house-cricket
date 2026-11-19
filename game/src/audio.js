@@ -414,6 +414,18 @@ export function tick(game) {
     }
   }
 }
+// [issue 11] The game was rewound (main.js, debug): the sounds that were playing stop (scheduled ones
+// too), nothing from the restored fx list plays again, the beacon's song restarts on the game clock
+// and the room's ambience loops are set again.
+export function rewound(game) {
+  for (const list of sfx.live.values()) for (const s of list) { try { s.stop(); } catch { /* done */ } }
+  sfx.live.clear();
+  cues = [];
+  st.lastFxObj = game.fx.length ? game.fx[game.fx.length - 1] : null;
+  bc.key = null; bc.spec = null; bc.pulses = []; bc.answerAt = null; bc.ripplesUntil = -1; bc.room = null; bc.lastPulse = -999;
+  bc.hist = bc.hist.filter((f) => f <= game.frame); bc.decoyHist = bc.decoyHist.filter((f) => f <= game.frame);
+  st.glide = !!game.player.gliding; st.raft = !!game.player.onRaft;
+}
 const atFrame = (fr) => (ac ? now() + Math.max(0, fr - bc.frame) / 60 + 0.02 : 0);
 
 function updateBeacon(game) {

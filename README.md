@@ -109,6 +109,7 @@ Other checks:
 - `node tools/check-world.mjs` checks every room can be reached, in every order the items can be found, and that no spot is a trap (somewhere you can get into and not get out of by playing). `node tools/escape-test.mjs` confirms a trap it names in the real sim.
 - `node tools/check-cracks.mjs` checks every save point can be left on foot.
 - `node tools/entity-test.mjs` and `node tools/feel-test.mjs` test the mechanics and the jump feel.
+- `node tools/rewind-test.mjs` checks the debug rewind (below) is exact: rewinding and playing the same keys again gives the same game, in several rooms, three gecko fights and across a room change.
 - `node tools/chirp-check.mjs` checks every cricket's song against the real species' pitch and rhythm.
 - `python3 tools/match-frames.py --check` checks every cricket's animation frames and poses, the NPC talk frames and the enemy walk frames stay within 2 levels of mean brightness of their base picture (so nothing flickers). Run `python3 tools/match-frames.py` (Pillow and numpy) to colour-match new frames to their base; it changes nothing on frames already matched.
 
@@ -120,6 +121,8 @@ House Cricket is a plain web page with no build step. Serve the `game` folder wi
     python3 -m http.server 8000
 
 then open http://localhost:8000. Opening the file directly by double-clicking won't work, because browsers don't run games from files on disk.
+
+**Debug rewind.** While playing, Backspace jumps the game back about five seconds (a "⟲ 5.0 s" note shows briefly), across a room change too. It is a debugging aid, on only when you play locally (localhost) or add `?rewind` (or `?dev`) to the address; `?rewind=0` turns it off locally. It does nothing in menus, dialogs, story panels or the Carrier, where Backspace is still Back, and it never writes or undoes a save. It restores the whole game (the cricket, enemies, the gecko and its fight, switches and gates, items and progress, the camera, the HUD); sounds that were playing stop. A save made during those seconds stays saved even though the game goes back before it.
 
 ## Credits
 

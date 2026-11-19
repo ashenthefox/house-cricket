@@ -280,6 +280,12 @@ export class Camera {
 export function seeded(seed) {
   let s = 0;
   for (const ch of String(seed)) s = (s * 31 + ch.charCodeAt(0)) >>> 0;
-  s = s || 1;
-  return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+  return rngFrom(s || 1);
+}
+// [issue 11] The generator from its raw state. rngState() reads that state, so a rewind snapshot
+// (src/rewind.js) can copy a generator that is part way through its sequence.
+export function rngFrom(s) {
+  const r = () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+  r.rngState = () => s;
+  return r;
 }

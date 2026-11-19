@@ -53,12 +53,13 @@ export class BossBase {
     this.rig = null;
     // [builder C] optional render hooks (render.js): drawDark replaces a dark room's darkness,
     // drawOver paints after it (eyes that shine in the dark, screen-space overlays)
-    if (spec.drawDark) this.drawDark = (c, r, g) => spec.drawDark(this, c, r, g);
-    if (spec.drawOver) this.drawOver = (c, r, g) => spec.drawOver(this, c, r, g);
     // [polish] drawBack: render-only, behind the platforms (after the far painting and back decor)
-    if (spec.drawBack) this.drawBack = (c, r, g) => spec.drawBack(this, c, r, g);
+    // [issue 11] getters below, not closures over `this`: a rewound boss (a copy) draws itself
     this.setPhase(1);
   }
+  get drawDark() { return this.spec.drawDark ? (c, r, g) => this.spec.drawDark(this, c, r, g) : undefined; }
+  get drawOver() { return this.spec.drawOver ? (c, r, g) => this.spec.drawOver(this, c, r, g) : undefined; }
+  get drawBack() { return this.spec.drawBack ? (c, r, g) => this.spec.drawBack(this, c, r, g) : undefined; }
   get tellFrames() { return Math.round((this.game.gentle ? TELL.gentle : this.tellS) * FPS); }
   get telling() { return this.game.frame < this.tellUntil; }
 

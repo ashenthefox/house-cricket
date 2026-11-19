@@ -94,3 +94,8 @@ button { font: inherit; }
    hearts and the icon row, so it never covers him */
 @media (max-height: 500px) and (pointer: coarse) { .hint { top: calc(6px + env(safe-area-inset-top)); max-width: min(42%, 460px); font-size: 13px; line-height: 1.25; padding: 5px 10px; }
   .toasts { top: calc(80px + env(safe-area-inset-top)); } .toast { font-size: 13px; line-height: 1.25; max-width: min(56vw, 480px); } }
+/* [issue 11] the debug rewind's cue (main.js rewind(): Backspace with ?rewind / ?dev / localhost) */
+.rewind-cue { position: absolute; left: 50%; top: 17%; transform: translate(-50%, -50%); z-index: 30; pointer-events: none;
+  font: 800 calc(26px * var(--ui)) Nunito, sans-serif; color: #F4EBDD; background: rgba(42,32,26,0.78); padding: 6px 16px;
+  border-radius: 10px; opacity: 0; transition: opacity 0.25s; }
+.rewind-cue.on { opacity: 1; transition: none; }

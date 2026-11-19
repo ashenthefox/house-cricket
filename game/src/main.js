@@ -25,6 +25,7 @@ import * as HOUSE from '../data/house.js';
 import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
 import { drawMech } from './mech-draw.js'; // [mech] engine mechanics drawing
 import { ArtGate } from './room-art.js'; // [art] a room shows once its art is in (issue #5)
+import { Rewinder } from './rewind.js'; // [issue 11] debug: Backspace rewinds about 5 s
 
 const STEP_MS = 1000 / FPS;
 const PAUSE_TABS = new Set(['pause', 'map', 'crickets', 'sounds']); // [final-S] the pause menu's own tabs
@@ -48,6 +49,11 @@ let titleReady = !!window.__bootPressed; // "Press any key or button" until the 
 window.__bootDone?.();
 let padNote = '';
 const frameLog = [];
+// [issue 11] Debug rewind: Backspace in play jumps back about 5 s (src/rewind.js). On with ?rewind,
+// ?dev or on localhost; ?rewind=0 turns it off. Off, Backspace is only the menus' Back, as before.
+const REWIND = (() => { const q = new URLSearchParams(location.search); return q.has('rewind') ? q.get('rewind') !== '0' : q.has('dev') || ['localhost', '127.0.0.1'].includes(location.hostname); })();
+const rewinder = REWIND ? new Rewinder() : null;
+let rewindCue = null, rewindCueT = 0;
 let heldOver = null; // [issue 16] 'story' | 'title': that screen stays up while the room after it loads (foldIntoStory, continueGame)
 
 function newGameObject() {
@@ -428,6 +434,7 @@ function step() {
     if (f.pressed.pause) { pause(); return; }
     if (f.pressed.map) { pause(null, 'map'); return; }
     if (f.pressed.mute) toggleMute();
+    if (rewinder && f.pressed.rewind && !game.inCarrier) { rewind(); return; } // [issue 11] debug
     if (gate.check(game) && !frozen) return; // [art] the room's art is still loading: the sim waits (tests' __game.step don't)
     game.bossWait = !frozen && gate.bossWaiting(game); // [art] a gecko never acts before it can be seen
     hub.update(game, f);
@@ -437,7 +444,27 @@ function step() {
     metaRun.step(f);
     if (game.meta?.flags.firstChirp && game.fx.some((e) => e.type === 'chirp' && e.f === game.frame)) game.meta.flags.firstChirp = false;
     if (game.frame % 15 === 0) updateTouchButtons();
+    if (rewinder) { if (game.inCarrier) rewinder.reset(null); else rewinder.record(game, () => ({ pendingCard: metaRun.pendingCard })); } // [issue 11]
   }
+}
+// [issue 11] Debug: back to the snapshot about 5 s ago (the whole game: src/rewind.js). The meta
+// layer's pending rescue card goes back with it; sounds that were playing stop and nothing plays
+// twice; the screen's own settings (camera size, Gentle Mode, upgrades) stay as they are now.
+// Never writes or reads a save slot.
+function rewind() {
+  const cam = game.camera, keep = { zoom: cam.zoom, hFrac: cam.hFrac, touchBias: cam.touchBias, avoid: cam.avoid };
+  const r = rewinder.rewind(game);
+  if (r) {
+    Object.assign(game.camera, keep);
+    metaRun.pendingCard = r.extra?.pendingCard || null; metaRun.lastFx = game.frame;
+    lastFxSound = game.frame;
+    renderer.fx.p.length = 0; renderer.fx.spot = null;
+    try { Audio.rewound(game); } catch { /* audio not up */ }
+    applyUpgrades(); updateTouchButtons();
+  }
+  if (!rewindCue) { rewindCue = document.createElement('div'); rewindCue.className = 'rewind-cue'; rewindCue.setAttribute('aria-live', 'polite'); stage.appendChild(rewindCue); }
+  rewindCue.textContent = r ? `\u27F2 ${(r.frames / FPS).toFixed(1)} s` : '\u27F2 no history yet';
+  rewindCue.classList.add('on'); clearTimeout(rewindCueT); rewindCueT = setTimeout(() => rewindCue.classList.remove('on'), 900);
 }
 // [audio] menu move / select / back sounds around the one focus model
 function menuInputWithSound(f) {
@@ -611,6 +638,7 @@ window.__game = {
   avoid: () => measureAvoid(), // [polish-V] read-only: the HUD/button rects the camera keeps clear
   camera: () => (game ? { x: game.camera.x, y: game.camera.y, zoom: game.camera.zoom, vw: game.camera.vw, vh: game.camera.vh, hFrac: game.camera.hFrac, px: game.player.cx, py: game.player.cy, pw: game.player.w, ph: game.player.h } : null),
   boss: () => (game?.boss ? { name: game.boss.name, x: game.boss.x, y: game.boss.y, done: !!game.boss.done, phase: game.boss.phase, mode: game.boss.mode, inFight: game.inFight() } : null),
+  rewind: () => (rewinder && game ? (rewind(), rewinder.snaps.length) : false), // [issue 11] debug; false when off
   held: () => Object.fromEntries(['left', 'right', 'up', 'down', 'jump', 'use', 'chirp', 'kick', 'listen'].map((k) => [k, input.heldNow(k)])),
 };
 
