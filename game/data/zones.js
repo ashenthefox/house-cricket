@@ -109,7 +109,7 @@ export const PREREQ = {
 // Which items open what, zone by zone (the backtracking list, for the map table and tools).
 export const BACKTRACK = {
   floss: ['bed-weft'], raft: ['bath-seedheart-soap'],
-  band: ['bed-seedheart-sill', 'bed-crumbs-shelf', 'bath-songseed-cabinet', 'kit-seedheart-cabinet', 'liv-songseed-rod'],
+  band: ['bed-seedheart-sill', 'bed-crumbs-shelf', 'bath-songseed-cabinet', 'kit-seedheart-cabinet', 'laun-songseed-shelf', 'liv-songseed-rod'],
   glider: ['bath-crumbs-shelf', 'kit-songseed-hood', 'liv-lumen'],
   thimble: ['bath-shelly', 'bath-chute', 'pan-songseed-cereal', 'liv-crumbs-keys', 'stu-crumbs-plaster'],
   glow: ['kit-crumbs-crawl', 'liv-crumbs-dark'],

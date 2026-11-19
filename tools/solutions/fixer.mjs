@@ -47,12 +47,12 @@ if (want('laun-shelf')) {
   must(a.g.mech.pushes[0].x >= 28, 'box not shoved in');
   a.down(L).until((g) => tx(g) < 20.5, 300, 'out of the cubby').up(L).until(ground, 60, 'stopped').wait(6).log('under the ironing board');
   a.down(USE).wait(22).up(USE).until((g) => ground(g) && ty(g) > 8.9 && ty(g) < 9.1, 120, 'on the ironing board').log('super-jump to the board (crumbs)');
-  a.down(L).until((g) => tx(g) < 13.7, 200, 'near the board end').up(L).until((g) => ground(g) && Math.abs(g.player.vx) < 1, 30, 'stopped').log('near the board end');
+  a.down(L).until((g) => tx(g) < 14.4, 200, 'the board end').up(L).until((g) => ground(g) && Math.abs(g.player.vx) < 1, 30, 'stopped').log('the board end');
   a.down(USE).wait(22).down(L).up(USE).until((g) => ground(g) && ty(g) < 3.1, 120, 'top shelf').log('super-jump to the top shelf');
   a.until((g) => tx(g) < 5, 200, 'the song-seed').up(L).log('the song-seed');
   a.down(R).until((g) => ground(g) && ty(g) > 8.9, 300, 'down').up(R).log('dropped to the board');
   a.down(L).until((g) => ground(g) && ty(g) > 9.1, 300, 'off the board end').log('off the board end');
-  if (ty(a.g) > 12.1) a.tap(J, 14).until((g) => ground(g) && ty(g) < 12.1, 90, 'back on the jugs').log('back on the jugs');
+  for (let i = 0; i < 3 && ty(a.g) > 12.1; i++) { const at = ty(a.g); a.tap(J, 14).until((g) => ground(g) && ty(g) < at - 1.9, 90, 'a step up').log('a step up'); } // the bottle, then the jugs
   a.until((g) => g.room.id === 'laun-washer', 600, 'out the doorway').log('into the washer');
   for (const id of ['laun-duo', 'crumbs', 'laun-songseed-shelf']) must(got.has(id), `missed ${id}`);
   a.end();

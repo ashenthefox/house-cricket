@@ -506,7 +506,7 @@ export const SECRETS = [
   S('laun-thermo', 'laun-sink', 'crumbs', 'thermostat', 'thermostat lock 72°F', { crumbs: 40 }),
   S('laun-songseed-drum', 'laun-dryer', 'songSeed', 'earplugs', 'inside the running dryer drum (loud)'),
   S('laun-mote', 'laun-basket', 'crumbs', 'crack', 'the baseboard by the basket'),
-  S('laun-songseed-shelf', 'laun-shelf', 'songSeed', 'band', 'the top detergent shelf'),
+  S('laun-songseed-shelf', 'laun-shelf', 'songSeed', 'band', 'the top detergent shelf'), // [issue #19] or the Feather, late (Hump or Frost reach it without the Band): an intended alternative
   S('laun-duo', 'laun-shelf', 'crumbs', 'perk:shove', 'under the detergent box Duo shoves'),
   S('laun-beep-battery', 'laun-lair', 'notCricket', 'battery', 'give Beep the spare battery from the Basement workbench (after Peridot)', { who: 'beep' }),
   // z06

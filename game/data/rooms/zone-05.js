@@ -71,11 +71,12 @@ ws.r(36, 9, 6, 1, '=');
 const sf = grid(1, 1).frame('#');
 sf.r(0, 12, 1, 4, '.');                              // left: the flood
 sf.r(0, 16, 32, 2);
-sf.r(1, 1, 1, 11, 'G').r(30, 1, 1, 12, 'G');   // [issue #19] the left upright stops over the doorway (rows 12-15)
+sf.r(1, 1, 1, 10, 'G').r(30, 1, 1, 12, 'G');
+sf.r(1, 11, 3, 1);                                   // [issue #19] a short shelf over the doorway (rows 12-15): the left upright ends on it
 sf.r(6, 12, 5, 4);                                   // detergent jugs
 sf.r(4, 14, 2, 2).r(11, 14, 2, 2);                   // [issue #19] a small bottle each side of the jugs: steps of 2 (Jump 2) on and off them
 sf.r(1, 3, 11, 1);                                   // the top shelf, 8 tiles up
-sf.r(12, 9, 12, 1, '=');                             // the ironing board ([issue #19] 2 longer to the left: a super-jump from its end drifts onto the top shelf)
+sf.r(14, 9, 10, 1, '=');                             // the ironing board
 sf.r(26, 13, 5, 1);                                  // the cubby under the shelf (rows 14-15); [fixer] the heavy
                                                      // detergent box in front of it is a push entity (Duo shoves it in)
 
