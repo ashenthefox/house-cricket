@@ -17,6 +17,7 @@ import { ZONES } from '../game/data/rooms/index.js';
 import { TILE } from '../game/data/movement.js';
 import { K } from '../game/src/physics.js';
 import { STANDABLE, floorProps } from '../game/src/notes.js';
+import { TEXT } from '../game/data/text.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -67,7 +68,9 @@ for (const room of Object.values(g0.world.rooms)) {
 const script = [];
 { // the tank cup: the tongs finish, the rim note flutters down
   const g = newGame(); g.startAt('tank-cup', undefined, undefined, { party: ['pip'], items: [] });
+  ok(g.signs.some((q) => q.text === TEXT.opening.tank.tongs), 'the tongs note is up before the tongs finish');
   g.boss.finish();
+  ok(!g.signs.some((q) => q.text === TEXT.opening.tank.tongs), 'the tongs note retires when the tongs finish');
   for (const s of g.signs.filter((q) => q.born != null)) script.push(['tank-cup', s]);
 }
 { // the sand: Duchess awake, Pip near the log: "Hide in the log!" at its mouth
@@ -121,7 +124,15 @@ if (args.includes('--wrap')) {
     await page.waitForTimeout(1500);
     await page.evaluate(() => window.__game.avoid());
     await page.waitForTimeout(200);
-    return JSON.stringify(await page.evaluate((texts) => window.__game.tips({ measure: texts }).measured, ${JSON.stringify(texts)}));
+    const measured = await page.evaluate((texts) => window.__game.tips({ measure: texts }).measured, ${JSON.stringify(texts)});
+    // the cup: the tongs card shows; when the tongs finish, the rim note's card takes over within a second, Pip not moving
+    await page.evaluate(() => { const R = window.__renderer; if (!R.__sc) { const o = R.draw.bind(R); R.draw = (g, v) => { if (g && g.room) window.__SC = g; return o(g, v); }; R.__sc = 1; } window.__game.goToRoom('tank-cup'); });
+    await page.waitForTimeout(1500);
+    const before = await page.evaluate(() => window.__game.tips().shown?.key || null);
+    await page.evaluate(() => window.__SC.boss.finish());
+    const t0 = Date.now(); let after = null;
+    while (Date.now() - t0 < 1000) { after = await page.evaluate(() => window.__game.tips().shown?.key || null); if (after === 'opening.tank.rim') break; await page.waitForTimeout(50); }
+    return JSON.stringify({ measured, cup: { before, after, ms: Date.now() - t0 } });
   }`;
   try { cli('close'); } catch { /* not open */ }
   cli('open', '--device', 'iPhone 15', url); // a phone held sideways (touch), then 667x375
@@ -129,7 +140,9 @@ if (args.includes('--wrap')) {
   try { out = cli('run-code', code); } finally { try { cli('close'); } catch { /* gone */ } }
   const res = out.split('### Result')[1]?.split('###')[0]?.trim();
   let m = null;
-  try { m = JSON.parse(JSON.parse(res)); } catch { console.log(out); }
+  let cup = null;
+  try { const r = JSON.parse(JSON.parse(res)); m = r.measured; cup = r.cup; } catch { console.log(out); }
+  ok(cup?.before === 'tank-cup:10,9' && cup?.after === 'opening.tank.rim', `the cup: the tongs card, then the rim card within a second of the tongs finishing (${JSON.stringify(cup)})`);
   ok(!!m, 'the wrap check ran');
   if (m) {
     const [one, many] = m.splice(0, 2);

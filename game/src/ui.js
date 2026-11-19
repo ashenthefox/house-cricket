@@ -487,7 +487,7 @@ export { ICON };
 // and it never moves while shown: if the cricket goes under it, it fades to about 30%. All in view
 // fractions; the card is measured only when its text, keys or size change, and moved (a transform) only
 // when its place changes. Timing runs on the game clock (a rewind or a new game starts it over).
-const SLOT = { top: 0.12, up: 0.16, low: 0.74, bottom: 0.82 }; // view fractions: the band's top, the upper card's top, the lower card's bottom, the band's bottom
+const SLOT = { top: 0.12, up: 0.25, low: 0.74, bottom: 0.82 }; // view fractions: the band's top, the upper card's top, the lower card's bottom, the band's bottom
 const ovl = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
 UI.prototype.updateTips = function (game, prompt) {
   const p = game.player, f = game.frame, cam = game.camera, T = TILE;
@@ -501,6 +501,12 @@ UI.prototype.updateTips = function (game, prompt) {
   const teaches = (sg) => !!(prompt && sg.text.includes(`{${prompt[0]}}`));
   const card = signs.find((s) => s.kind === 'card');
   let st = this._tip && !this._tip.fading ? this._tip : null;
+  // a note a script has just put up (the cup rim's) takes over the card at once, if he's near it
+  const fresh = signs.find((s) => s.born != null && !this._tipBorn.has(`${s.key}@${s.born}`) && noteLive(game, s));
+  if (fresh) {
+    this._tipBorn.add(`${fresh.key}@${fresh.born}`);
+    if (stay(fresh) && st?.key !== fresh.key) { if (st) this.hideTip(); this.showTip(game, fresh); st = this._tip; }
+  }
   if (st) {
     const cur = signs.find((s) => s.key === st.key && s.text === st.text);
     let go = !cur || (st.kind === 'note' && !noteLive(game, cur));
@@ -509,7 +515,11 @@ UI.prototype.updateTips = function (game, prompt) {
       else if (teaches(cur)) { go = true; this.markTipRead(st); this._tipQuiet = st.key; } // the prompt takes over (a 300 ms fade): read
       else if (stay(cur)) st.out = null;
       else { st.out ??= f; if (f - st.out >= NOTE.linger && f - st.f0 >= NOTE.minShow) go = true; }
-      if (!go && !st.read && !this.tipCard.classList.contains('away') && f - st.f0 >= NOTE.fadeIn + NOTE.read) this.markTipRead(st);
+      // read: shown in full (not cut to one line under a toast, faded under the cricket or hidden) for long enough
+      const full = !['away', 'squeeze', 'under'].some((c) => this.tipCard.classList.contains(c));
+      if (full && f > st.lastF) st.full += f - st.lastF;
+      st.lastF = f;
+      if (!go && !st.read && st.full >= NOTE.fadeIn + NOTE.read) this.markTipRead(st);
     }
     if (go) { this.hideTip(); st = null; }
   }
@@ -560,7 +570,7 @@ UI.prototype.toastY = function () {
   return matchMedia('(max-height: 500px) and (pointer: coarse)').matches ? 80 / H : 0.3;
 };
 UI.prototype.resetTips = function () {
-  this._tip = null; this._tipCand = null; this._tipQuiet = null; this._tipRect = null;
+  this._tip = null; this._tipCand = null; this._tipQuiet = null; this._tipRect = null; this._tipBorn = new Set();
   this.tipCard.classList.remove('on', 'under', 'squeeze'); this.tipCard.hidden = true;
 };
 UI.prototype.markTipRead = function (st) {
@@ -615,7 +625,7 @@ UI.prototype.showTip = function (game, sg) {
       else if (ovl(pip, rectAt(low)) && !busy.some((r) => ovl(r, rectAt(up)))) { y0 = up; slot = 'up'; }
     }
   }
-  this._tip = { key: sg.key, text: sg.text, kind: sg.kind, f0: f, out: null, read: false, fading: false, slot, y0, cx, lines: size.lines, rect: rectAt(y0) };
+  this._tip = { key: sg.key, text: sg.text, kind: sg.kind, f0: f, lastF: f, full: 0, out: null, read: false, fading: false, slot, y0, cx, lines: size.lines, rect: rectAt(y0) };
   if (wasHidden) void el.offsetWidth; // the fade-in starts from its own place
   el.classList.add('on');
 };

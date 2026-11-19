@@ -75,9 +75,10 @@ const Cup = {
     const s = this, g = s.g, e = s.e, floorY = cupFloor(e);
     if (s.done) return;
     s.done = true; s.mode = 'gone';
-    // [issue 9] the rim tip flutters down on the cup floor by the right wall, where the leap goes out
+    // [issue 9] the rim tip flutters down in the middle of the cup floor (where the tongs note stood: in reach from both walls)
     const c0 = e.cup?.[0] ?? 11, c1 = e.cup?.[1] ?? 17;
-    g.scriptNote('opening.tank.rim', { x: c0 + 1, y: Math.round(floorY / T) - 1, w: c1 - c0 - 1, nx: c1 - 2, text: TK.rim });
+    for (const sg of g.signs) if (sg.text === TK.tongs) g.retireNote(sg.key); // the tongs are gone: their note too
+    g.scriptNote('opening.tank.rim', { x: c0 + 1, y: Math.round(floorY / T) - 1, w: c1 - c0 - 1, nx: Math.floor((c0 + c1) / 2), text: TK.rim });
   },
   draw(c) {
     const s = this, e = s.e, floorY = cupFloor(e);
@@ -201,9 +202,9 @@ const Sand = {
     const awake = s.mode !== 'asleep' && s.mode !== 'eye' && !lost;
     // the "Hide in the log!" sign: once she has lunged, or once he's near the log
     if (!s.signed && !lost && s.mode !== 'asleep' && (s.lunges > 0 || Math.abs(p.cx - (s.log().x + s.log().w / 2)) < 6 * T)) {
-      // [issue 9] a note at the log's mouth (the side he comes from), fluttering down
-      const lx = Math.floor(s.log().x / T);
-      s.signed = true; g.scriptNote('opening.tank.hideLog', { x: lx - 4, y: s.e.y ?? 15, w: 4, nx: lx - 2, text: TK.hideLog });
+      // [issue 9] a note at the log's opening (it faces right), fluttering down
+      const l = s.log(), rx = Math.floor((l.x + l.w) / T); // the first column right of the hide spot; the note just past the opening
+      s.signed = true; g.scriptNote('opening.tank.hideLog', { x: rx, y: s.e.y ?? 15, w: 2, nx: rx + 1, text: TK.hideLog });
     }
     const live = () => !p.hidden && s.roarCool === 0 && ov(s.snout(), { x: p.x + 3, y: p.y + 3, w: p.w - 6, h: p.h - 6 });
     switch (s.mode) {
@@ -279,7 +280,7 @@ const Sand = {
         if (!hidden || revealed) { s.seen(); break; }
         if (s.t > SAND.sniff) { // she shrugs and turns away: the way on opens right then
           rs.taken.add(SLEPT);
-          g.signs = g.signs.filter((sg) => sg.key !== 'opening.tank.hideLog'); // the note's job is done
+          g.retireNote('opening.tank.hideLog'); // the note's job is done
           s.mode = 'shrug'; s.t = 0; s.pose = 'idle'; s.pulse = false;
           g.toast(TK.shrug, 150); g.toast(TK.lost, 180);
         }

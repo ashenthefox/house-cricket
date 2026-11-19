@@ -303,6 +303,8 @@ export class Game {
     if (s.kind === 'note') this.emit('sfx', { name: 'crinkle', gain: 0.35, rate: 1.5 }); // a paper sound (the tank's beats load it)
     return s;
   }
+  // [issue 9] a script retires a note whose lesson is over (the tongs once they're gone): note and card go
+  retireNote(key) { this.signs = this.signs.filter((s) => s.key !== key); }
   inFight() { return !!(this.boss && !this.boss.done && typeof this.boss.lose === 'function'); }
   // [final-S] Pause > "Back to room entrance": free; in a gecko fight it is the phase restart.
   backToEntrance() {
