@@ -110,3 +110,27 @@ Player and Builder reviewed the change (no art or sound, so no art director).
 | "Followable zone" not defined | should-fix (Builder) | Fixed: Carrier, Tank, rescued, unreachable and fights excluded |
 | Keep the pulse and grow-with-closeness | nice | Kept |
 | Testability: pure module, headless test, debug hook | nice | Taken into the build plan |
+
+## Change: issue #7, Duchess hunts in the tank's sand room (one round, 2026-11-19)
+
+Player and Builder reviewed (no new art or sound; existing growl/snore reused).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Waiting ~30 s for her to plod home before the exit opens | must-fix (both) | Fixed: the exit opens when she turns away; the plod and nap are ambient |
+| Rushers reach a shut exit before any lunge; hiding before a lunge undefined | must-fix (Player), should-fix (Builder) | Fixed: hiding works whenever she's awake; she tells and lunges into the log; the sign also shows near the log; a new exit toast |
+| Phone stick drift pops Pip out of the log mid-sniff | must-fix (Player) | Fixed: only Jump leaves the log while she comes and sniffs |
+| z00.md is generated from house.js and gen-zone-briefs.mjs | must-fix (Builder) | Fixed: the spec lives in GAME_DESIGN.md; the build updates house.js and the generator and regenerates z00.md |
+| Knockback could push Pip out of the room; only the snout should catch | must-fix (Builder) | Fixed: snout-only catches, skitter in her facing direction, never out of the room, she stays right of tile 8 |
+| Don't reuse daze (earplugs toast) or hurt | must-fix (Builder) | Taken into the build: a plain shove with no event or damage |
+| Gentle Mode not wired into the tank | must-fix (Builder) | Fixed: the tank uses the shared tell timing |
+| Recorded solutions break; full-run pins the Bedroom's start frame | must-fix (Builder) | Taken into the build: re-author zone-00-path, pad to keep the full run's G0, or re-record and re-check |
+| Skitter direction and grace period; repeated toasts | should-fix (Player) | Fixed: away from her head toward the log; a shake-off after a roar; rotating toasts |
+| She must keep up with a rusher | should-fix (Player) | Fixed: scurry speed when he's far ahead or hidden |
+| Odd moves: jumping over her, going back left, hiding mid-lunge | should-fix (Player) | Fixed: body and tail harmless, she turns; a lunge at a hidden Pip thunks into the log |
+| Sleep flag storage; walking into her while asleep | should-fix (Builder) | Fixed: room state (survives rewind); asleep she's harmless |
+| Berms: she must cross them; a berm isn't cover | should-fix (both) | Fixed: she follows the berm tops, lunges stop at a berm face, standing on a berm is safe, a one-time toast |
+| Being seen at the log corners Pip | should-fix (Builder) | Fixed: a recoil without skitter; a Chirp from the log gives him away |
+| Signs, text, snore preload, header comments | should-fix (Builder) | Taken into the build |
+| Rewind and determinism; the checker can't see the gate | should-fix (Builder) | Taken into the build: plain fields, seeded RNG only, new rewind cases, a headless gate test |
+| Staging of the sniff; one-time wake line | nice | Taken |
