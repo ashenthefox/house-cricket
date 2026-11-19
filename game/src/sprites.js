@@ -84,11 +84,11 @@ export function settled(path) {
   const e = cache.get(path);
   return !!e && (e.ok || e.bad);
 }
-// start loading; resolves once settled (loaded or failed)
-export function load(path) {
+// start loading (fetch priority 'low', or as given); resolves once settled (loaded or failed)
+export function load(path, priority = 'low') {
   if (!exists(path)) return Promise.resolve();
   if (path.endsWith('.json')) return jsonEntry(path).done;
-  return entry(path, 'low').done;
+  return entry(path, priority).done;
 }
 
 const json = new Map();

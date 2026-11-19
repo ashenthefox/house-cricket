@@ -166,12 +166,13 @@ export class Renderer {
     this.nearCache.clear();
   }
 
-  // [art] the cover while a room's art loads (src/room-art.js): ink, then "Loading" if it lasts
-  drawCover(alpha, label) {
+  // [art] the cover while a room's art loads (src/room-art.js): ink, then "Loading" if it lasts.
+  // ink 'wipe': a door / edge wipe held on its first frame (drawTransition's ink, opaque)
+  drawCover(alpha, label, ink) {
     if (alpha <= 0) return;
     const c = this.ctx;
     c.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-    c.fillStyle = `rgba(20,16,14,${Math.min(1, alpha)})`; c.fillRect(0, 0, VW, VH * 2); // [final-G] a wide phone's view is taller than VH
+    c.fillStyle = `rgba(${ink === 'wipe' ? '42,32,26' : '20,16,14'},${Math.min(1, alpha)})`; c.fillRect(0, 0, VW, VH * 2); // [final-G] a wide phone's view is taller than VH
     if (!label) return;
     c.save(); c.globalAlpha = Math.min(1, alpha);
     c.fillStyle = 'rgba(244,235,221,0.8)'; c.font = '28px "Patrick Hand", sans-serif'; c.textAlign = 'center';

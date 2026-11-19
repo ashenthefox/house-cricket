@@ -70,6 +70,7 @@ function slotButton(A, n, data, action, opts = {}) {
   return b;
 }
 export function newGameSlots(A) {
+  A.warmOpening?.(); // [issue 16] the first story panel
   const list = h('div', { class: 'menu-list' });
   for (const { n, data } of A.Save.listSlots()) {
     list.append(slotButton(A, n, data, () => {
@@ -483,7 +484,7 @@ export function post(A, back = () => A.resume()) {
   const here = g.saveCrack?.room;
   const items = m.cracks.filter((c) => g.world.rooms[c.room]).map((c) => {
     const r = g.world.rooms[c.room];
-    return { label: `${r.zone.name || ''}: ${r.name}`, disabled: !g.inCarrier && c.room === here, action: () => A.travel(c) };
+    return { label: `${r.zone.name || ''}: ${r.name}`, disabled: !g.inCarrier && c.room === here, action: () => A.travel(c), onFocus: () => A.artAhead?.(c.room) }; // [issue 16] its art loads while it's in focus
   });
   items.push({ label: 'Back', action: back });
   A.ui.menu('post', items, { title: line('npcs.shelly.facility'), sub: line('npcs.shelly.carrier'), back, class: 'panel-card' });

@@ -48,6 +48,7 @@ let titleReady = !!window.__bootPressed; // "Press any key or button" until the 
 window.__bootDone?.();
 let padNote = '';
 const frameLog = [];
+let storyHeld = false; // [issue 16] the last story panel stays up while the room after it loads (foldIntoStory)
 
 function newGameObject() {
   const g = new Game([...ZONES, HUB_ZONE], { onSave: (gm) => { Save.writeSlot(slot, Save.fromGame(gm)); } }); // [meta] + the Carrier's rooms
@@ -179,7 +180,10 @@ const A = {
   lairReady: (door) => { openModal(); Screens.lairReady(A, door); },
   crackMenu: () => { openModal(); Screens.crackMenu(A); },
   storyEvent: (name, d) => storyEvent(name, d),
+  artAhead: (id) => { const r = game?.world.rooms[id]; if (r) gate.ahead(game, r, { zone: false, nbs: false, front: true }); }, // [issue 16] a Post destination in focus
+  warmOpening: () => { const p = line('opening.panels')?.[0]?.img; if (p && !warmOpening.img) { const im = new Image(); im.src = 'assets/' + p; warmOpening.img = im; } }, // [issue 16]
 };
+const warmOpening = {};
 const metaRun = new MetaRun(A);
 // a tap or click counts as "any key" on the title, and as the first input for sound
 overlayEl.addEventListener('pointerdown', () => {
@@ -195,6 +199,37 @@ function showTitle() {
   screen = 'title'; paused = false;
   ui.showHUD(false); touch.show(false); hub.active = false;
   Screens.title(A);
+  warmTitle();
+}
+// [issue 16] While the title is up, load what the next minute needs (room-art.js gate.ahead): the
+// Continue save's room, its zone's critical art and its neighbours (read from the save now), then
+// the new game's: the tank's first room, the tank's critical art, the first Bedroom room; and the
+// HUD's portraits. The lists are worked out on stand-in games set up as Continue / New Game will.
+let warmedFor = null;
+function warmTitle() {
+  const latest = Save.latestSlot(), key = latest ? `${latest.n}:${latest.data.savedAt}` : 'new';
+  if (warmedFor === key) return;
+  warmedFor = key;
+  const hud = (g) => g.player.trio.map((id) => `sprites/crickets/${id}/portrait.png`);
+  try {
+    if (latest) {
+      const g = newGameObject();
+      Save.intoGame(g, latest.data); Meta.ensure(g);
+      gate.ahead(g, g.room, { files: hud(g) });
+    }
+    const tank = ZONES.find((z) => z.n === 0), bed = ZONES.find((z) => z.n === 1);
+    const first = tank || bed || ZONES[0], g = newGameObject();
+    g.startAt(first.start.room, undefined, undefined, { party: ['pip'], items: [] });
+    gate.ahead(g, g.room, { files: hud(g) });
+    if (bed && bed !== first) gate.ahead(g, g.world.rooms[bed.start.room], { zone: false, nbs: false });
+    gate.ahead(null, null, { files: ['ui/panel.png'] }); // the dialog box and the map (big: last)
+  } catch (e) { console.warn('[art] title preload', e); }
+}
+// [issue 16] A story just ended into play: if the room's art is still loading, its last panel stays
+// up (story.holdOpen) until it's in, instead of the ink cover (tick releases it); then the fade.
+function foldIntoStory() {
+  game.trans = { f: 0, dur: 24, kind: 'fade' }; // the panel -> game fade (visual only)
+  if (gate.check(game)) { story.holdOpen(); storyHeld = true; }
 }
 function newGame(n) {
   slot = n;
@@ -219,6 +254,7 @@ function startTank(skipped) {
   game.startAt(tank.start.room, undefined, undefined, { party: ['pip'], items: [] });
   game.meta.flags.inTank = true;
   startPlay();
+  foldIntoStory(); // [issue 16]
 }
 function afterEscape(skipPanel) {
   ui.showHUD(false); touch.show(false);
@@ -227,6 +263,7 @@ function afterEscape(skipPanel) {
     const keep = game.meta; keep.flags.inTank = false; keep.opened = true;
     game.startAt(first.start.room, undefined, undefined, { party: ['pip'], items: [] });
     startPlay();
+    foldIntoStory(); // [issue 16]
     game.toast(line('opening.home'), 240);
     game.meta.flags.firstChirp = true;
     A.autosave();
@@ -264,6 +301,7 @@ function continueGame(latest) {
   try { Save.intoGame(game, latest.data); } catch (e) { console.warn('save could not be loaded', e); const z = ZONES.find((zz) => zz.n === 1) || ZONES[0]; game.startAt(z.start.room); }
   Meta.ensure(game); applyUpgrades();
   startPlay();
+  game.trans = { f: 0, dur: 24, kind: 'fade' }; // [issue 16] the Continue fade (a wait for the room's art holds its first frame)
   if (latest.data.carrier) goCarrier(latest.data.returnCrack || latest.data.crack || game.saveCrack, true);
 }
 function startPlay() {
@@ -310,6 +348,7 @@ function goCarrier(crack, fromLoad) {
   game.startAt(hubRoomFor(stage));
   game.trans = { f: 0, dur: 24, kind: 'fade' };
   hub.enter(game, ret);
+  gate.ahead(game, game.world.rooms[ret.room]); // [issue 16] the way back loads while you're aboard
   if (!fromLoad) A.autosave();
   A.playMusic('carrier');
   try { Audio.setCarrierVoices?.(Meta.RESCUABLE.filter((id) => game.rescued.has(id))); } catch { /* ignore */ }
@@ -471,13 +510,14 @@ function tick(now) {
     if (n === 8) acc = 0;
   }
   if (screen === 'play' && game) gate.check(game, !story.active); // [art] under a story panel the room's art starts loading
+  if (storyHeld && (!gate.holding || screen !== 'play')) { storyHeld = false; story.release(); } // [issue 16] the room's in: the panel goes, the fade runs
   if (screen === 'play' && game && !story.active) {
     if (game.inCarrier) hub.draw(renderer, game);
     else {
       S.setDrawing(game.room?.id || null, gate.holding); // [art] ?artcheck logs misses against this room
       renderer.draw(game, { shake: settings.shake }); drawMetaWorld();
       S.setDrawing(null);
-      const cv = gate.cover(); if (cv) renderer.drawCover(cv.alpha, cv.label); // [art] ink until the room's art is in
+      const cv = gate.cover(storyHeld ? 'story' : null); if (cv) renderer.drawCover(cv.alpha, cv.label, cv.ink); // [art] the wait, folded into the panel or the transition; else ink until the room's art is in
     }
     ui.updateHUD(game); if (now - avoidAt > 500) measureAvoid(); updateMetaHUD(); // [polish-V]
   } else if (!story.active) renderer.draw({ room: null }, {});

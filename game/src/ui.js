@@ -143,6 +143,7 @@ export class UI {
     const b = h('button', { class: `menu-btn kind-${kind} ${it.offLabel ? 'named-vals' : ''} ${it.class || ''}` });
     if (it.id) b.dataset.id = it.id;
     if (it.disabled) b.disabled = true;
+    if (it.onFocus) b._onFocus = it.onFocus; // [issue 16] e.g. the Post loads the focused destination's art
     const label = h('span', { class: 'mb-label' });
     if (it.icon) label.append(it.icon);
     label.append(it.label);

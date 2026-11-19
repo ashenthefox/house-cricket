@@ -16,8 +16,20 @@
 //                           and, if any of it is still loading, holds: the sim waits and the
 //                           renderer draws an ink cover until it's in (or until nothing has
 //                           arrived for STALL_MS, or CAP_MS in all, so a slow or broken file never
-//                           blocks play). Then, in the background, two files at a time at low
-//                           priority: the late list, the neighbours, and any prefetch() rooms.
+//                           blocks play). Then, in the background, three files at a time: the
+//                           ahead() lists, the late list, the zone's critical art, the neighbours,
+//                           and any prefetch() rooms.
+//   zoneArt(game, zone)  -> [issue 16] a zone's critical art, { lairs, rest }: each lair's first
+//                           look (painting, gecko rig, props, captive), then every other room's
+//                           things (decor, hiding spots...) and near layer. Loaded on entering
+//                           the zone, ahead of the neighbours.
+//   gate.ahead(game, room) [issue 16] loads a room before it's entered (all its art, its zone's
+//                           critical art, its neighbours): main.js asks during the title (the
+//                           new game's first rooms, the Continue save's room), in the Carrier (the
+//                           way back) and for the Post destination in focus.
+//   gate.cover(over)     -> what to draw while a room is held: the wait is folded into what's on
+//                           screen (a story panel main.js keeps up, the room change's own wipe or
+//                           fade held on its first frame); the bare ink cover is the fallback.
 //                           bossWaiting(game): the boss's rig isn't loaded (main.js keeps the
 //                           boss from acting until it can be seen; game.bossWait).
 //
@@ -44,7 +56,7 @@ const CAP_MS = 10000;   // never hold longer than this: a short wait beats a lon
 const BOSS_WAIT_MS = 30000; // a gecko waits for its art at most this long in a room, then acts (drawn or not)
 const LABEL_MS = 600;    // "Loading" appears on the cover after this
 const FADE = 12;         // frames the cover fades over after a hold (when no transition runs)
-const BG_SLOTS = 2;      // background loads at a time, so the next room never queues behind them
+const BG_SLOTS = 3;      // background loads at a time (of the browser's 6 a host), so the next room never queues behind them
 const FIRST_LOOKS = ['base', 'idle', 'run', 'leap']; // the party's looks the gate waits for (a room is often entered in the air)
 
 const geckoDir = (n) => `sprites/geckos/${n}/`;
@@ -104,15 +116,31 @@ export function roomArt(game, room) {
   }
   // 3. the party, as it first shows (drawPlayer)
   for (const id of p?.trio || []) addAll(2, lookFiles(id, FIRST_LOOKS));
-  const gate = [...new Set(tiers.flatMap((t) => [...t]))], inGate = new Set(gate);
+  const gate = [...new Set(tiers.flatMap((t) => [...t]))], inGate = new Set(gate), things = [...tiers[1]];
   // soon: the near-layer silhouettes (drawNear: faint, in front; asked for at once, low priority,
   // not waited for); late: soon, then the party's other looks
   const keep = (l) => [...new Set(l)].filter((f) => !inGate.has(f) && S.exists(f));
   const soon = keep(nearList(room).map((n) => propPath(n.prop)));
   const late = keep([...soon, ...(p?.trio || []).flatMap((id) => lookFiles(id, LOOKS))]);
-  return { gate, soon, late };
+  return { gate, soon, late, things };
 }
 const allArt = (game, room) => { const a = roomArt(game, room); return [...a.gate, ...a.late]; };
+
+// [issue 16] A zone's critical art: { lairs, rest }. lairs: each lair's whole first look (painting,
+// the boss's gecko rig, props and captive, its near layer); rest: every other room's things (decor,
+// hiding spots, cages, mechanics, enemies) and near layer. Not their paintings (the neighbour
+// prefetch brings those, a step ahead). On phones (small memory: props are never released) only
+// the lairs.
+export function zoneArt(game, zone) {
+  const lairs = new Set(), rest = new Set();
+  for (const r of Object.values(game.world.rooms)) {
+    if (r.zone !== zone) continue;
+    const a = roomArt(game, r);
+    if (r.entities.some((e) => e.type === 'boss')) for (const p of [...a.gate, ...a.soon]) lairs.add(p);
+    else if (!S.isPhone()) for (const p of [...a.things, ...a.soon]) rest.add(p);
+  }
+  return { lairs: [...lairs], rest: [...rest].filter((p) => !lairs.has(p)) };
+}
 
 // Rooms one step away: across an edge (the house grid) or through a door / lair entrance.
 export function neighbours(world, room) {
@@ -155,12 +183,13 @@ export class ArtGate {
     this.need = []; this.watched = null; this.settledN = 0;
     this.t0 = null; this.enteredAt = 0; this.lastProgress = 0; this.fade = 0; this.last = null;
     this.gen = 0; this.bg = []; this.bgBusy = new Set(); this.extra = []; this.nbs = [];
+    this.early = []; this.zoneMemo = null; this.heldAs = null; this.drawn = null;
   }
   // Call with the live game every step and before every frame. visible = false while a story
   // panel covers the game: the room's art starts loading, but the timeouts don't run yet.
   // Returns true while the room is held (the sim should wait).
   check(game, visible = true) {
-    if (!game?.room || game.inCarrier) { if (this.holding) this.done(true); this.game = game; this.room = null; return false; }
+    if (!game?.room || game.inCarrier) { if (this.holding) this.done(true); this.game = game; this.room = null; this.drawn = null; return false; }
     if (game !== this.game || game.room !== this.room) this.enter(game);
     if (this.holding) this.poll(visible);
     return this.holding;
@@ -168,6 +197,32 @@ export class ArtGate {
   // Rooms to load in the background as well, until they are entered (the first Bedroom room
   // during the opening panels: the tank doesn't link to it).
   prefetch(rooms) { this.extra = rooms.filter(Boolean); this.queue(); }
+  // [issue 16] Load ahead of need, ahead of this room's own background list: `files`, then `room`
+  // as `game` would show it (all of it), its zone's critical art, its neighbours. For the title
+  // (the Continue save's room, the new game's first rooms), the Carrier's way back, the Post
+  // destination in focus. Dropped on the next room change (by then it is what that room loads).
+  // front: before what's already queued here. The zones it touches are kept (sprites.zoneHold)
+  // until the next room change's zone set says otherwise, as #5's memory budget does.
+  ahead(game, room, { files = [], zone = true, nbs = true, front = false } = {}) {
+    const items = files.length ? [{ get: () => files, pri: 'auto' }] : [];
+    if (game && room) {
+      const near = nbs ? neighbours(game.world, room) : [];
+      for (const p of zoneKeep(game.world, [room, ...near])) S.zoneHold(p);
+      items.push({ get: () => allArt(game, room), pri: 'auto' });
+      if (zone) items.push({ get: () => this.zoneList(game, room.zone).lairs, pri: 'auto' }, { get: () => this.zoneList(game, room.zone).rest, pri: 'auto' });
+      for (const r of near) items.push({ get: () => allArt(game, r), pri: 'low' });
+    }
+    this.early = front ? [...items, ...this.early] : [...this.early, ...items];
+    this.queue();
+  }
+  // zoneArt(game, zone), worked out once per game and zone
+  zoneList(game, zone) {
+    const m = this.zoneMemo;
+    if (m && m.game === game && m.zone === zone) return m.list;
+    const list = zoneArt(game, zone);
+    this.zoneMemo = { game, zone, list };
+    return list;
+  }
   // The boss's gecko isn't loaded yet: it mustn't act unseen (main.js sets game.bossWait).
   bossWaiting(game) {
     if (!game?.boss || !game.room) return false;
@@ -181,7 +236,7 @@ export class ArtGate {
     return !geckoArt(g).every(S.settled);
   }
   enter(game) {
-    this.game = game; this.room = game.room; this.gen++;
+    this.game = game; this.room = game.room; this.gen++; this.early = []; this.heldAs = null;
     this.extra = this.extra.filter((r) => r !== game.room);
     const nbs = neighbours(game.world, game.room);
     S.setZone(zoneKeep(game.world, [game.room, ...nbs, ...this.extra]));
@@ -215,51 +270,68 @@ export class ArtGate {
     if (!this.holding) return;
     const held = this.t0 != null ? now() - this.t0 : 0, waited = this.watched != null;
     S.watch(null); this.watched = null; this.holding = false;
-    // a held room fades in, unless its own transition (wipe, fade) is still to run
-    this.fade = waited && !this.game?.trans ? FADE : 0;
-    this.last = { room: this.room?.id, files: this.need.length, held: waited, heldMs: Math.round(held), timedOut: !!timedOut };
+    // a room held under the bare cover fades in, unless its own transition (wipe, fade) is still to
+    // run; one held under a story panel or a transition's first frame just goes on
+    this.fade = waited && !this.game?.trans && (this.heldAs == null || this.heldAs === 'cover') ? FADE : 0;
+    this.last = { room: this.room?.id, files: this.need.length, held: waited, heldMs: Math.round(held), timedOut: !!timedOut, as: this.heldAs };
     this.queue();
   }
-  // The cover to draw over this frame, or null: { alpha, label }.
-  cover() {
+  // What to draw over this frame while the room's art is held, or null: { kind, alpha, label, ink }.
+  // [issue 16] The wait goes into what is already on screen: over = 'story' while main.js keeps
+  // the story panel up (draw nothing: the panel covers the game); a room change's own transition
+  // (the door / edge wipe, the travel / Continue / title fade) waits on its first frame (kind
+  // 'transition', ink: its kind); only with neither does the bare ink cover show (kind 'cover').
+  cover(over = null) {
+    let c = null;
     if (this.holding && this.watched) {
-      const t = this.t0 == null ? 0 : now() - this.t0;
-      return { alpha: 1, label: t > LABEL_MS ? `Loading... ${this.settledN}/${this.total || this.need.length}` : '' };
-    }
-    if (this.fade > 0) return { alpha: this.fade-- / FADE, label: '' };
-    return null;
+      const t = this.t0 == null ? 0 : now() - this.t0, tr = this.game?.trans;
+      const label = t > LABEL_MS ? `Loading... ${this.settledN}/${this.total || this.need.length}` : '';
+      if (over === 'story') c = { kind: 'story', alpha: 0, label: '' };
+      else if (tr && tr.f === 0 && (tr.kind === 'fade' || tr.kind === 'wipe')) c = { kind: 'transition', alpha: 1, label, ink: tr.kind };
+      else c = { kind: 'cover', alpha: 1, label };
+      this.heldAs = c.kind;
+    } else if (this.fade > 0) c = { kind: 'cover', alpha: this.fade-- / FADE, label: '' };
+    this.drawn = c ? c.kind : null;
+    return c;
   }
-  // The background list, in order: this room's late files, its neighbours, the prefetch rooms.
-  // While a room is held on screen only the hold loads (pump).
+  // The background list, in order: the ahead() lists, this room's late files, [issue 16] its
+  // zone's critical art (zoneArt), its neighbours, the prefetch rooms. While a room is held on
+  // screen only the hold loads (pump).
   queue() {
-    const game = this.game, room = this.room, extra = this.extra.map((r) => () => allArt(game, r));
-    if (!game) return;
-    const late = () => (room ? roomArt(game, room).late : []), nbs = this.nbs.map((r) => () => allArt(game, r));
+    const game = this.game, room = game && this.room;
+    const L = (get, pri = 'low') => ({ get, pri });
+    const extra = game ? this.extra.map((r) => L(() => allArt(game, r))) : [];
+    // the zone's lairs first (a gecko is the thing a player sees pop in), then the party's other looks, the rest of the zone
+    const late = room ? [L(() => this.zoneList(game, room.zone).lairs, 'auto'), L(() => roomArt(game, room).late), L(() => this.zoneList(game, room.zone).rest, 'auto')] : [];
+    const nbs = room ? this.nbs.map((r) => L(() => allArt(game, r))) : [];
     // under a story panel (held, not on screen) the prefetch rooms come before the neighbours
-    this.bg = this.holding && this.t0 == null ? [late, ...extra, ...nbs] : [late, ...nbs, ...extra];
+    this.bg = this.holding && this.t0 == null ? [...this.early, ...late, ...extra, ...nbs] : [...this.early, ...late, ...nbs, ...extra];
     this.pump(this.gen);
   }
-  // BG_SLOTS files at a time, at low fetch priority
+  // BG_SLOTS files at a time ('low' fetch priority; 'auto' for the ahead() lists and the zone's critical art)
   pump(gen) {
     const free = () => !this.holding || (this.t0 == null && this.need.every(S.settled)); // never ahead of the room's own files
     while (gen === this.gen && free() && this.bgBusy.size < BG_SLOTS) {
-      const p = this.nextBg();
-      if (!p) return;
+      const n = this.nextBg();
+      if (!n) return;
+      const [p, pri] = n;
       this.bgBusy.add(p);
-      S.load(p).then(() => { this.bgBusy.delete(p); this.pump(this.gen); });
+      S.load(p, pri).then(() => { this.bgBusy.delete(p); this.pump(this.gen); });
     }
   }
+  // the first file, in list order, that is neither in nor on its way (a big file still loading
+  // doesn't hold up the lists after it)
   nextBg() {
-    while (this.bg.length) {
-      const left = this.bg[0]().filter((p) => !S.settled(p));
-      if (!left.length) { this.bg.shift(); continue; }
-      return left.find((p) => !this.bgBusy.has(p)) || null; // the rest are on their way
+    while (this.bg.length && this.bg[0].get().every(S.settled)) this.bg.shift();
+    for (const it of this.bg) {
+      const p = it.get().find((x) => !S.settled(x) && !this.bgBusy.has(x));
+      if (p) return [p, it.pri];
     }
     return null;
   }
   info() {
     const left = (r) => allArt(this.game, r).filter((p) => !S.settled(p)).length;
     return { holding: this.holding, room: this.room?.id, need: this.need.length, settled: this.settledN, last: this.last, background: this.bg.length, bgBusy: [...this.bgBusy],
-      bossWait: !!this.game?.bossWait, prefetch: this.extra.map((r) => ({ id: r.id, left: left(r) })) };
+      bossWait: !!this.game?.bossWait, drawn: this.drawn, waiting: this.holding ? this.need.filter((p) => !S.settled(p)) : [], ahead: this.early.length, prefetch: this.extra.map((r) => ({ id: r.id, left: left(r) })) };
   }
 }
