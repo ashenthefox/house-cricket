@@ -46,6 +46,8 @@ export class UI {
     this.btnMute = h('button', { class: 'icon-btn', 'aria-label': 'mute', title: 'Mute (M)', onclick: () => this.handlers.mute?.() });
     this.btnMap = h('button', { class: 'icon-btn', 'aria-label': 'map', title: 'Map (Tab)', onclick: () => this.handlers.map?.() });
     this.btnPause = h('button', { class: 'icon-btn', 'aria-label': 'pause', title: 'Pause (Esc)', onclick: () => this.handlers.pause?.() });
+    this.btnMute.innerHTML = ICON.speaker;
+    this._muteIconState = false;
     this.btnMap.innerHTML = ICON.map; this.btnPause.innerHTML = ICON.pause;
     // meta HUD: crumbs counter (top-right), Frost's thermometer, the chirp indicator (screen edge)
     this.crumbs = h('div', { class: 'crumbs', 'aria-label': 'crumbs' });
@@ -275,7 +277,10 @@ export class UI {
         this.trio.append(b);
       });
     }
-    this.btnMute.innerHTML = this.muted ? ICON.speakerOff : ICON.speaker;
+    if (this._muteIconState !== !!this.muted) {
+      this._muteIconState = !!this.muted;
+      this.btnMute.innerHTML = this._muteIconState ? ICON.speakerOff : ICON.speaker;
+    }
     // toasts
     const tKey = game.toasts.map((t) => t.f + t.text).join('|') + this.capKey(); // [polish-T] caps follow the input in use
     if (tKey !== this._toastKey) {
