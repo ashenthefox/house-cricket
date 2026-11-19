@@ -6,6 +6,8 @@ import { CRICKETS } from '../data/crickets.js';
 import { ITEMS } from '../data/items.js';
 import * as S from './sprites.js';
 import { turn } from './ear.js';
+import { NOTE, noteLive } from './notes.js'; // [issue 9] tutorial notes on the path
+import { TILE } from '../data/movement.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const h = (tag, attrs = {}, ...kids) => {
@@ -79,11 +81,14 @@ export class UI {
     this.strip = h('canvas', { class: 'beacon-strip', hidden: '', 'aria-hidden': 'true', width: '300', height: '44' });
     const right = h('div', { class: 'hud-right' }, this.crumbs, this.earDock, this.btnMute, this.btnMap, this.btnPause);
     this.prompt = h('div', { class: 'prompt', hidden: '' });
-    this.hint = h('div', { class: 'hint', hidden: '' });
+    // [issue 9] the tip card and the toasts share one centred column, the card first (updateTips)
+    this.tipCard = h('div', { class: 'tip-card', hidden: '', 'aria-live': 'polite' });
     this.toastBox = h('div', { class: 'toasts', 'aria-live': 'polite' });
+    this.tipCol = h('div', { class: 'tip-col' }, this.tipCard, this.toastBox);
+    this.tipsRead = new Set(); // main.js hands over the save slot's set (read notes; never part of the sim)
     this.card = h('div', { class: 'item-card', hidden: '' });
     this.prompt.addEventListener('click', () => this.handlers.promptTap?.());
-    this.hud.append(this.ripples, left, right, this.thermo, this.indicator, this.strip, this.prompt, this.hint, this.toastBox, this.card);
+    this.hud.append(this.ripples, left, right, this.thermo, this.indicator, this.strip, this.prompt, this.tipCol, this.card);
     // [final-S] index.html shows the title before the game loads: adopt its nodes where they are (moving them would restart the fade/animations)
     const bootArt = r.querySelector(':scope > .title-art[data-boot]'), bootMenus = r.querySelector(':scope > .menus[data-boot]');
     this.menus = bootMenus || h('div', { class: 'menus' });
@@ -367,13 +372,7 @@ export class UI {
       this._pk = pk; this.prompt.innerHTML = '';
       if (prompt) { this.prompt.append(this.cap(prompt[0]), ' ', ...this.richText(prompt[1])); this.prompt.hidden = false; } else this.prompt.hidden = true; // [polish-T] richText
     }
-    let sign = null;
-    for (const sg of game.signs || []) if (p.cx > sg.x - 20 && p.cx < sg.x + sg.w + 20 && Math.abs(p.cy - sg.y - 20) < 160) sign = sg.text;
-    // [polish-T] one tip per action at a time: a sign teaching the action the prompt asks for (the Bedroom's
-    // "{chirp} chirps..." under "Call out") waits until the prompt is gone
-    if (sign && prompt && sign.includes(`{${prompt[0]}}`)) sign = null;
-    const sk = sign ? sign + this.capKey() : null; // [polish-T]
-    if (sk !== this._sign) { this._sign = sk; this.hint.innerHTML = ''; if (sign) this.hint.append(...this.richText(sign)); this.hint.hidden = !sign; }
+    this.updateTips(game, prompt);
   }
 }
 
@@ -423,7 +422,8 @@ UI.prototype.updateMetaHUD = function (info) {
     const a = this._earC, rx = 45, ry = 38, pu = ear.pulseV || 0, ld = ear.strength;
     // [polish-V] never on the HUD or the thumb buttons (main.js measures them: this.avoid): slide in along the ray
     let k = 1; const hw = (this._indW || 0.035) * 0.9, hh = (this._indH || 0.07) * 0.9; // half size (view fractions), waves included
-    const hit = (x, y) => (this.avoid || []).some((r) => x + hw > r.x0 - 0.01 && x - hw < r.x1 + 0.01 && y + hh > r.y0 - 0.01 && y - hh < r.y1 + 0.01); // [polish-V]
+    const avoid = this._tipRect ? [...(this.avoid || []), this._tipRect] : this.avoid || []; // [issue 9] and the tip card
+    const hit = (x, y) => avoid.some((r) => x + hw > r.x0 - 0.01 && x - hw < r.x1 + 0.01 && y + hh > r.y0 - 0.01 && y - hh < r.y1 + 0.01); // [polish-V]
     while (k > 0.25 && hit(0.5 + Math.cos(a) * rx * k / 100, 0.5 + Math.sin(a) * ry * k / 100)) k -= 0.05; // [polish-V]
     this.indicator.style.left = `${50 + Math.cos(a) * rx * k}%`; this.indicator.style.top = `${50 + Math.sin(a) * ry * k}%`; // [polish-V] k
     this.indicator.style.opacity = (0.75 + 0.25 * Math.max(ld, pu)).toFixed(2);
@@ -478,6 +478,187 @@ UI.prototype.drawStrip = function (bc) {
 // [polish-T] {left} {right} (with anything but words between) is one Move chip, {swapPrev} {swapNext} one Swap chip
 export function pairTokens(text) { return String(text).replace(/\{left\}\s*(?:\/|or)?\s*\{right\}/g, '{move}').replace(/\{swapPrev\}\s*(?:\/|or)?\s*\{swapNext\}/g, '{swap}'); }
 export { ICON };
+
+// ---- [issue 9] the tip card (design: HUD, Tutorial notes) ----
+// One tip at a time: a note's card when the cricket comes near it (notes.js NOTE: range, dwell, minimum
+// time, linger, read), or a card-only tip while a script has it up (Nana's phase hints). Its slot is
+// chosen once, when it appears (the upper slot unless the cricket, a hazard or the gecko's tell is
+// there; the lower one; in a fight the taller free band beside the framed pair; a tip's `at: 'low'`),
+// and it never moves while shown: if the cricket goes under it, it fades to about 30%. All in view
+// fractions; the card is measured only when its text, keys or size change, and moved (a transform) only
+// when its place changes. Timing runs on the game clock (a rewind or a new game starts it over).
+const SLOT = { top: 0.12, up: 0.16, low: 0.74, bottom: 0.82 }; // view fractions: the band's top, the upper card's top, the lower card's bottom, the band's bottom
+const ovl = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+UI.prototype.updateTips = function (game, prompt) {
+  const p = game.player, f = game.frame, cam = game.camera, T = TILE;
+  const signs = game.signs || [];
+  if ((this._tipF != null && f < this._tipF) || this._tipGame !== game) { this.resetTips(); this._tipGame = game; } // rewind / new game
+  this._tipF = f;
+  if (game.room?.id !== this._tipRoom) { this._tipRoom = game.room?.id; this.resetTips(); }
+  const feet = p.y + p.h;
+  const near = (sg, rx, up, down) => Math.abs(p.cx - sg.nx) <= rx * T && feet >= sg.ny - up * T && feet <= sg.ny + down * T;
+  const appear = (sg) => near(sg, NOTE.appear, 1.5, 0.5), stay = (sg) => near(sg, NOTE.stay, 3, 1);
+  const teaches = (sg) => !!(prompt && sg.text.includes(`{${prompt[0]}}`));
+  const card = signs.find((s) => s.kind === 'card');
+  let st = this._tip && !this._tip.fading ? this._tip : null;
+  if (st) {
+    const cur = signs.find((s) => s.key === st.key && s.text === st.text);
+    let go = !cur || (st.kind === 'note' && !noteLive(game, cur));
+    if (!go && st.kind === 'note') {
+      if (card) go = true;
+      else if (teaches(cur)) { go = true; this.markTipRead(st); this._tipQuiet = st.key; } // the prompt takes over (a 300 ms fade): read
+      else if (stay(cur)) st.out = null;
+      else { st.out ??= f; if (f - st.out >= NOTE.linger && f - st.f0 >= NOTE.minShow) go = true; }
+      if (!go && !st.read && !this.tipCard.classList.contains('away') && f - st.f0 >= NOTE.fadeIn + NOTE.read) this.markTipRead(st);
+    }
+    if (go) { this.hideTip(); st = null; }
+  }
+  if (this._tipQuiet) { const q = signs.find((s) => s.key === this._tipQuiet); if (!q || q.kind !== 'note' || !stay(q)) this._tipQuiet = null; }
+  if (!st) {
+    if (card) this.showTip(game, card);
+    else {
+      let best = null, bd = 1e9;
+      for (const sg of signs) {
+        if (!noteLive(game, sg) || !appear(sg) || sg.key === this._tipQuiet || teaches(sg)) continue;
+        const d = Math.abs(p.cx - sg.nx);
+        if (d < bd) { best = sg; bd = d; }
+      }
+      // a read note doesn't come back while he's in the air or stunned
+      if (best && this.tipsRead.has(best.key) && (!p.grounded || p.invuln > 0)) best = null;
+      if (!best) this._tipCand = null;
+      else {
+        if (this._tipCand?.key !== best.key) this._tipCand = { key: best.key, f0: f };
+        const still = p.grounded && Math.abs(p.vx) < 5;
+        if (still || f - this._tipCand.f0 >= NOTE.dwell) this.showTip(game, best);
+      }
+    }
+  }
+  st = this._tip;
+  // after its fade-out the card goes (and the toasts take the column's usual place)
+  if (st?.fading && performance.now() - st.hideAt > 330) { this.tipCard.hidden = true; this._tip = st = null; }
+  const live = st && !st.fading;
+  this._tipRect = live ? st.rect : null; // the ear guide keeps clear of it (updateMetaHUD)
+  // hidden during a running or held room transition (and under any dialog: meta.css modal-open)
+  const away = !!(game.trans || this.tipHold);
+  if (this.tipCard.classList.contains('away') !== away) this.tipCard.classList.toggle('away', away);
+  if (live) {
+    const pr = this.viewRect(cam, { x0: p.x, y0: p.y, x1: p.x + p.w, y1: p.y + p.h });
+    const under = ovl(pr, st.rect);
+    if (this.tipCard.classList.contains('under') !== under) this.tipCard.classList.toggle('under', under);
+    const sq = game.toasts.length > 0 && st.lines > 1; // a toast is new information: a long card shrinks to one line
+    if (this.tipCard.classList.contains('squeeze') !== sq) this.tipCard.classList.toggle('squeeze', sq);
+  }
+  // the column: at the card's slot while one shows, else the toasts' usual place
+  const H = this.hud.clientHeight || 1;
+  const y = st ? st.y0 : this.toastY();
+  const tf = `translate(-50%, ${Math.round(y * H)}px)`, lf = `${((st ? st.cx : 0.5) * 100).toFixed(2)}%`;
+  if (tf !== this._tipTf) { this._tipTf = tf; this.tipCol.style.transform = tf; }
+  if (lf !== this._tipLf) { this._tipLf = lf; this.tipCol.style.left = lf; }
+};
+UI.prototype.toastY = function () {
+  const H = this.hud.clientHeight || 720;
+  return matchMedia('(max-height: 500px) and (pointer: coarse)').matches ? 80 / H : 0.3;
+};
+UI.prototype.resetTips = function () {
+  this._tip = null; this._tipCand = null; this._tipQuiet = null; this._tipRect = null;
+  this.tipCard.classList.remove('on', 'under', 'squeeze'); this.tipCard.hidden = true;
+};
+UI.prototype.markTipRead = function (st) {
+  st.read = true;
+  if (st.kind === 'note' && !this.tipsRead.has(st.key)) { this.tipsRead.add(st.key); this.handlers.tipRead?.(st.key); }
+};
+UI.prototype.hideTip = function () {
+  const st = this._tip; if (!st || st.fading) return;
+  st.fading = true; st.hideAt = performance.now();
+  this.tipCard.classList.remove('on', 'under');
+};
+// world rect (room px) -> view fractions
+UI.prototype.viewRect = function (cam, r) {
+  return { x0: (r.x0 - cam.x) / cam.vw, x1: (r.x1 - cam.x) / cam.vw, y0: (r.y0 - cam.y) / cam.vh, y1: (r.y1 - cam.y) / cam.vh };
+};
+// The card's content and size (measured only when the text, the keys in use or the screen change)
+UI.prototype.setTipText = function (text) {
+  const W = this.hud.clientWidth || 1, H = this.hud.clientHeight || 1;
+  const k = `${text}|${this.capKey()}|${W}x${H}|${this._tipW}`;
+  const el = this.tipCard;
+  if (k === this._tipMk) return this._tipSize;
+  this._tipMk = k;
+  el.classList.remove('squeeze', 'under');
+  el.innerHTML = ''; el.append(...this.richText(text));
+  el.hidden = false;
+  const cs = getComputedStyle(el), pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+  const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.35;
+  this._tipSize = { w: el.offsetWidth / W, h: el.offsetHeight / H, lines: Math.max(1, Math.round((el.offsetHeight - pad) / lh)) };
+  return this._tipSize;
+};
+UI.prototype.showTip = function (game, sg) {
+  const f = game.frame, cam = game.camera, p = game.player, el = this.tipCard;
+  const wasHidden = el.hidden;
+  const size = this.setTipText(sg.text);
+  const cx = this._tipCx ?? 0.5, cw = size.w, ch = size.h;
+  const rectAt = (y0) => ({ x0: cx - cw / 2 - 0.01, x1: cx + cw / 2 + 0.01, y0: y0 - 0.01, y1: y0 + ch + 0.01 });
+  const top = this._tipTop ?? SLOT.top, up = Math.max(SLOT.up, top), low = SLOT.low - ch;
+  let y0 = up, slot = 'up';
+  const pip = this.viewRect(cam, cam.pipRect(p));
+  const boss = cam.framed ? cam.bossRect() : null;
+  if (boss) {
+    // a fight: the taller free band above or below the framed pair
+    const b = this.viewRect(cam, boss), y0p = Math.min(pip.y0, b.y0), y1p = Math.max(pip.y1, b.y1);
+    const above = y0p - top, below = SLOT.bottom - y1p;
+    if (above >= below) { y0 = Math.max(top, top + (above - ch) / 2); slot = 'above'; } else { y0 = Math.min(SLOT.bottom - ch, y1p + (below - ch) / 2); slot = 'below'; }
+  } else {
+    const busy = [pip, ...this.tipHazards(game).map((r) => this.viewRect(cam, r))];
+    if (sg.at === 'low' || busy.some((r) => ovl(r, rectAt(up)))) {
+      // the lower slot; where the cricket stands low in the view (touch screens frame him ~2/3 down), just under him
+      y0 = low; slot = 'low';
+      if (ovl(pip, rectAt(low)) && pip.y1 + 0.01 + ch <= 0.96) y0 = pip.y1 + 0.01;
+      else if (ovl(pip, rectAt(low)) && !busy.some((r) => ovl(r, rectAt(up)))) { y0 = up; slot = 'up'; }
+    }
+  }
+  this._tip = { key: sg.key, text: sg.text, kind: sg.kind, f0: f, out: null, read: false, fading: false, slot, y0, cx, lines: size.lines, rect: rectAt(y0) };
+  if (wasHidden) void el.offsetWidth; // the fade-in starts from its own place
+  el.classList.add('on');
+};
+// what the card must not cover when it appears: projectiles, a boss's hazards (the tongs), the gecko's tell
+UI.prototype.tipHazards = function (game) {
+  const out = [], b = game.boss, f = game.frame;
+  for (const r of game.projectiles || []) out.push({ x0: r.x, y0: r.y, x1: r.x + r.w, y1: r.y + r.h });
+  if (b && typeof b.hazards === 'function') out.push(...b.hazards());
+  if (b && !b.done && ((b.tellUntil ?? -1) > f || b.mode === 'tell' || b.mode === 'logTell')) { const r = game.camera.bossRect(); if (r) out.push(r); }
+  return out;
+};
+// The card's band and width (main.js measureAvoid: this.avoid): it starts under the icon row (the top row's
+// buttons reach towards the middle) and is as wide as the space between the HUD's columns beside it (the
+// hearts and portraits on the left, the crumbs on the right), centred, at most 640 px.
+UI.prototype.layoutTips = function () {
+  const W = this.hud.clientWidth || 0; if (!W) return;
+  const hud = (this.avoid || []).filter((a) => a.kind === 'hud');
+  let top = SLOT.top;
+  for (const a of hud) if (a.x0 < 0.75 && a.x1 > 0.5) top = Math.max(top, a.y1 + 0.01); // the icon row
+  let l = 0, r = 1;
+  for (const a of hud) if (a.y1 > top) { if (a.x1 < 0.5) l = Math.max(l, a.x1); else if (a.x0 > 0.5) r = Math.min(r, a.x0); }
+  const w = Math.round(Math.min(640, 2 * Math.min(0.5 - l, r - 0.5) * W - 16));
+  if (w !== this._tipW) { this._tipW = w; this.hud.style.setProperty('--tip-w', w + 'px'); }
+  this._tipTop = top; this._tipCx = 0.5;
+};
+// [issue 9] read-only, for __game.tips(): the card's state; measure: tip texts -> their lines in the card as it is now
+UI.prototype.tipsInfo = function (measure) {
+  const st = this._tip;
+  const out = {
+    shown: st && !st.fading ? { key: st.key, text: st.text, kind: st.kind, slot: st.slot, rect: st.rect, lines: st.lines, under: this.tipCard.classList.contains('under'), squeeze: this.tipCard.classList.contains('squeeze'), away: this.tipCard.classList.contains('away') } : null,
+    read: [...this.tipsRead], width: this._tipW ?? null, cx: this._tipCx ?? 0.5,
+  };
+  if (measure) {
+    const c = this.tipCard.cloneNode(false); c.className = 'tip-card on'; c.removeAttribute('hidden');
+    c.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+    this.tipCol.append(c);
+    const cs = getComputedStyle(c), pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+    const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.35;
+    out.measured = measure.map((text) => { c.innerHTML = ''; c.append(...this.richText(text)); return { text, lines: Math.round((c.offsetHeight - pad) / lh), width: c.offsetWidth, max: cs.maxWidth, font: cs.fontSize }; });
+    c.remove();
+  }
+  return out;
+};
 // [issue 3] taps on the ear (resting or out): [issue 10] one click or tap does what the ear's state at
 // the press says (main.js earAction: pin, rest, dismiss; nothing while Listening) once the double-tap
 // window has passed; two in a row toggle auto-chirp (and never also click). The window runs from

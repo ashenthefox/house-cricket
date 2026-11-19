@@ -21,6 +21,7 @@ import { MetaRun } from './meta-run.js';
 import { setupFeedback } from './feedback.js';
 import { line } from './lines.js';
 import { tempAt, beaconSpec, measure, route } from './beacon.js';
+import { noteLive } from './notes.js'; // [issue 9]
 import * as Ear from './ear.js'; // [issue 10] the ear guide (pure display state, kept out of the game)
 import * as HOUSE from '../data/house.js';
 import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
@@ -61,10 +62,15 @@ const rewinder = REWIND ? new Rewinder() : null;
 let rewindCue = null, rewindCueT = 0;
 // [issue 10] ?earlost=N (seconds) shortens the ear guide's 60 s lost timer, for browser checks.
 const EAR_LOST = (() => { const q = new URLSearchParams(location.search); const v = Number(q.get('earlost')); return q.has('earlost') && v > 0 ? Math.round(v * FPS) : null; })();
+// [issue 9] the tutorial notes read in this save slot ('room:x,y'; a script tip by its text id). Never part of the
+// game (a rewind or a replay doesn't touch it); saved with the slot, reset with a new one.
+const tipsRead = ui.tipsRead;
+const slotData = (gm) => Save.fromGame(gm, tipsRead);
+function loadTips(d) { tipsRead.clear(); for (const k of (d && Array.isArray(d.tipsRead) ? d.tipsRead : [])) tipsRead.add(k); }
 let heldOver = null; // [issue 16] 'story' | 'title': that screen stays up while the room after it loads (foldIntoStory, continueGame)
 
 function newGameObject() {
-  const g = new Game([...ZONES, HUB_ZONE], { onSave: (gm) => { Save.writeSlot(slot, Save.fromGame(gm)); } }); // [meta] + the Carrier's rooms
+  const g = new Game([...ZONES, HUB_ZONE], { onSave: (gm) => { Save.writeSlot(slot, slotData(gm)); } }); // [meta] + the Carrier's rooms
   g.camera.touchBias = isTouch; g.camera.zoom = phoneZoom(); g.camera.hFrac = viewFrac; // [final-G] hFrac
   g.camera.game = g; g.camera.avoid = avoidRects; // [polish-V] arena framing reads game.boss; the HUD/button rects
   Meta.ensure(g); g.gentle = !!settings.gentle; // [meta] crumbs, secrets, arrivals...; Gentle Mode for bosses
@@ -103,6 +109,7 @@ function measureAvoid() {
   avoidRects = out; avoidAt = performance.now();
   if (game) game.camera.avoid = out;
   ui.avoid = out; ui._indW = 0; // [polish-V] the ear re-measures its size
+  ui.layoutTips(); // [issue 9] the tip card's width: the space between the HUD columns
   return out;
 }
 addEventListener('resize', resize);
@@ -166,7 +173,7 @@ const house = HOUSE; // data/house.js: the dollhouse (room cells, the Carrier's 
 const hub = new Hub({
   ui,
   onFacility: (kind, owner) => { openModal(); Screens.facility(A, kind, owner); },
-  onCrack: () => { openModal(); Save.writeSlot(slot, Save.fromGame(game)); Audio.play('save-crack'); Screens.hubCrack(A); },
+  onCrack: () => { openModal(); Save.writeSlot(slot, slotData(game)); Audio.play('save-crack'); Screens.hubCrack(A); },
   onSing: () => carrierSings(),
   sfx: (n) => A.sfx(n),
   toast: (t) => game && game.toast(t, 180),
@@ -194,7 +201,7 @@ const A = {
   playMusic: (name) => { try { Audio.music?.(name); } catch { /* ignore */ } },
   dialogSay: (lines, onDone) => { ui.closeMenu(); dialog.open(lines, { onDone: () => { onDone && onDone(); if (!metaRun.handoff()) afterModal(); } }); }, // [polish-T] handoff: the next screen opens as the dialog closes
   here: () => (game ? { room: game.room.id, tx: Math.floor(game.player.cx / 40), ty: Math.floor((game.player.y + game.player.h - 1) / 40) } : null),
-  autosave: () => { if (game && !frozen) Save.writeSlot(slot, Save.fromGame(game)); },
+  autosave: () => { if (game && !frozen) Save.writeSlot(slot, slotData(game)); },
   applyUpgrades: () => applyUpgrades(),
   indicator: () => (Audio.indicator && game ? Audio.indicator(game) : null),
   goCarrier: (crack) => goCarrier(crack),
@@ -265,6 +272,7 @@ function newGame(n) {
   slot = n;
   A.playMusic(null); // [final-S] drop a music override (the Carrier, Nana's finale) left by the last game
   Save.clearSlot(n);
+  loadTips(null); // [issue 9] a new slot starts with no notes read
   game = newGameObject();
   metaRun.reset();
   ui.closeMenu(); ui.showTitleArt(false);
@@ -311,7 +319,7 @@ function playEnding() {
   A.playMusic(null); // [polish-T] was nana.js after() (the ending now starts as her last line closes)
   ui.closeMenu(); ui.showHUD(false); touch.show(false);
   const crack = Meta.ensure(game).lairCrack || game.saveCrack || A.here(); // [final-S] back from the Carrier to Nana's door crack
-  Save.writeSlot(slot, Save.fromGame(game));
+  Save.writeSlot(slot, slotData(game));
   story.play(line('ending.panels'), { id: 'ending', onDone: () => story.credits({ onDone: () => story.thanks({ onDone: () => goCarrier(crack) }) }) });
 }
 function carrierSings() {
@@ -328,6 +336,7 @@ function continueGame(latest) {
   slot = latest.n;
   game = newGameObject();
   metaRun.reset();
+  loadTips(latest.data); // [issue 9]
   try { Save.intoGame(game, latest.data); } catch (e) { console.warn('save could not be loaded', e); const z = ZONES.find((zz) => zz.n === 1) || ZONES[0]; game.startAt(z.start.room); }
   Meta.ensure(game); applyUpgrades();
   startPlay();
@@ -352,7 +361,7 @@ function pause(msg, tab) {
 }
 function resume() { paused = false; ui.closeMenu(); A.pauseMsg = null; A._trioDraft = null; afterModal(); } // [final-S] a closed picker drops its draft
 function quitToTitle() {
-  if (game) Save.writeSlot(slot, Save.fromGame(game));
+  if (game) Save.writeSlot(slot, slotData(game));
   if (game?.inCarrier) hub.leave(game);
   A.playMusic(null); // [final-S] the Carrier's / the finale's override must not carry over to the title
   game = null; showTitle();
@@ -607,11 +616,12 @@ function tick(now) {
       const heldTr = gate.heldKind(heldOver) === 'transition';
       if (heldTr) { if (!renderer.snapOk) renderer.snapshot(); } else renderer.dropSnapshot();
       S.setDrawing(game.room?.id || null, gate.holding); // [art] ?artcheck logs misses against this room
-      renderer.draw(game, { shake: settings.shake, held: heldTr, glint: earGlint() }); drawMetaWorld(); // [issue 10] the ear's doorway glint
+      renderer.draw(game, { shake: settings.shake, held: heldTr, glint: earGlint(), tipRead: (sg) => tipsRead.has(sg.key) }); drawMetaWorld(); // [issue 10] the ear's doorway glint
       S.setDrawing(null);
       const cv = gate.cover(heldOver); // [art] the wait, folded into the panel, the title or the transition; else ink until the room's art is in
       if (cv?.kind === 'transition') renderer.drawHeld(cv.alpha, cv.ink); else if (cv) renderer.drawCover(cv.alpha, cv.label, cv.ink);
     }
+    ui.tipHold = !!heldOver || gate.holding; // [issue 9] the tip card hides during a held transition
     ui.updateHUD(game); if (now - avoidAt > 500) measureAvoid(); updateMetaHUD(); // [polish-V]
   } else if (!story.active) renderer.draw({ room: null }, {});
   paused = screen === 'play' && (!!ui.screen || dialog.active || story.active);
@@ -693,6 +703,13 @@ window.__game = {
   ear: () => ({ ...ear, mode: Ear.earMode(settings), setting: settings.ear, shown: earShow, pathDist: earDist, answerAt: earAnswerAt, frame: game?.frame ?? null,
     aim: earAim ? { ...earAim } : null, angle: game ? earAngle() : null, shownAngle: ui._earC ?? null, glint: game ? earGlint() : null, lostFrames: EAR_LOST || Ear.LOST_FRAMES,
     dock: !ui.earDock.hidden && !ui.earDock.classList.contains('away'), edge: !ui.indicator.hidden }),
+  // [issue 9] read-only: the tip card (what shows, its slot and rect in view fractions, the read set) and every
+  // note in the room (where it stands, read, still standing); measure: tip texts -> their lines in the card as it is
+  tips: (opts = {}) => {
+    const info = ui.tipsInfo(opts.measure || null);
+    info.notes = game ? (game.signs || []).map((s) => ({ key: s.key, kind: s.kind, text: s.text, tx: s.tx ?? null, gy: s.gy ?? null, x: s.nx ?? null, y: s.ny ?? null, bad: s.bad || null, read: tipsRead.has(s.key), live: noteLive(game, s) })) : [];
+    return JSON.parse(JSON.stringify(info));
+  },
   held: () => Object.fromEntries(['left', 'right', 'up', 'down', 'jump', 'use', 'chirp', 'kick', 'listen'].map((k) => [k, input.heldNow(k)])),
 };
 

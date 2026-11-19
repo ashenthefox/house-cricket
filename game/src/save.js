@@ -58,8 +58,9 @@ export function loadSettings() {
 }
 export function saveSettings(st) { try { store()?.setItem(SETTINGS, JSON.stringify(st)); } catch { /* ignore */ } }
 
-// Game -> save data, and back.
-export function fromGame(game) {
+// Game -> save data, and back. [issue 9] tipsRead: the slot's read tutorial notes (kept outside the game by
+// main.js; a load hands them back as data.tipsRead)
+export function fromGame(game, tipsRead = null) {
   const p = game.player;
   const broken = {};
   for (const [id, rs] of Object.entries(game.roomState)) if (rs.broken.size) broken[id] = [...rs.broken];
@@ -80,6 +81,7 @@ export function fromGame(game) {
     carrier: !!game.inCarrier,          // saved in the Carrier: load back into it
     zoneName: game.zone?.name || '',
     playTime: Math.round(game.playFrames / 60),
+    tipsRead: tipsRead ? [...tipsRead] : [],
   };
 }
 export function intoGame(game, d) {
