@@ -76,6 +76,11 @@ export default {
       { obj: 'fabric', x: 1, y: 26, w: 62, h: 10, color: '#8DA2D0', pattern: 'quilt', accent: '#F4EBDD' }, // the bedspread
     ],
   },
+  'bed-lair': {
+    paint: [
+      { obj: 'metal', x: 59, y: 6, w: 1, h: 10, color: '#3E4550', axis: 'v' },        // the tank's frame (outside the right glass)
+    ],
+  },
   'bed-dresser': {
     paint: [{ obj: 'wood', x: 38, y: 16, w: 20, h: 16, color: '#9A6A44', drawers: 4 }],
   },

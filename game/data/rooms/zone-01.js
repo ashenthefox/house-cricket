@@ -125,13 +125,15 @@ function lair() {
   g.clear(62, 10, 2, 4);                      // to the Hall (rows 10-13; the rescue gate)
   g.box(2, 4, 2, 12, 'G');                    // left glass
   g.box(58, 6, 2, 10, 'G').clear(58, 2, 2, 4); // right glass (the rim at row 6)
+  g.box(59, 6, 1, 10, '#');                   // [issue #4] the tank's frame outside the right glass: grippy, so the 2-wide gap down to
+                                              // the gate is a wall-jump climb back to the rim (before the rescue the gate is shut).
+                                              // (Rungs there caught the drop to the gate on the way out: full-run.json.)
   g.row(10, 16, 6, '=').clear(10, 17, 6, 1);  // the lid gap: up from the dresser (a flap you can jump up through)
   g.box(19, 14, 3, 2, '#');                   // sand berm (left)
   g.box(42, 14, 3, 2, '#');                   // sand berm (right)
   g.box(28, 12, 8, 4, '#');                   // Duchess's rock (Stripe's cup on top)
   // fake-plant leaves up to the right rim (the way on after the rescue)
   g.row(50, 13, 4, '=').row(54, 11, 4, '=').row(50, 9, 4, '=').row(54, 7, 4, '=');
-  g.row(60, 12, 2, '=').row(60, 10, 2, '=').row(60, 8, 2, '='); // [issue #4] rungs outside the right glass, back up to the rim (before the rescue the gate is shut: you were stuck there)
   g.row(54, 14, 3, '='); // [playtest] a low leaf: the row-13 leaf was a 3-tile rise from the floor (Pip peaked 0.002 px short; Jump 2 crickets were stuck in the lair)
   g.put(6, 15, 'h');                          // the hide log
   return g.rows();
