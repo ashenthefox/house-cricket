@@ -9,9 +9,14 @@
 //   { zone }                         the whole zone
 //   { room, rect: [x, y, w, h] }     the room's tiles (a stuck pocket counts as exempt only when every
 //                                    one of its spots is inside an exempt rect)
+//   { rule: 'hazard-wall' }         every wall-cling spot with thorns, water (no Raft) or a bottomless fall
+//                                    straight below it: letting go (or sliding down) drops you in at once
+//   { fight: boss, room, rect }      not an exemption: a gecko fight's ground. Until the boss's cricket is
+//                                    rescued, every spot in the rect is a way on (the fight itself moves you:
+//                                    the check otherwise counts only the boss's own spot)
 export const TRAP_EXEMPT = [
+  { rule: 'hazard-wall', why: 'clinging (Booties) to the wall of a thorn, water or bottomless pit: you slide or drop into it and are put back at once' },
+  { fight: 'duchess', room: 'bed-lair', rect: [4, 11, 54, 5], why: 'Duchess stalks the whole sand floor, over the rock; stuck in a berm, her body is the step up to the rock and the cup' },
   { zone: 'zone-99', why: 'the Sandbox: a dev-only test zone, not in the release build' },
   { zone: 'zone-98', why: 'the engine test rooms: a dev-only test zone, not in the release build' },
-  { room: 'pan-shelves', rect: [33, 15, 4, 4], why: 'the thorn pit under the hook: clinging to its walls (Booties) you slide onto the thorns and are put back on the ledge at once' },
-  { room: 'att-rafters', rect: [81, 15, 1, 20], why: 'the thorn pit left of the rafter wall: clinging to the wall (Booties) you slide onto the thorns and are put back at once' },
 ];
