@@ -38,7 +38,7 @@ function setPlat(b, g, on) {
 }
 
 export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
-  art: () => ({ props: ['feeder-cup', 'feeder-cup-tipped', 'cup-tab', 'cup-tab-pulled'], crickets: { stripe: ['idle'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
+  art: () => ({ props: ['feeder-cup', 'feeder-cup-tipped', 'cup-tab', 'cup-tab-pulled'], crickets: { stripe: ['idle', 'leap'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
  
   phases: 3, len: LEN,
   start(b, g) {
@@ -168,13 +168,20 @@ export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue(
     else {
       const im = S.get('props/feeder-cup.png');
       if (im) c.drawImage(im, CUP_X - cupH * 0.44, ROCK.top - cupH + 4, cupH * 0.88, cupH);
-      if (r && !b.done) r.drawCricketAt(c, 'stripe', CUP_X, ROCK.top - 0.9 * T, -1, { look: 'idle', scale: 0.8 });
+      // [issue 13] Stripe, full size on the cup's floor and facing Pip, with a hop up to the lid now
+      // and then: at 0.8 scale, floating mid-cup behind the front tab, he read as part of the
+      // cup's painted texture and the cup looked empty
+      if (r && !b.done) {
+        const ht = (b.t || 0) % 150, hop = ht < 22 ? Math.sin(Math.PI * ht / 22) * 0.75 * T : 0;
+        const face = b.game?.player && b.game.player.cx > CUP_X ? 1 : -1;
+        r.drawCricketAt(c, 'stripe', CUP_X - face * 0.1 * T, ROCK.top - cupH * 0.12 - hop, face, { look: hop ? 'leap' : 'idle' });
+      }
       TABS.forEach((t, i) => {
         const pulled = b.pulled?.[i];
         const ti = S.get(`props/${pulled ? 'cup-tab-pulled' : 'cup-tab'}.png`);
         const now = i === b.phase - 1 && !pulled;
         const w = (pulled ? 0.9 : 1.1) * T, h = w * (ti ? ti.height / ti.width : 0.3);
-        const x = t.x + (i === 0 ? -w * 0.3 : i === 1 ? w * 0.3 : 0) - w / 2, y = ROCK.top - (i === 2 ? 0.8 * T : 1.6 * T) - h / 2;
+        const x = t.x + (i === 0 ? -w * 0.3 : i === 1 ? w * 0.3 : 0) - w / 2, y = ROCK.top - (i === 2 ? 0.25 * T : 1.6 * T) - h / 2;
         if (ti) { c.save(); if (i === 0) { c.translate(x + w, y); c.scale(-1, 1); c.drawImage(ti, 0, 0, w, h); } else c.drawImage(ti, x, y, w, h); c.restore(); }
         if (now && Math.floor(b.t / 20) % 2 === 0) { c.save(); c.strokeStyle = '#F2C46D'; c.lineWidth = 3; c.beginPath(); c.arc(t.x, y + h / 2, 18, 0, 7); c.stroke(); c.restore(); }
       });
