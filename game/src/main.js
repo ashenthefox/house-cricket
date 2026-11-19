@@ -20,7 +20,8 @@ import { Hub, HUB_ZONE, hubRoomFor, isHubRoom } from './hub.js';
 import { MetaRun } from './meta-run.js';
 import { setupFeedback } from './feedback.js';
 import { line } from './lines.js';
-import { tempAt } from './beacon.js';
+import { tempAt, beaconSpec, measure, route } from './beacon.js';
+import * as Ear from './ear.js'; // [issue 10] the ear guide (pure display state, kept out of the game)
 import * as HOUSE from '../data/house.js';
 import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
 import { drawMech } from './mech-draw.js'; // [mech] engine mechanics drawing
@@ -58,6 +59,8 @@ const frameLog = [];
 const REWIND = (() => { const q = new URLSearchParams(location.search); return q.has('rewind') && q.get('rewind') !== '0'; })();
 const rewinder = REWIND ? new Rewinder() : null;
 let rewindCue = null, rewindCueT = 0;
+// [issue 10] ?earlost=N (seconds) shortens the ear guide's 60 s lost timer, for browser checks.
+const EAR_LOST = (() => { const q = new URLSearchParams(location.search); const v = Number(q.get('earlost')); return q.has('earlost') && v > 0 ? Math.round(v * FPS) : null; })();
 let heldOver = null; // [issue 16] 'story' | 'title': that screen stays up while the room after it loads (foldIntoStory, continueGame)
 
 function newGameObject() {
@@ -129,9 +132,11 @@ ui.handlers = {
   map: () => { if (screen === 'play' && !dialog.active && !story.active) { if (ui.screen === 'map') resume(); else if (ui.screen) { if (PAUSE_TABS.has(ui.screen)) Screens.pause(A, 'map'); } else pause(null, 'map'); } }, // [final-S] not from a card
   promptTap: () => { if (game?.inCarrier) hub.tapPrompt(); else if (game) { input._press(['up'], 'touch'); input._release(['up']); } },
   mute: () => toggleMute(),
-  // [issue 3] the ear: a tap docks / undocks it (Settings > Chirp indicator), a double tap flips auto-chirp
-  // (Settings > Beacon chirps: Always <-> When I call; Off goes to Always)
-  earDock: () => { if (!earLive()) return; A.setSetting('indicator', !settings.indicator); measureAvoid(); },
+  // [issue 10] the ear: a click does what the ear's state at the press says (Ear.clickAction): pin a
+  // resting ear out, rest a pinned one, dismiss one that came out on its own; [issue 3] a double click
+  // flips auto-chirp (Settings > Beacon chirps: Always <-> When I call; Off goes to Always)
+  earAction: () => (earLive() && earShow ? Ear.clickAction(ear, Ear.earMode(settings)) : null),
+  earClick: (act) => earClick(act),
   earAuto: () => {
     if (!earLive()) return;
     const on = settings.beaconChirps !== 'always';
@@ -141,6 +146,15 @@ ui.handlers = {
   swapTo: (i) => { if (game && i !== game.player.active) game.player.queuedSwap = i; },
 };
 const earLive = () => screen === 'play' && !!game && !ui.screen && !story.active;
+function earClick(act) {
+  if (!earLive() || !earShow || !act) return;
+  const dbl = line(settings.beaconChirps === 'always' ? 'ui.earDblCall' : 'ui.earDblAuto');
+  if (act === 'pin') { A.setSetting('ear', 'always'); if (!settings.earTold) A.setSetting('earTold', true); game.toast(line('ui.earPinned', { dbl }), 210); }
+  else if (act === 'rest') {
+    if (settings.beaconChirps === 'off' && settings.ear === 'helps') game.toast(line('ui.earStaysOut'), 180); // Off: "When it helps" counts as "Always out"
+    else { A.setSetting('ear', 'helps'); ear = Ear.restart(ear, earDist); game.toast(line('ui.earResting', { dbl }), 210); }
+  } else if (act === 'dismiss') { ear = Ear.dismiss(ear, earDist, earAnswerAt); game.toast(line('ui.earDismissed'), 180); }
+}
 function toggleMute() { settings.muted = !settings.muted; Audio.setMuted(settings.muted); ui.muted = settings.muted; Save.saveSettings(settings); }
 
 // ---- screens (meta and UI: src/menus/screens.js, story.js, dialog.js, hub.js, meta-run.js) ----
@@ -445,6 +459,7 @@ function step() {
     hub.update(game, f);
     game.update(f);
     Audio.tick(game); // [audio] effects from game.fx, music, beacon, game-clock cues (100 ms lookahead)
+    earStep(!game.card && !(game.hold > 0)); // [issue 10] after the game and the audio (the answer's frame)
     playRumble();
     metaRun.step(f);
     if (game.meta?.flags.firstChirp && game.fx.some((e) => e.type === 'chirp' && e.f === game.frame)) game.meta.flags.firstChirp = false;
@@ -465,6 +480,7 @@ function rewind() {
     lastFxSound = game.frame;
     renderer.fx.p.length = 0; renderer.fx.spot = null;
     try { Audio.rewound(game); } catch { /* audio not up */ }
+    earReset(); // [issue 10] the ear starts over (and snaps) after a rewind
     applyUpgrades(); updateTouchButtons();
   }
   if (!rewindCue) { rewindCue = document.createElement('div'); rewindCue.className = 'rewind-cue'; rewindCue.setAttribute('aria-live', 'polite'); stage.appendChild(rewindCue); }
@@ -527,20 +543,48 @@ function drawMetaWorld() {
   }
   c.restore();
 }
+// [issue 10] The ear guide (src/ear.js): its state lives here, outside the game, so replays, saves and
+// rewind snapshots never see it. One step per fixed step; `inControl` is false under the item card and
+// a hold (respawn, back to the entrance); paused, dialog, story and art-hold steps never get here.
+let ear = Ear.initial(), earGame = null, earVia = null, earAim = null, earShow = false, earDist = null, earAnswerAt = null;
+let earSnap = 0, earPulse = 0; // counters the HUD watches: snap the angle; the lost "this way" pulse
+function earReset() { ear = Ear.initial(); earVia = null; earAim = null; earShow = false; earSnap++; }
+function earStep(inControl) {
+  if (earGame !== game) { earGame = game; earReset(); } // a new game (New Game, Continue, goToRoom)
+  const spec = game.inCarrier ? null : beaconSpec(game), m = spec ? measure(game, spec) : null;
+  earDist = m?.pathDist ?? null;
+  earShow = !game.inCarrier && game.zone?.n >= 1 && !!spec && earDist != null && !game.inFight();
+  if (game.fx.some((e) => e.type === 'die' && e.f === game.frame)) ear = Ear.restart(ear, earDist); // a respawn: best = here
+  const r = earShow ? route(game, spec, earVia) : null;
+  earVia = r?.via ?? null; earAim = r ? { ...r.aim, room: game.room.id, target: r.target, door: r.door } : null;
+  const ind = Audio.indicator ? Audio.indicator(game) : null;
+  earAnswerAt = ind?.answerFrame ?? null;
+  ear = Ear.step(ear, { followable: earShow, key: spec ? `${spec.zone}|${spec.phase}` : null, pathDist: earDist, inControl, listening: !!game.player.listening, frame: game.frame, answerAt: earAnswerAt, mode: Ear.earMode(settings), lostFrames: EAR_LOST });
+  if (ear.cameOut) {
+    earSnap++;
+    if (!settings.earTold) { A.setSetting('earTold', true); game.toast(line('ui.earFirst'), 300); } // the first time it ever comes out
+  }
+  if (ear.lostNow) { earPulse++; A.sfx('chime'); } // a "this way" pulse and a soft cue
+}
+// the way to walk as a screen angle (the HUD smooths it), and the doorway glint's spot (render.js)
+function earAngle() { const p = game.player; return earAim && earAim.room === game.room?.id ? Math.atan2(earAim.y - p.cy, earAim.x - p.cx) : null; }
+function earGlint() {
+  if (!ear.out || !earShow || !earAim || earAim.target || earAim.room !== game.room?.id) return null;
+  const room = game.room, k = 24; // a doorway on the room's edge: drawn just inside it
+  return { x: Math.max(k, Math.min(room.pw - k, earAim.x)), y: Math.max(k, Math.min(room.ph - k, earAim.y)) };
+}
 function updateMetaHUD() {
   const p = game.player, m = game.meta || {};
-  let ind = null;
   const d = !game.inCarrier ? A.indicator() : null; // [final-S] also feeds the ripples and the rhythm strip
-  if (!game.inCarrier && !game.inFight()) { // [polish-V] not in an arena once the fight starts (it sat on the geckos)
-    if (d && d.show) ind = { on: true, angle: d.angle, strength: d.loudness ?? 0.5, pulse: (d.pulse || 0) > 0.3, pulseV: d.pulse || 0, chirpAt: d.lastChirpFrame };
-    else if (!Audio.indicator) { const t = game.beaconTarget?.(); if (t) ind = { on: true, angle: Math.atan2(t.y - p.cy, t.x - p.cx), strength: 0.6, pulse: game.frame % 90 < 12 }; }
-    // [final-S] explain the indicator once, the first time it shows in the Bedroom (after the first call)
-    if (ind && ind.on && settings.indicator && game.zone?.n === 1 && !m.flags?.firstChirp && m.flags && !m.flags.indicatorHint && !ui.screen && !dialog.active && !frozen) {
-      m.flags.indicatorHint = true; game.toast(line('ui.indicatorHint'), 360);
-    }
-  }
+  const a = earShow ? earAngle() : null;
+  const earInfo = a != null ? {
+    out: ear.out, reason: ear.reason, angle: a, mode: Ear.earMode(settings), snap: earSnap, pulseN: earPulse, room: game.room.id,
+    strength: d?.show ? d.loudness ?? 0.5 : 0.5, pulseV: d?.show ? d.pulse || 0 : 0, chirpAt: d?.show ? d.lastChirpFrame : null,
+  } : null;
+  // [issue 10] one direction everywhere: the ripples come from the way to walk too
+  const bc = d && d.show ? (a != null ? { ...d, dx: Math.cos(a), dy: Math.sin(a) } : d) : null;
   const temp = p.stats?.perk === 'thermometer' && !game.inCarrier ? Math.round(tempAt(game.room, p.cx)) : null;
-  ui.updateMetaHUD({ crumbs: m.crumbs || 0, temp, indicator: ind, docked: !settings.indicator, autoChirp: settings.beaconChirps === 'always', beacon: d && d.show ? d : null, listening: !!p.listening, alwaysRipples: !!settings.ripples }); // [issue 3] indicator off = docked in the HUD
+  ui.updateMetaHUD({ crumbs: m.crumbs || 0, temp, ear: earInfo, paused: paused || frozen, autoChirp: settings.beaconChirps === 'always', beacon: bc, listening: !!p.listening, alwaysRipples: !!settings.ripples });
 }
 function logFrame(name) {
   const l = frameLog[frameLog.length - 1];
@@ -563,7 +607,7 @@ function tick(now) {
       const heldTr = gate.heldKind(heldOver) === 'transition';
       if (heldTr) { if (!renderer.snapOk) renderer.snapshot(); } else renderer.dropSnapshot();
       S.setDrawing(game.room?.id || null, gate.holding); // [art] ?artcheck logs misses against this room
-      renderer.draw(game, { shake: settings.shake, held: heldTr }); drawMetaWorld();
+      renderer.draw(game, { shake: settings.shake, held: heldTr, glint: earGlint() }); drawMetaWorld(); // [issue 10] the ear's doorway glint
       S.setDrawing(null);
       const cv = gate.cover(heldOver); // [art] the wait, folded into the panel, the title or the transition; else ink until the room's art is in
       if (cv?.kind === 'transition') renderer.drawHeld(cv.alpha, cv.ink); else if (cv) renderer.drawCover(cv.alpha, cv.label, cv.ink);
@@ -645,6 +689,10 @@ window.__game = {
   camera: () => (game ? { x: game.camera.x, y: game.camera.y, zoom: game.camera.zoom, vw: game.camera.vw, vh: game.camera.vh, hFrac: game.camera.hFrac, px: game.player.cx, py: game.player.cy, pw: game.player.w, ph: game.player.h } : null),
   boss: () => (game?.boss ? { name: game.boss.name, x: game.boss.x, y: game.boss.y, done: !!game.boss.done, phase: game.boss.phase, mode: game.boss.mode, inFight: game.inFight() } : null),
   rewind: () => (rewinder && game ? (rewind(), rewinder.snaps.length) : false), // [issue 11] debug; false when off
+  // [issue 10] read-only: the ear guide (its state, the setting in effect, where it aims, the lost timer's length, what shows)
+  ear: () => ({ ...ear, mode: Ear.earMode(settings), setting: settings.ear, shown: earShow, pathDist: earDist, answerAt: earAnswerAt, frame: game?.frame ?? null,
+    aim: earAim ? { ...earAim } : null, angle: game ? earAngle() : null, shownAngle: ui._earC ?? null, glint: game ? earGlint() : null, lostFrames: EAR_LOST || Ear.LOST_FRAMES,
+    dock: !ui.earDock.hidden && !ui.earDock.classList.contains('away'), edge: !ui.indicator.hidden }),
   held: () => Object.fromEntries(['left', 'right', 'up', 'down', 'jump', 'use', 'chirp', 'kick', 'listen'].map((k) => [k, input.heldNow(k)])),
 };
 

@@ -5,6 +5,7 @@
 import { CRICKETS } from '../data/crickets.js';
 import { ITEMS } from '../data/items.js';
 import * as S from './sprites.js';
+import { turn } from './ear.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const h = (tag, attrs = {}, ...kids) => {
@@ -59,24 +60,24 @@ export class UI {
     this.crumbs.append(h('span', { class: 'crumb-icon' }), h('span', { class: 'crumb-n', text: '0' }));
     this.thermo = h('div', { class: 'thermo', hidden: '' }, h('span', { class: 'thermo-tube' }, h('span', { class: 'thermo-fill' })), h('span', { class: 'thermo-read', text: '70°F' }));
     // [final-S] the chirp indicator: an ear with sound waves that pulse with each beacon chirp and grow with loudness
-    // [issue 3] a button: tap it to dock it in the HUD (this.earDock), double-tap to toggle auto-chirp
-    this.indicator = h('button', { type: 'button', class: 'chirp-ind', id: 'chirp-indicator', hidden: '', tabindex: '-1', 'aria-label': 'Chirp indicator' });
+    // [issue 10] the ear guide: it rests as a HUD button (this.earDock) and comes out to the screen edge
+    // (this.indicator) when it helps; a click pins / rests / dismisses it, a double click toggles auto-chirp
+    this.indicator = h('button', { type: 'button', class: 'chirp-ind', id: 'chirp-indicator', hidden: '', tabindex: '-1', 'aria-label': 'Ear guide' });
     this.indicator.innerHTML = '<span class="ci-ring"></span><svg viewBox="-32 -32 64 64" class="ci-svg" aria-hidden="true">'
       + '<g class="ci-waves"><path class="w1" d="M19.5 -11.3 A22.5 22.5 0 0 1 19.5 11.3"/><path class="w2" d="M24.2 -14 A28 28 0 0 1 24.2 14"/><path class="w3" d="M28.6 -16.5 A33 33 0 0 1 28.6 16.5"/></g>'
       + '<circle class="ci-disc" r="16"/>' + EAR_PATHS + '<path class="ci-gap" d="M-10 -10 L10 10"/><path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
-    this.earDock = h('button', { type: 'button', class: 'icon-btn ear-btn', hidden: '', tabindex: '-1', 'aria-label': 'Chirp indicator (docked)' });
-    this.earDock.innerHTML = '<svg viewBox="-14 -14 28 28" aria-hidden="true">' + EAR_PATHS + '<path class="ci-gap" d="M-10 -10 L10 10"/><path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
+    this.earDock = h('button', { type: 'button', class: 'icon-btn ear-btn', hidden: '', tabindex: '-1', 'aria-label': 'Ear guide (resting)' });
+    this.earDock.innerHTML = '<svg viewBox="-14 -14 28 28" aria-hidden="true" class="ear-svg">' + EAR_PATHS + '<path class="ci-gap" d="M-10 -10 L10 10"/><path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
     this.earTaps(this.indicator); this.earTaps(this.earDock);
     this.ripples = h('div', { class: 'beacon-ripples', 'aria-hidden': 'true' });
     this.strip = h('canvas', { class: 'beacon-strip', hidden: '', 'aria-hidden': 'true', width: '300', height: '44' });
     const right = h('div', { class: 'hud-right' }, this.crumbs, this.earDock, this.btnMute, this.btnMap, this.btnPause);
     this.prompt = h('div', { class: 'prompt', hidden: '' });
     this.hint = h('div', { class: 'hint', hidden: '' });
-    this.listen = h('div', { class: 'listen', hidden: '' }, h('div', { class: 'listen-arrow' }));
     this.toastBox = h('div', { class: 'toasts', 'aria-live': 'polite' });
     this.card = h('div', { class: 'item-card', hidden: '' });
     this.prompt.addEventListener('click', () => this.handlers.promptTap?.());
-    this.hud.append(this.ripples, left, right, this.thermo, this.indicator, this.strip, this.prompt, this.hint, this.listen, this.toastBox, this.card);
+    this.hud.append(this.ripples, left, right, this.thermo, this.indicator, this.strip, this.prompt, this.hint, this.toastBox, this.card);
     // [final-S] index.html shows the title before the game loads: adopt its nodes where they are (moving them would restart the fade/animations)
     const bootArt = r.querySelector(':scope > .title-art[data-boot]'), bootMenus = r.querySelector(':scope > .menus[data-boot]');
     this.menus = bootMenus || h('div', { class: 'menus' });
@@ -310,12 +311,7 @@ export class UI {
     } else if (!this.card.hidden) { this.card.hidden = true; this._ck = null; }
     // signs (hint) and context prompts
     this.updateHints(game);
-    // listen arrow
-    if (p.listening) {
-      const tgt = game.beaconTarget();
-      this.listen.hidden = !tgt;
-      if (tgt) { const a = Math.atan2(tgt.y - p.cy, tgt.x - p.cx); this.listen.firstChild.style.transform = `rotate(${a}rad) scale(${(1 + 0.18 * (this._beaconPulse || 0)).toFixed(3)})`; }
-    } else this.listen.hidden = true;
+    // [issue 10] no separate Listen arrow: while Listening the ear guide comes out and is the arrow
   }
   verbLine(item) {
     const verbs = { booties: [['Press toward a wall in the air', null]], floss: [['Grab a hook', 'use']], raft: [['Float on water', null]], band: [['Hold to charge a super-jump', 'use']], glider: [['Hold while falling to glide', 'jump']], thimble: [['Ground-pound:', 'down'], ['+', 'jump']], glow: [['Light the dark; tap to flash', 'use']], earplugs: [['Walk through loud places', null]], feather: [['Press in the air to flutter', 'jump']] };
@@ -385,27 +381,40 @@ UI.prototype.updateMetaHUD = function (info) {
     const tk = String(info.temp);
     if (this._tempK !== tk) { this._tempK = tk; this.thermo.lastChild.textContent = `${info.temp}°F`; this.thermo.querySelector('.thermo-fill').style.height = `${Math.max(8, Math.min(100, (info.temp - 40) * 1.6))}%`; }
   } else this.thermo.hidden = true;
-  const ind = info.indicator, bc = info.beacon;
+  const ear = info.ear, bc = info.beacon;
   this._beaconPulse = bc?.show ? bc.pulse || 0 : 0;
-  // [issue 3] docked (Settings > Chirp indicator off): a HUD button instead of the ear at the edge, only
-  // while the ear would show. Classes and labels change only on a change (never rebuild clickable nodes).
-  const docked = !!info.docked, auto = info.autoChirp !== false;
-  const dockOn = !!(ind && ind.on && docked);
-  if (this.earDock.hidden === dockOn) this.earDock.hidden = !dockOn;
-  const ek = `${docked}|${auto}`;
+  // [issue 10] the ear guide. Resting: a HUD button beside mute / map / pause; out: the ear at the screen
+  // edge (the button keeps its place, unseen, so the row never jumps). Neither shows where there's no
+  // cricket to follow (main.js: info.ear null). Classes and labels change only on a change (never
+  // rebuild clickable nodes).
+  const auto = info.autoChirp !== false, out = !!(ear && ear.out);
+  if (this.earDock.hidden === !!ear) this.earDock.hidden = !ear;
+  if (this.earDock.classList.contains('away') !== out) this.earDock.classList.toggle('away', out);
+  const ek = `${auto}|${ear?.mode}|${ear?.reason}|${out}`;
   if (this._earK !== ek) {
     this._earK = ek;
     for (const e of [this.indicator, this.earDock]) e.classList.toggle('auto-off', !auto);
     const dbl = `double-click to turn auto-chirp ${auto ? 'off' : 'on'}`;
-    this.indicator.setAttribute('aria-label', `Chirp indicator, auto-chirp ${auto ? 'on' : 'off'}`);
-    this.indicator.title = `Click to dock the ear, ${dbl}`;
-    this.earDock.setAttribute('aria-label', `Docked chirp indicator, auto-chirp ${auto ? 'on' : 'off'}`);
-    this.earDock.title = `Click to show the ear at the screen edge, ${dbl}`;
+    const click = !ear ? '' : ear.reason === 'listen' ? 'Listening' : !out ? 'Click to keep the ear out' : ear.reason === 'always' ? 'Click to rest the ear' : 'Click to tuck the ear away until it can help again';
+    this.earDock.setAttribute('aria-label', `Ear guide, resting, auto-chirp ${auto ? 'on' : 'off'}`);
+    this.earDock.title = `Ear guide: ${click}, ${dbl}`;
+    this.indicator.setAttribute('aria-label', `Ear guide, the way to go, auto-chirp ${auto ? 'on' : 'off'}`);
+    this.indicator.title = `Ear guide: ${click}, ${dbl}`;
   }
-  if (ind && ind.on && !docked) {
+  // resting, the button gives a small pulse with each chirp
+  if (ear && !out) { const k = `scale(${(1 + 0.2 * (ear.pulseV || 0)).toFixed(2)})`; if (this._dockPu !== k) { this._dockPu = k; this.earDock.firstChild.style.transform = k; } }
+  // the shown angle turns toward the way to walk (ear.js turn(): the short way, at most a half-turn a
+  // second, frozen while paused); it snaps when it comes out, after a rewind and on a room change (with a fade)
+  const now = performance.now(), dt = info.paused ? 0 : Math.max(0, now - (this._earT ?? now)) / 1000; this._earT = now;
+  if (ear && this._earPulseN == null) this._earPulseN = ear.pulseN;
+  if (out) {
+    const snap = this._earSnap !== ear.snap || this._earC == null || this.indicator.hidden, room = this._earRoom !== ear.room;
+    if (snap || room) { this._earC = ear.angle; this._earSign = 1; }
+    else { const r = turn(this._earC, ear.angle, Math.min(dt, 0.05), this._earSign); this._earC = r.c; this._earSign = r.sign; }
+    if (room && !snap) { const c = this.indicator.classList; c.remove('fade-in'); void this.indicator.offsetWidth; c.add('fade-in'); }
     this.indicator.hidden = false;
-    // sit on an ellipse inside the screen edge, in the beacon's direction; the waves face the call
-    const a = ind.angle, rx = 45, ry = 38, pu = ind.pulseV ?? (ind.pulse ? 1 : 0), ld = ind.strength;
+    // sit on an ellipse inside the screen edge, in the way to walk; the waves face it
+    const a = this._earC, rx = 45, ry = 38, pu = ear.pulseV || 0, ld = ear.strength;
     // [polish-V] never on the HUD or the thumb buttons (main.js measures them: this.avoid): slide in along the ray
     let k = 1; const hw = (this._indW || 0.035) * 0.9, hh = (this._indH || 0.07) * 0.9; // half size (view fractions), waves included
     const hit = (x, y) => (this.avoid || []).some((r) => x + hw > r.x0 - 0.01 && x - hw < r.x1 + 0.01 && y + hh > r.y0 - 0.01 && y - hh < r.y1 + 0.01); // [polish-V]
@@ -414,12 +423,16 @@ UI.prototype.updateMetaHUD = function (info) {
     this.indicator.style.opacity = (0.75 + 0.25 * Math.max(ld, pu)).toFixed(2);
     this.indicator.style.transform = `scale(${(0.9 + 0.5 * ld + 0.2 * pu).toFixed(3)})`;
     this.indicator.style.setProperty('--pu', pu.toFixed(3));
+    this.indicator.style.setProperty('--ax', Math.cos(a).toFixed(3)); this.indicator.style.setProperty('--ay', Math.sin(a).toFixed(3));
     this.indicator.querySelector('.ci-waves').setAttribute('transform', `rotate(${(a * 180 / Math.PI).toFixed(1)})`);
     const ws = this.indicator.querySelectorAll('.ci-waves path');
     ws.forEach((w, i) => { w.style.opacity = Math.max(0.3 - i * 0.08, Math.min(1, pu * 1.8 - i * 0.35)).toFixed(2); });
     if (!this._indW && this.root.clientWidth) { this._indW = this.indicator.offsetWidth / this.root.clientWidth; this._indH = this.indicator.offsetHeight / this.root.clientHeight; } // [polish-V]
-    if (ind.chirpAt != null && ind.chirpAt !== this._indChirp) { this._indChirp = ind.chirpAt; const r = this.indicator.firstChild; r.classList.remove('go'); void r.offsetWidth; r.classList.add('go'); }
-  } else this.indicator.hidden = true;
+    if (ear.chirpAt != null && ear.chirpAt !== this._indChirp) { this._indChirp = ear.chirpAt; const r = this.indicator.firstChild; r.classList.remove('go'); void r.offsetWidth; r.classList.add('go'); }
+    // lost: a short "this way" nudge (main.js plays the soft cue)
+    if (ear.pulseN !== this._earPulseN) { this._earPulseN = ear.pulseN; const c = this.indicator.classList; c.remove('this-way'); void this.indicator.offsetWidth; c.add('this-way'); }
+  } else { this.indicator.hidden = true; if (ear) this._earPulseN = ear.pulseN; }
+  this._earSnap = ear?.snap; this._earRoom = ear?.room;
   // [final-S] the visual double (design: HUD, beacon): screen-edge ripples and the rhythm strip,
   // while listening, for 4 s after a call, or always with "Always show beacon ripples"
   const vis = !!(bc && bc.show && ((info.listening && bc.mode !== 'off') || bc.ripples || info.alwaysRipples)); // [final-2] Beacon chirps Off: Listen shows the ear and the arrow only (as "When I call": ripples after a call)
@@ -459,8 +472,9 @@ UI.prototype.drawStrip = function (bc) {
 // [polish-T] {left} {right} (with anything but words between) is one Move chip, {swapPrev} {swapNext} one Swap chip
 export function pairTokens(text) { return String(text).replace(/\{left\}\s*(?:\/|or)?\s*\{right\}/g, '{move}').replace(/\{swapPrev\}\s*(?:\/|or)?\s*\{swapNext\}/g, '{swap}'); }
 export { ICON };
-// [issue 3] taps on the ear (floating or docked): one click or tap docks / undocks it once the
-// double-tap window has passed, two in a row toggle auto-chirp (and never also dock). The window runs from
+// [issue 3] taps on the ear (resting or out): [issue 10] one click or tap does what the ear's state at
+// the press says (main.js earAction: pin, rest, dismiss; nothing while Listening) once the double-tap
+// window has passed; two in a row toggle auto-chirp (and never also click). The window runs from
 // the first release to the second press (as a native double-click does), so a slow second press still
 // counts. Pointer events with capture, so a tap on the moving ear still counts if it slides between down
 // and up; nothing reaches the game (the stage's dialog tap, the touch stick under it) and the button
@@ -473,16 +487,16 @@ UI.prototype.earTaps = function (el) {
     try { el.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     const second = !!this._earTimer; // a press inside the window: this is the double
     if (second) { clearTimeout(this._earTimer); this._earTimer = null; }
-    this._earDown = { id: e.pointerId, t: performance.now(), second };
+    this._earDown = { id: e.pointerId, t: performance.now(), second, act: second ? null : this.handlers.earAction?.() ?? null }; // [issue 10] decided at the press
   });
   el.addEventListener('pointerup', (e) => {
     e.stopPropagation();
     const d = this._earDown; if (!d || d.id !== e.pointerId) return;
     this._earDown = null;
     if (d.second) this.handlers.earAuto?.();
-    else if (performance.now() - d.t < EAR_HOLD_MS) this._earTimer = setTimeout(() => { this._earTimer = null; this.handlers.earDock?.(); }, EAR_DOUBLE_MS);
+    else if (performance.now() - d.t < EAR_HOLD_MS) this._earTimer = setTimeout(() => { this._earTimer = null; this.handlers.earClick?.(d.act); }, EAR_DOUBLE_MS);
   });
   el.addEventListener('pointercancel', (e) => { if (this._earDown?.id === e.pointerId) this._earDown = null; });
   el.addEventListener('mousedown', (e) => e.preventDefault()); // keep focus off it: Space / Enter stay with the game
-  el.addEventListener('click', (e) => { e.stopPropagation(); if (e.detail === 0) this.handlers.earDock?.(); }); // keyboard / assistive activation
+  el.addEventListener('click', (e) => { e.stopPropagation(); if (e.detail === 0) this.handlers.earClick?.(this.handlers.earAction?.()); }); // keyboard / assistive activation
 };

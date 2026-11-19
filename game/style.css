@@ -32,7 +32,7 @@ button { font: inherit; }
 .prompt, .hint, .toast, .item-card { background: rgba(42,32,26,.82); border: 2px solid rgba(244,235,221,.35); border-radius: 14px; color: var(--paper); font-size: max(15px, calc(17px * var(--ui))); line-height: 1.35; }
 .prompt { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom)); padding: 6px 14px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .hint { position: absolute; left: 50%; transform: translateX(-50%); top: calc(12px + env(safe-area-inset-top)); max-width: min(60%, 640px); padding: 8px 16px; text-align: center; text-wrap: balance; }
-.hint[hidden], .prompt[hidden], .item-card[hidden], .listen[hidden] { display: none; }
+.hint[hidden], .prompt[hidden], .item-card[hidden] { display: none; }
 .toasts { position: absolute; left: 50%; transform: translateX(-50%); top: 30%; display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .toast { padding: 6px 14px; text-wrap: balance; text-align: center; max-width: 70vw; animation: pop .25s ease-out; }
 @keyframes pop { from { transform: scale(.85); opacity: 0; } }
@@ -45,8 +45,6 @@ button { font: inherit; }
 .cap .cap-arrow { width: 1.15em; height: 1.15em; flex: none; color: inherit; } /* [issue #8] bold arrows, not the fallback font's thin ↑ */
 .cap-glyph svg { width: 1.1em; height: 1.1em; color: var(--paper); }
 .cap-touch { border-radius: 999px; }
-.listen { position: absolute; left: 50%; bottom: calc(76px + 50px * var(--ui) + env(safe-area-inset-bottom)); transform: translateX(-50%); }
-.listen-arrow { width: calc(104px * var(--ui)); height: calc(104px * var(--ui)); border-radius: 50%; box-shadow: 0 0 22px 8px rgba(232,184,90,.35); /* [final-S] bigger, a soft glow */ background: rgba(42,32,26,.45) no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M10 30h32M34 18l14 12-14 12' fill='none' stroke='%23F4EBDD' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: 74%; filter: drop-shadow(0 0 6px rgba(232,184,90,.9)) drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
 
 /* ---- menus ---- */
 .menus { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 40%, rgba(59,74,122,.55), rgba(20,16,14,.88)); }

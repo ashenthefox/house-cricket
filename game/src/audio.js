@@ -50,7 +50,7 @@ const LEVEL = { music: 0.55, sfx: 0.85, beacon: 1.0 };
 const db = (x) => Math.pow(10, x / 20);
 
 let ac = null, N = null;                  // context and nodes
-let settings = { muted: false, music: 0.8, sfx: 0.9, beacon: 0.9, beaconChirps: 'always', indicator: true, easyPitch: false };
+let settings = { muted: false, music: 0.8, sfx: 0.9, beacon: 0.9, beaconChirps: 'always', ear: 'helps', easyPitch: false };
 let saveFn = null;
 const st = {
   screen: 'title', paused: false, listen: false, want: null, override: null, cutHz: null,
@@ -115,11 +115,11 @@ const now = () => ac.currentTime;
 // ---------------------------------------------------------------- settings
 /** Use main's settings object (from save.js loadSettings) and its saver; applies everything. */
 export function configure(s, save) {
-  settings = Object.assign(s, { beaconChirps: 'always', indicator: true, easyPitch: false, ...s });
+  settings = Object.assign(s, { beaconChirps: 'always', ear: 'helps', easyPitch: false, ...s });
   saveFn = save || null;
   applyVolumes();
 }
-/** Change one setting (music | sfx | beacon 0..1, muted, beaconChirps 'always'|'call'|'off', indicator, easyPitch) and save it. */
+/** Change one setting (music | sfx | beacon 0..1, muted, beaconChirps 'always'|'call'|'off', ear 'helps'|'always'|'listen', easyPitch) and save it. */
 export function setSetting(k, v) {
   settings[k] = v;
   if (k === 'easyPitch') { synthCache.clear(); bc.key = null; }
@@ -563,13 +563,13 @@ export function frame({ screen, paused, game } = {}) {
  */
 export function indicator(game) {
   const m = bc.m, spec = bc.spec;
-  if (!m || !spec) return { show: false, enabled: !!settings.indicator, mode: settings.beaconChirps };
+  if (!m || !spec) return { show: false, enabled: true, mode: settings.beaconChirps };
   const p = game?.player;
   const dx0 = p ? m.waypoint.x - p.cx : 1, dy0 = p ? m.waypoint.y - p.cy : 0, len = Math.hypot(dx0, dy0) || 1;
   const listenDb = p?.listening ? listenGainDb(m, p, LISTEN_BOOST_DB) - m.gainDb : 0; // [fixer] listen range
   const nextT = bc.timelines[0]?.next ?? null;
   return {
-    show: true, enabled: !!settings.indicator, mode: settings.beaconChirps,
+    show: true, enabled: true, mode: settings.beaconChirps,
     angle: Math.atan2(dy0, dx0), dx: dx0 / len, dy: dy0 / len,
     loudness: Math.max(0, Math.min(1, (m.gainDb + listenDb - FLOOR_DB) / -FLOOR_DB)),
     pulse: bc.frame >= bc.lastPulse ? Math.exp(-(bc.frame - bc.lastPulse) / 9) : 0,
@@ -613,7 +613,7 @@ export function audioState() {
     beaconMuted: !!settings.muted || !(settings.beacon > 0) || settings.beaconChirps === 'off',
     volumes: { music: settings.music, sfx: settings.sfx, beacon: settings.beacon },
     gains: N ? { master: +N.master.gain.value.toFixed(3), music: +N.musicVol.gain.value.toFixed(3), sfx: +N.sfxVol.gain.value.toFixed(3), beacon: +N.beaconVol.gain.value.toFixed(3), duck: +N.duck.gain.value.toFixed(3) } : null,
-    beaconChirps: settings.beaconChirps, indicator: !!settings.indicator, easyPitch: !!settings.easyPitch,
+    beaconChirps: settings.beaconChirps, ear: settings.ear, easyPitch: !!settings.easyPitch,
     track: mus.cur?.name || null, wantTrack: st.want, decoded: mus.decoded.size, decodedTracks: [...mus.decoded.keys()],
     listenDuck: st.listen, duckDb: (st.listen ? LISTEN_DUCK_DB : 0) + (st.paused ? PAUSE_DUCK_DB : 0), paused: st.paused,
     cutHz: st.cutHz ? Math.round(st.cutHz) : null, cutDb: st.cutHz ? CUT_DB : 0, cutQ: CUT_Q,

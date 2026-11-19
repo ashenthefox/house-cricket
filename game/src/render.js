@@ -661,6 +661,7 @@ export class Renderer {
     this.drawPlayer(c, game);
     this.drawDecor(c, game, 'front');
     this.fx.draw(c);
+    if (view.glint) this.drawGlint(c, view.glint); // [issue 10] the ear guide's doorway
     if (this.debug) this.drawDebug(c, game);
     c.restore();
     this.drawNear(c, game, cam);
@@ -670,6 +671,21 @@ export class Renderer {
     this.fx.drawScreen(c, game, VW, VH * (cam.hFrac || 1)); // [final-G] the view's real height (a wide phone)
     if (!view.held) this.drawTransition(c, game); // [issue 16] held: main.js draws the held transition over this frame
     this.perf.frame = performance.now() - t0;
+  }
+
+  // [issue 10] A small pulsing glint at the doorway the ear guide aims at (room coordinates; main.js only
+  // passes one while the ear is out), so the ear reads as "go there".
+  drawGlint(c, g) {
+    const k = 0.5 + 0.5 * Math.sin(this.t / 9), r = 9 + 5 * k;
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    const gr = c.createRadialGradient(g.x, g.y, 0, g.x, g.y, r * 2.4);
+    gr.addColorStop(0, `rgba(255,236,180,${(0.55 + 0.35 * k).toFixed(2)})`); gr.addColorStop(0.35, `rgba(232,184,90,${(0.3 + 0.2 * k).toFixed(2)})`); gr.addColorStop(1, 'rgba(232,184,90,0)');
+    c.fillStyle = gr; c.beginPath(); c.arc(g.x, g.y, r * 2.4, 0, 7); c.fill();
+    c.strokeStyle = `rgba(255,244,214,${(0.6 + 0.4 * k).toFixed(2)})`; c.lineWidth = 2.5; c.lineCap = 'round';
+    const s = r * 1.1; // a four-point sparkle
+    c.beginPath(); c.moveTo(g.x - s, g.y); c.lineTo(g.x + s, g.y); c.moveTo(g.x, g.y - s); c.lineTo(g.x, g.y + s); c.stroke();
+    c.restore();
   }
 
   // [final-G] on touch the camera may look past the room's floor (so the cricket stays above the thumbs) or

@@ -38,16 +38,23 @@ export function latestSlot() {
   return best;
 }
 
+// every setting in the design's Settings screen (shared across slots)
+export const SETTINGS_DEFAULTS = {
+  muted: false, music: 0.8, sfx: 0.9, beacon: 0.9,
+  beaconChirps: 'always',      // 'always' | 'call' (only when I chirp) | 'off'
+  ear: 'helps',                // [issue 10] the Ear guide: 'helps' | 'always' (out) | 'listen' (only when I listen)
+  vibration: true, gentle: false, ripples: false, easyPitch: false, shake: true,
+  textSpeed: 'normal',         // 'slow' | 'normal' | 'fast' | 'instant'
+};
+/** Stored settings -> today's. [issue 10] Issue #3's `indicator` (true or false) becomes Ear guide "When it helps". */
+export function migrateSettings(stored) {
+  const s = { ...SETTINGS_DEFAULTS, ...(stored && typeof stored === 'object' ? stored : {}) };
+  if (!['helps', 'always', 'listen'].includes(s.ear)) s.ear = 'helps';
+  delete s.indicator;
+  return s;
+}
 export function loadSettings() {
-  // every setting in the design's Settings screen (shared across slots)
-  const def = {
-    muted: false, music: 0.8, sfx: 0.9, beacon: 0.9,
-    beaconChirps: 'always',      // 'always' | 'call' (only when I chirp) | 'off'
-    indicator: true,             // the chirp indicator at the screen edge
-    vibration: true, gentle: false, ripples: false, easyPitch: false, shake: true,
-    textSpeed: 'normal',         // 'slow' | 'normal' | 'fast' | 'instant'
-  };
-  try { return { ...def, ...(JSON.parse(store()?.getItem(SETTINGS) || '{}') || {}) }; } catch { return def; }
+  try { return migrateSettings(JSON.parse(store()?.getItem(SETTINGS) || '{}')); } catch { return migrateSettings({}); }
 }
 export function saveSettings(st) { try { store()?.setItem(SETTINGS, JSON.stringify(st)); } catch { /* ignore */ } }
 

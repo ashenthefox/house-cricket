@@ -106,7 +106,14 @@ export const TEXT = {
     crumbs: '+{n} crumbs',
     duet: 'Pip and Chip, together! The music box opens: +{n} crumbs, and the Duet for the Stage.', // [fixer]
     shortcut: 'A secret shortcut!', // [fixer]
-    indicatorHint: 'The ear at the screen edge points to a trapped cricket\'s call. It pulses with each chirp and grows as you get closer. Hold {listen} to listen.', // [final-S] first time, in the Bedroom
+    // [issue 10] the ear guide: the first time it ever comes out, and what a click on it did
+    earFirst: 'The ear points the way to go. Tap it to keep it out.',
+    earPinned: 'Ear guide: pinned out. Double-click: {dbl}',
+    earResting: 'Ear guide: resting. It comes out when it helps. Double-click: {dbl}',
+    earDismissed: 'Ear guide: tucked away until it can help again.',
+    earStaysOut: 'Ear guide: it stays out while Beacon chirps is Off.',
+    earDblCall: 'the cricket sings only when you call.',
+    earDblAuto: 'the cricket sings on its own.',
     checkpoint: 'Checkpoint',
     gentleOffer: 'That gecko is tricky. Try Gentle Mode? (Hits cost half, tells are slower.)',
     gentleOn: 'Gentle Mode is on.',
@@ -474,6 +481,7 @@ export const TEXT = {
     padNote: 'Plug in a PS5 or other controller and press any button. Works best in Chrome or Edge.',
     touchNote: 'Turn your phone sideways. The stick appears where your left thumb lands.',
     report: 'Ctrl+Shift+F: report a bug',
+    ear: 'The ear beside the pause button comes out to point the way to go: while you listen, after the cricket answers your chirp, and when you seem lost. Tap it to keep it out. Settings > Ear guide.', // [issue 10]
   },
   shop: {
     heart: { name: 'Seed-heart', desc: '+1 heart' },
