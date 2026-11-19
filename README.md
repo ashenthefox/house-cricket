@@ -111,7 +111,8 @@ Other checks:
 - `node tools/entity-test.mjs` and `node tools/feel-test.mjs` test the mechanics and the jump feel.
 - `node tools/rewind-test.mjs` checks the debug rewind (below) is exact: a run that rewinds and plays the same keys again ends in the same game as one that never rewound, in the tank's scripted beats, gecko fights, across room changes and at random points in every solution. It also checks no game state is kept where a rewind can't copy it.
 - `node tools/chirp-check.mjs` checks every cricket's song against the real species' pitch and rhythm.
-- `python3 tools/match-frames.py --check` checks every cricket's animation frames and poses, the NPC talk frames and the enemy walk frames stay within 2 levels of mean brightness of their base picture (so nothing flickers). Run `python3 tools/match-frames.py` (Pillow and numpy) to colour-match new frames to their base; it changes nothing on frames already matched.
+- `node tools/sfx-check.mjs` checks every sound effect is loaded before it plays. The effects every room uses load at the start, just after the title music. The rest load with their zone's art: ambience loops, decoys and each gecko fight's sounds (listed in `game/src/zone-sfx.js` and in each boss's `sfx`).
+- `python3 tools/match-frames.py --check` checks every cricket's animation frames and poses, the NPC talk frames and the enemy walk frames stay within 2 levels of mean brightness of their base picture (so nothing flickers), in the PNG sources under `art/` and in the WebP the game ships. Run `python3 tools/match-frames.py` (Pillow and numpy) to colour-match new frames to their base; it changes nothing on frames already matched.
 
 ## Playing locally
 
@@ -121,6 +122,14 @@ House Cricket is a plain web page with no build step. Serve the `game` folder wi
     python3 -m http.server 8000
 
 then open http://localhost:8000. Opening the file directly by double-clicking won't work, because browsers don't run games from files on disk.
+
+**The art files.** The game draws WebP pictures (`game/assets/`), built from PNG sources in [`art/`](art/), which has the same folders: `art/sprites/crickets/pip/base.png` becomes `game/assets/sprites/crickets/pip/base.webp`. To change or add a sprite, prop, item, Carrier piece or UI picture:
+
+1. Edit or add the PNG under `art/`. For a cricket's animation frames, an NPC's talk frame or an enemy's walk frame, run `python3 tools/match-frames.py` to colour-match it to its base (it works on the PNGs).
+2. Run `python3 tools/build-art.py` (Pillow) to make the WebP of whatever changed (quality 90 with exact alpha; pictures stored far larger than the game draws them are shrunk to twice their largest drawn size, as listed in `art/max-size.json`; `node tools/draw-sizes.mjs` measures those sizes in the browser).
+3. Run `node tools/list-assets.mjs` so the game knows the file exists.
+
+`python3 tools/build-art.py --check` fails if a WebP is missing or older than its PNG, and `python3 tools/match-frames.py --check` measures both the PNGs and the WebP. The paintings (`game/assets/bg/`, `story/`), textures and sounds are kept as they ship. Terrain swatches (`art/terrain/`) only feed `tools/make-textures.py`. Gecko rigs come from `tools/split-gecko.py`, which cuts the PNGs in `art/sprites/geckos/` and writes their `meta.json` into `game/assets/`. `node tools/asset-weight.mjs` reports what the game downloads: the bytes before the first room, for each lair, in total, and the biggest files.
 
 **Debug rewind.** While playing, Backspace jumps the game back about five seconds (a "⟲ 5.0 s" note shows briefly; "no older history" when there is nothing further back), across a room change too. It is a debugging aid, on only when you add `?rewind` to the address (for example http://localhost:8000/?rewind); without it, local play and the replay tools run the game players get. It does nothing in menus, dialogs, story panels or the Carrier, where Backspace is still Back, and it never writes or undoes a save. It restores the whole game (the cricket, enemies, the gecko and its fight, switches and gates, items and progress, the camera, the HUD); sounds that were playing stop. A save made during those seconds stays saved even though the game goes back before it.
 
