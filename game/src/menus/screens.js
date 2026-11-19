@@ -111,7 +111,7 @@ export function settings(A, back, focus) {
     { kind: 'slider', label: 'Sound volume', id: 'sfx', get: () => st.sfx, set: set('sfx') },
     { kind: 'slider', label: 'Beacon volume', id: 'beacon', get: () => st.beacon, set: set('beacon') },
     { kind: 'choice', label: 'Beacon chirps', id: 'beaconChirps', get: () => st.beaconChirps, set: set('beaconChirps'), options: [{ v: 'always', label: 'Always' }, { v: 'call', label: 'When I call' }, { v: 'off', label: 'Off' }] },
-    { kind: 'toggle', label: 'Chirp indicator', id: 'indicator', get: () => st.indicator, set: set('indicator') },
+    { kind: 'toggle', label: 'Chirp indicator', id: 'indicator', get: () => st.indicator, set: set('indicator'), onLabel: 'Edge', offLabel: 'Docked' }, // [issue 3] off: docked in the HUD (tap the ear to switch)
     { kind: 'toggle', label: 'Always show beacon ripples', id: 'ripples', get: () => st.ripples, set: set('ripples') },
     { kind: 'toggle', label: 'Easier beacon pitch', id: 'easyPitch', get: () => st.easyPitch, set: set('easyPitch') },
     { kind: 'toggle', label: 'Mute', id: 'muted', get: () => st.muted, set: (v) => A.setMuted(v) },

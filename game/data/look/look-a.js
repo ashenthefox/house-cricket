@@ -4,7 +4,7 @@ export default {
   // ---- zone 0: the Tank ----
   'tank-cup': {
     paint: [
-      { obj: 'stone', x: 6, y: 10, w: 16, h: 4, color: '#A89A86' },               // Duchess's basking rock (its foot is sand)
+      { obj: 'stone', x: 2, y: 10, w: 20, h: 4, color: '#A89A86' },               // Duchess's basking rock, up to the glass (its foot is sand)
       { obj: 'metal', x: 2, y: 0, w: 30, h: 1, color: '#6F7782', axis: 'h', bands: 0 }, // the tank's top rim
     ],
   },
@@ -72,7 +72,13 @@ export default {
       pillow(36, 24, 6, 2, '#E9D2C8', 'stripe'), pillow(42, 22, 4, 4, '#C9D6EC', 'dots'), pillow(46, 20, 4, 6, '#E6C9A8'),
       pillow(50, 18, 4, 8, '#D7B4C8', 'stripe'), { obj: 'wood', x: 54, y: 16, w: 10, h: 10, color: '#8A6444', doors: 2 },  // the headboard
       { obj: 'fabric', x: 14, y: 22, w: 6, h: 4, color: '#C8564B', pattern: 'plaid', accent: '#F2C46D' }, // a folded quilt
+      { obj: 'fabric', x: 12, y: 24, w: 2, h: 2, color: '#B7A6D3', pattern: 'dots', accent: '#F4EBDD' }, // a rolled sock
       { obj: 'fabric', x: 1, y: 26, w: 62, h: 10, color: '#8DA2D0', pattern: 'quilt', accent: '#F4EBDD' }, // the bedspread
+    ],
+  },
+  'bed-lair': {
+    paint: [
+      { obj: 'metal', x: 59, y: 6, w: 1, h: 10, color: '#3E4550', axis: 'v' },        // the tank's frame (outside the right glass)
     ],
   },
   'bed-dresser': {
@@ -155,7 +161,7 @@ export default {
   'kit-stove': {
     paint: [
       { obj: 'appliance', x: 14, y: 6, w: 34, h: 16, color: '#E2D4AE', door: 'oven', dials: 4 }, // the oven
-      { obj: 'wood', x: 2, y: 14, w: 12, h: 16, color: '#A86E44', doors: 2 },    // the cabinet base
+      { obj: 'wood', x: 2, y: 6, w: 12, h: 24, color: '#A86E44', doors: 2 },     // the cabinet base (flush with the oven top)
       { obj: 'wood', x: 56, y: 16, w: 8, h: 1, color: '#C9A06A' },               // the counter from the fridge
     ],
   },

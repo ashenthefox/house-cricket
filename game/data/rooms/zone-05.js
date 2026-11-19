@@ -28,8 +28,10 @@ sk.r(1, 10, 11, 1, '=');                             // the window-well sill (dr
 sk.r(12, 10, 9, 3, 'G');                             // the utility sink (porcelain, on the wall)
 sk.r(21, 12, 3, 4).r(24, 14, 3, 2);                  // a detergent box and a bucket: steps up to the rim
 sk.r(5, 14, 3, 2).r(8, 12, 3, 4);                    // a bucket and a crate under the sill (back up from the dryer door)
+sk.r(11, 14, 2, 2);                                  // [issue #4] a pail under the sink: back up out of the gap below it (was 4 up)
 sk.r(46, 7, 5, 6, 'G').r(46, 13, 1, 3).r(50, 13, 1, 3); // the water heater on its legs
 sk.r(35, 12, 4, 1).r(38, 13, 1, 3);                  // the thermostat cubby (its gate is an entity)
+sk.r(39, 14, 2, 2);                                  // [issue #4] a jug beside the cubby: back up out of the gap by the water heater (was 4 up)
 
 // ---- laun-dryer: the dryer (cell 3,9, 2x2) ----
 const dr = grid(2, 2).frame('#');
@@ -52,6 +54,7 @@ bk.r(9, 26, 15, 8);                                  // towels (a soft landing f
 bk.r(20, 24, 4, 2);                                  // a towel heap up to the rim
 bk.r(1, 26, 2, 8).r(1, 33, 1, 1, '.').r(2, 33, 1, 1, '%'); // the baseboard: a crack (Mote) and a cache behind it
 bk.r(27, 31, 4, 3);                                  // a sock pile by the door
+for (const r of [32, 30, 28, 26, 24, 22]) bk.r(5, r, 2, 1, '='); // [issue #4] clothes-pegs up behind the basket, to its rim (the gap was 8 deep)
 
 // ---- laun-washer: the washer (cell 7,10, 2x1) ----
 const ws = grid(2, 1).frame('#');
@@ -60,6 +63,7 @@ ws.r(0, 16, 64, 2);
 ws.r(44, 16, 6, 2, 'C');                             // rubble over the old basement stairs (exact: cols 12-17 of cell 8)
 ws.r(50, 13, 13, 3, '~');                            // the washer flood
 ws.r(14, 13, 5, 3).r(30, 13, 3, 3);                  // a laundry basket, a box
+ws.r(19, 15, 1, 1).r(33, 15, 1, 1);                  // [issue #4] a sock by each: they were 3 up (too high for Jump 2) from the floor between and past them
 ws.r(22, 10, 11, 1, '=');                            // a drying rack
 ws.r(36, 9, 6, 1, '=');
 

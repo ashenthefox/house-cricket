@@ -45,11 +45,16 @@ export function setOnTell(fn) { onTell = fn; }
 export const opts = { touch: false };
 
 const base = (n) => `sprites/geckos/${n}`;
+// [art] every picture a rig can draw: body, tail, legs, strike/sleep frames and the extra poses
+// (Kite's glide, Lashes' lick): each .png in its folder but idle.png and portrait.png (dialog
+// portraits, never drawn by the rig). From the asset list, so it doesn't wait on meta.json.
+const filesMemo = new Map();
 export function files(name) {
-  const m = S.getJSON(`${base(name)}/meta.json`);
-  const list = [`${base(name)}/body.png`, `${base(name)}/tail.png`];
-  if (m) { for (const l of m.legs || []) list.push(`${base(name)}/${l.file}`); for (const f of Object.values(m.frames || {})) list.push(`${base(name)}/${f.file}`); }
-  return list;
+  if (!filesMemo.has(name)) {
+    const dir = base(name) + '/';
+    filesMemo.set(name, S.list(dir).filter((f) => f.endsWith('.png') && !f.includes('/', dir.length) && !/\/(idle|portrait)\.png$/.test(f)));
+  }
+  return filesMemo.get(name);
 }
 // start loading a gecko's art (call on entering the lair room or earlier); held with the zone
 export function preload(name) { S.getJSON(`${base(name)}/meta.json`); S.preload(files(name)); S.zoneHold(base(name) + '/'); }

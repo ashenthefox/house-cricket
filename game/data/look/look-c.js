@@ -26,8 +26,8 @@ export default {
   },
   'stu-globe': {
     paint: [
-      { obj: 'glass', x: 41, y: 9, w: 4, h: 7 },                                         // the mantel clock's glass door
-      { obj: 'wood', x: 40, y: 8, w: 6, h: 8, color: '#7A4A30', grain: 'v' },            // ... and its case
+      { obj: 'glass', x: 41, y: 9, w: 4, h: 5 },                                         // the mantel clock's glass door
+      { obj: 'wood', x: 40, y: 8, w: 6, h: 7, color: '#7A4A30', grain: 'v' },            // ... and its case (on little feet: a crawl under it)
       books(8, 13, 4, 3, 'stack', ['#4E7A55', '#8A3B32', '#A8823C']),                    // a stack of books
     ],
   },

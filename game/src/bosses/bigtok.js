@@ -33,6 +33,7 @@ const JAR = { x: 3.6 * T, y: SHELF[3] };
 const reach = (p) => p.cx > 10 * T && p.cx < 52 * T;
 
 export default makeBoss('bigtok', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
+  art: () => ({ props: DECOYS.filter(Boolean).map((d) => d.kind), crickets: { duo: ['idle'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
  
   phases: 3, len: LEN,
   // [polish-V] the arena camera frames his head and shoulders (where he is drawn round his HOME)

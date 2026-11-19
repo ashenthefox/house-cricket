@@ -36,7 +36,7 @@ There are 11 crickets you can swap between, each a real species with its own rea
 
 - **On a phone:** hold it sideways and use the on-screen buttons. You can install the game from your browser's menu to play full screen, even offline.
 - **With a controller:** plug in a PS5 controller (USB or Bluetooth) and press any button. It works best in Chrome or Edge, and Xbox and other controllers work too.
-- **Following the chirp:** listen for the trapped cricket's chirp. The ear at the edge of the screen points toward it and pulses with each chirp, and the chirp gets louder as you get closer.
+- **Following the chirp:** listen for the trapped cricket's chirp. The ear at the edge of the screen points toward it and pulses with each chirp, and the chirp gets louder as you get closer. Click or tap the ear to tuck it in beside the buttons at the top (and again to bring it back), or double-click it to switch the cricket's chirping between on its own and only when you call.
 - **Losing and saving:** there's no game over. A fall costs one heart and puts you back on solid ground, and losing a gecko fight restarts only that part of the fight. Save at the cracks in the baseboards (three save slots). Every crack can take you home to the Carrier.
 - **Gentle Mode:** in Settings, it halves damage and slows the geckos' warnings.
 
@@ -106,10 +106,11 @@ Every zone, every gecko fight and the whole game from New Game to the credits ha
 
 Other checks:
 
-- `node tools/check-world.mjs` checks every room can be reached, in every order the items can be found.
+- `node tools/check-world.mjs` checks every room can be reached, in every order the items can be found, and that no spot is a trap (somewhere you can get into and not get out of by playing). `node tools/escape-test.mjs` confirms a trap it names in the real sim.
 - `node tools/check-cracks.mjs` checks every save point can be left on foot.
 - `node tools/entity-test.mjs` and `node tools/feel-test.mjs` test the mechanics and the jump feel.
 - `node tools/chirp-check.mjs` checks every cricket's song against the real species' pitch and rhythm.
+- `python3 tools/match-frames.py --check` checks every cricket's animation frames and poses, the NPC talk frames and the enemy walk frames stay within 2 levels of mean brightness of their base picture (so nothing flickers). Run `python3 tools/match-frames.py` (Pillow and numpy) to colour-match new frames to their base; it changes nothing on frames already matched.
 
 ## Playing locally
 

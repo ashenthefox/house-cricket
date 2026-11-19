@@ -31,6 +31,7 @@ const litFor = (phase, done) => (done ? [false, false, false] : [phase < 2, phas
 function onFloor(p) { return Math.abs(p.y + p.h - FLOOR) < 6 && p.state !== 'air'; }
 
 export default makeBoss('peridot', {
+  art: () => ({ props: ['pull-chain'], crickets: { hump: ['idle', 'kick'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {
     b.lit = litFor(b.phase, false);

@@ -20,6 +20,11 @@ export function secretKind(id) {
   if (k === 'crumbs' || id.startsWith('crumbs:')) return 'crumbs';
   return k || 'secret';
 }
+// [art] the picture a crumb cache or secret entity shows (main.js drawMetaWorld): items/<file>.png
+export function pickupFile(e) {
+  const k = e.type === 'crumbs' ? 'crumbs' : secretKind(e.id || '');
+  return k === 'heart' ? 'seed-heart' : k === 'song' ? 'song-seed' : 'crumb';
+}
 
 export function fresh() {
   return {

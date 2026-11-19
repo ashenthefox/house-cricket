@@ -412,7 +412,7 @@ None of them involves hurting the gecko. Each is a single arena with 3 phases. T
 - **Zone complete:** "Stripe is safe!" with the cricket's portrait, then "Return to the Carrier?".
 - **Carrier hub:** a side-view diorama inside the plastic keeper. Residents wander, and you walk up to facilities to use them. A save crack in the corner leads back.
 - **Victory:** 4 ending panels, then the credits (roll, skippable), then "Thank you for playing", then back to the Carrier.
-- **Settings:** Music volume, SFX volume, **Beacon volume**, **Beacon chirps** (Always / When I call / Off), **Chirp indicator** (on by default), Mute, Vibration, Gentle Mode, **Always show beacon ripples** (off by default), **Easier beacon pitch** (off by default; plays voices above 5.5 kHz an octave lower), Screen shake (on/off), Text speed, and **Report a bug** (shown once published).
+- **Settings:** Music volume, SFX volume, **Beacon volume**, **Beacon chirps** (Always / When I call / Off), **Chirp indicator** (Edge by default, or Docked), Mute, Vibration, Gentle Mode, **Always show beacon ripples** (off by default), **Easier beacon pitch** (off by default; plays voices above 5.5 kHz an octave lower), Screen shake (on/off), Text speed, and **Report a bug** (shown once published).
 - **Credits:** "An idea by Rich Conlan", made with gamegen, font credits.
 
 All menus, dialog and cards are DOM overlays, so they stay sharp and readable on phones and are pressable by mouse, touch, keys and pad (one focus model).
@@ -558,7 +558,7 @@ All menus, dialog and cards are DOM overlays, so they stay sharp and readable on
   - Hump's foot-tap and case-tap: a short synthesized wooden knock.
 - **Decoys synthesized in `chirps.js`** (their rhythm is the puzzle, so it must be exact): the smoke alarm (one short high piezo beep, about 3 kHz), Peeper (a clear rising peep, once a second), and Chikchak (a run of 6–9 "chik" clicks). Soot's swift chitter and Velvet's bat squeaks come from audiogen.
 - **Beacon options** (from request 6):
-  - **Chirp indicator** (on by default): a small ear icon at the screen edge that points toward the trapped cricket, pulses in time with each chirp, and grows with loudness. It's subtle, so following by ear still matters. The full ripples and rhythm strip stay a Listen feature (or always on, with "Always show beacon ripples").
+  - **Chirp indicator** (Edge by default): a small ear icon at the screen edge that points toward the trapped cricket, pulses in time with each chirp, and grows with loudness. It's subtle, so following by ear still matters. Click or tap it to dock it as a button beside mute/map/pause (the setting's Docked); click the docked ear to send it back to the edge. Double-click or double-tap either form to switch Beacon chirps between Always and When I call (Off goes to Always); a toast says which, and the ear is struck through while it isn't Always (issue #3). The full ripples and rhythm strip stay a Listen feature (or always on, with "Always show beacon ripples").
   - **Beacon chirps** setting:
     - **Always** (default): the trapped cricket sings on its own.
     - **When I call:** it chirps only in answer to your Chirp.

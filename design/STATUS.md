@@ -14,6 +14,8 @@
 9. `--continue --art-sheet --budget $50 --gamepad --publish --feedback`
 10. `--publish`
 11. `--publish`
+12. #3: Ear indicator: click to dock/undock, double-click to toggle auto-chirp (https://github.com/zeveck/house-cricket/issues/3). `I should also be able to click the ear to "hide it" which should dock it near the other buttons and it can launch again when clicked again. Double clicking it should toggle whether I hear the autochirp?`
+13. `--publish`
 ## Settings
 
 - Platform: both (default)
@@ -68,7 +70,12 @@
   - The full run was re-authored again and replays twice.
 - [x] 9. Wrap up:
   - Done: social card, GitHub preview (media/github-social.jpg), README with screenshots, Pages workflow at the repo root (game/), and the game served at http://localhost:8000.
-  - PUBLISHED 2026-11-18 at https://zeveck.github.io/house-cricket/ (public repo zeveck/house-cricket; Pages via the workflow; Report a bug points at the repo, with labels bug and player-report). Credit confirmed on publish: Rich Conlan.
+  - PUBLISHED 2026-11-18 at https://zeveck.github.io/house-cricket/ (public repo zeveck/house-cricket; Pages via the workflow; Report a bug points at the repo, with labels bug and player-report). Credit confirmed on publish: Rich Conlan (now GAMEGEN_CREDIT).
   - Live check: desktop and phone, 0 console errors, sw.js stamped.
-  - The local game server was stopped by Claude Code under memory pressure.
-  - GitHub preview image: to upload (none set).
+  - REPUBLISHED 2026-11-18 at https://housecricket.synapticnoise.com/ (request 11):
+    - DNS CNAME added at GoDaddy; the github.io address redirects;
+    - making-of on: the README's How it was made and Replaying the tests sections, plus design/, solutions and tools in the repo (local paths swapped for placeholders);
+    - title-screen links to synapticnoise.com and GitHub;
+    - added to the top of the gallery at zeveck/synapticnoise.
+  - HTTPS: required (certificate issued).
+  - REPUBLISHED 2026-11-19 (request 13), with the reviewed fixes for issues #1, #2, #3, #4, #5, #8 and #12. Each was fixed, independently reviewed, and checked with the quick replays; the full run replays on main before the push.

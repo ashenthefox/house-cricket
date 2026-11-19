@@ -40,8 +40,9 @@ button { font: inherit; }
 .card-kicker { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
 .card-name { font-size: 1.5em; font-weight: 800; margin: 2px 0 6px; }
 .card-verb { display: flex; gap: 4px; align-items: center; justify-content: center; flex-wrap: wrap; }
-.cap { display: inline-flex; align-items: center; justify-content: center; min-width: 1.7em; height: 1.6em; padding: 0 .4em; border: 2px solid var(--paper); border-bottom-width: 3.5px; border-radius: 6px; font-weight: 800; font-size: .9em; background: rgba(244,235,221,.12); }
+.cap { display: inline-flex; align-items: center; justify-content: center; gap: .25em; /* [issue #8] keeps "Stick ↑" apart: the space collapses in a flex box */ min-width: 1.7em; height: 1.6em; padding: 0 .4em; border: 2px solid var(--paper); border-bottom-width: 3.5px; border-radius: 6px; font-weight: 800; font-size: .9em; background: rgba(244,235,221,.12); }
 .cap-pad, .cap-glyph { border-radius: 50%; min-width: 1.8em; height: 1.8em; padding: 0 .3em; }
+.cap .cap-arrow { width: 1.15em; height: 1.15em; flex: none; color: inherit; } /* [issue #8] bold arrows, not the fallback font's thin ↑ */
 .cap-glyph svg { width: 1.1em; height: 1.1em; color: var(--paper); }
 .cap-touch { border-radius: 999px; }
 .listen { position: absolute; left: 50%; bottom: calc(76px + 50px * var(--ui) + env(safe-area-inset-bottom)); transform: translateX(-50%); }

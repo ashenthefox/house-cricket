@@ -46,6 +46,7 @@ function moveTo(b, g, spot, secs) {
 }
 
 export default makeBoss('mossy', {
+  art: (e, o) => ({ props: ['bamboo-cage'], crickets: { [o.cricket || 'rin']: ['idle', 'listen'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   // [polish-V] the arena camera frames him only while he can be seen (it must not give a hiding place
   // away), and for a first look as the fight starts

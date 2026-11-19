@@ -24,6 +24,7 @@ import { tempAt } from './beacon.js';
 import * as HOUSE from '../data/house.js';
 import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
 import { drawMech } from './mech-draw.js'; // [mech] engine mechanics drawing
+import { ArtGate } from './room-art.js'; // [art] a room shows once its art is in (issue #5)
 
 const STEP_MS = 1000 / FPS;
 const PAUSE_TABS = new Set(['pause', 'map', 'crickets', 'sounds']); // [final-S] the pause menu's own tabs
@@ -32,6 +33,8 @@ const canvas = document.getElementById('view');
 const input = new Input();
 const renderer = new Renderer(canvas);
 renderer.drawMech = drawMech; // [mech] render.js calls it after the enemies
+const gate = new ArtGate(); // [art] loads each room's art before it shows, then its neighbours'
+window.__gate = { info: () => gate.info() }; // read-only
 const ui = new UI(document.getElementById('overlay'), input);
 const settings = Save.loadSettings();
 Audio.configure(settings, Save.saveSettings); ui.muted = settings.muted; // [audio] volumes, mute, beacon options (persisted)
@@ -77,7 +80,7 @@ let avoidRects = [], avoidAt = -1e9;
 function measureAvoid() {
   const sr = stage.getBoundingClientRect(); if (!sr.width || !sr.height) return avoidRects;
   const out = [], fr = (r, kind) => { if (r && r.width > 0 && r.height > 0) out.push({ kind, x0: (r.left - sr.left) / sr.width, y0: (r.top - sr.top) / sr.height, x1: (r.right - sr.left) / sr.width, y1: (r.bottom - sr.top) / sr.height }); };
-  for (const sel of ['.hud .hud-left .hud-row', '.hud .hud-left .trio', '.hud .hud-right']) for (const e of document.querySelectorAll(sel)) fr(e.getBoundingClientRect(), 'hud');
+  for (const sel of ['.hud .hud-left .hud-row', '.hud .hud-left .trio', '.hud .hud-right', '.hud .crumbs'] /* [issue 3] the crumbs sit under the icon row on phones */) for (const e of document.querySelectorAll(sel)) fr(e.getBoundingClientRect(), 'hud');
   if (isTouch && document.querySelector('.touch-layer.on')) {
     let u = null;
     for (const b of document.querySelectorAll('.touch-layer .touch-btn')) { const r = b.getBoundingClientRect(); if (!r.width) continue; u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; }
@@ -115,8 +118,18 @@ ui.handlers = {
   map: () => { if (screen === 'play' && !dialog.active && !story.active) { if (ui.screen === 'map') resume(); else if (ui.screen) { if (PAUSE_TABS.has(ui.screen)) Screens.pause(A, 'map'); } else pause(null, 'map'); } }, // [final-S] not from a card
   promptTap: () => { if (game?.inCarrier) hub.tapPrompt(); else if (game) { input._press(['up'], 'touch'); input._release(['up']); } },
   mute: () => toggleMute(),
+  // [issue 3] the ear: a tap docks / undocks it (Settings > Chirp indicator), a double tap flips auto-chirp
+  // (Settings > Beacon chirps: Always <-> When I call; Off goes to Always)
+  earDock: () => { if (!earLive()) return; A.setSetting('indicator', !settings.indicator); measureAvoid(); },
+  earAuto: () => {
+    if (!earLive()) return;
+    const on = settings.beaconChirps !== 'always';
+    A.setSetting('beaconChirps', on ? 'always' : 'call');
+    game.toast(on ? 'Auto-chirp on: the trapped cricket chirps by itself.' : 'Auto-chirp off: it chirps back when you call.', 150);
+  },
   swapTo: (i) => { if (game && i !== game.player.active) game.player.queuedSwap = i; },
 };
+const earLive = () => screen === 'play' && !!game && !ui.screen && !story.active;
 function toggleMute() { settings.muted = !settings.muted; Audio.setMuted(settings.muted); ui.muted = settings.muted; Save.saveSettings(settings); }
 
 // ---- screens (meta and UI: src/menus/screens.js, story.js, dialog.js, hub.js, meta-run.js) ----
@@ -194,6 +207,8 @@ function newGame(n) {
   const tank = ZONES.find((z) => z.n === 0);
   const first = tank || ZONES.find((z) => z.n === 1) || ZONES.find((z) => z.n === 99) || ZONES[0];
   game.startAt(first.start.room, undefined, undefined, { party: ['pip'], items: [] });
+  const bed = ZONES.find((z) => z.n === 1); // [art] the tank doesn't link to the Bedroom: load its first room during the panels too
+  if (bed && bed !== first) gate.prefetch([game.world.rooms[bed.start.room]]);
   story.play(line('opening.panels'), { id: 'opening', onDone: (skipped) => startTank(skipped) });
 }
 // After panels 1-3: the playable tank escape (zone 0) if it's built; it ends with
@@ -362,6 +377,8 @@ function step() {
     if (f.pressed.pause) { pause(); return; }
     if (f.pressed.map) { pause(null, 'map'); return; }
     if (f.pressed.mute) toggleMute();
+    if (gate.check(game) && !frozen) return; // [art] the room's art is still loading: the sim waits (tests' __game.step don't)
+    game.bossWait = !frozen && gate.bossWaiting(game); // [art] a gecko never acts before it can be seen
     hub.update(game, f);
     game.update(f);
     Audio.tick(game); // [audio] effects from game.fx, music, beacon, game-clock cues (100 ms lookahead)
@@ -411,7 +428,7 @@ function drawMetaWorld() {
   c.save(); c.setTransform(renderer.scale, 0, 0, renderer.scale, 0, 0); c.scale(cam.zoom, cam.zoom); c.translate(-Math.round(cam.x), -Math.round(cam.y));
   for (const e of ents) {
     if (!e.done && (e.type === 'crumbs' || e.type === 'secret')) { // [builder B] crumb caches, seed-hearts and song-seeds were never drawn
-      const k = e.type === 'crumbs' ? 'crumbs' : Meta.secretKind(e.id || ''), file = k === 'heart' ? 'seed-heart' : k === 'song' ? 'song-seed' : 'crumb';
+      const file = Meta.pickupFile(e); // [art] shared with room-art.js
       const img = S.get(`items/${file}.png`), bob = Math.sin(renderer.t / 18 + e.px * 0.01) * 3, hh = file === 'crumb' ? 24 : 32;
       if (img) c.drawImage(img, e.px + 20 - hh * img.width / img.height / 2, e.py + 38 - hh + bob, hh * img.width / img.height, hh);
       else { c.fillStyle = '#F2C46D'; c.beginPath(); c.arc(e.px + 20, e.py + 26 + bob, 8, 0, 7); c.fill(); }
@@ -430,16 +447,16 @@ function updateMetaHUD() {
   const p = game.player, m = game.meta || {};
   let ind = null;
   const d = !game.inCarrier ? A.indicator() : null; // [final-S] also feeds the ripples and the rhythm strip
-  if (settings.indicator && !game.inCarrier && !game.inFight()) { // [polish-V] not in an arena once the fight starts (it sat on the geckos)
+  if (!game.inCarrier && !game.inFight()) { // [polish-V] not in an arena once the fight starts (it sat on the geckos)
     if (d && d.show) ind = { on: true, angle: d.angle, strength: d.loudness ?? 0.5, pulse: (d.pulse || 0) > 0.3, pulseV: d.pulse || 0, chirpAt: d.lastChirpFrame };
     else if (!Audio.indicator) { const t = game.beaconTarget?.(); if (t) ind = { on: true, angle: Math.atan2(t.y - p.cy, t.x - p.cx), strength: 0.6, pulse: game.frame % 90 < 12 }; }
     // [final-S] explain the indicator once, the first time it shows in the Bedroom (after the first call)
-    if (ind && ind.on && game.zone?.n === 1 && !m.flags?.firstChirp && m.flags && !m.flags.indicatorHint && !ui.screen && !dialog.active && !frozen) {
+    if (ind && ind.on && settings.indicator && game.zone?.n === 1 && !m.flags?.firstChirp && m.flags && !m.flags.indicatorHint && !ui.screen && !dialog.active && !frozen) {
       m.flags.indicatorHint = true; game.toast(line('ui.indicatorHint'), 360);
     }
   }
   const temp = p.stats?.perk === 'thermometer' && !game.inCarrier ? Math.round(tempAt(game.room, p.cx)) : null;
-  ui.updateMetaHUD({ crumbs: m.crumbs || 0, temp, indicator: ind, beacon: d && d.show ? d : null, listening: !!p.listening, alwaysRipples: !!settings.ripples });
+  ui.updateMetaHUD({ crumbs: m.crumbs || 0, temp, indicator: ind, docked: !settings.indicator, autoChirp: settings.beaconChirps === 'always', beacon: d && d.show ? d : null, listening: !!p.listening, alwaysRipples: !!settings.ripples }); // [issue 3] indicator off = docked in the HUD
 }
 function logFrame(name) {
   const l = frameLog[frameLog.length - 1];
@@ -453,8 +470,15 @@ function tick(now) {
     while (acc >= STEP_MS && n < 8) { step(); acc -= STEP_MS; n++; }
     if (n === 8) acc = 0;
   }
+  if (screen === 'play' && game) gate.check(game, !story.active); // [art] under a story panel the room's art starts loading
   if (screen === 'play' && game && !story.active) {
-    if (game.inCarrier) hub.draw(renderer, game); else { renderer.draw(game, { shake: settings.shake }); drawMetaWorld(); }
+    if (game.inCarrier) hub.draw(renderer, game);
+    else {
+      S.setDrawing(game.room?.id || null, gate.holding); // [art] ?artcheck logs misses against this room
+      renderer.draw(game, { shake: settings.shake }); drawMetaWorld();
+      S.setDrawing(null);
+      const cv = gate.cover(); if (cv) renderer.drawCover(cv.alpha, cv.label); // [art] ink until the room's art is in
+    }
     ui.updateHUD(game); if (now - avoidAt > 500) measureAvoid(); updateMetaHUD(); // [polish-V]
   } else if (!story.active) renderer.draw({ room: null }, {});
   paused = screen === 'play' && (!!ui.screen || dialog.active || story.active);

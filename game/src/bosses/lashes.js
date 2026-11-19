@@ -36,6 +36,7 @@ function makeFruit(phase) {
 }
 
 export default makeBoss('lashes', {
+  art: () => ({ props: ['grape', 'banana-slice', 'jam-blob'], crickets: { frost: ['idle', 'chirp'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {
     const [r0, r1] = RANGES[b.phase];

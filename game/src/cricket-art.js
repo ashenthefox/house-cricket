@@ -45,6 +45,30 @@ function fitOf(id, key) {
   return a?.fit || 1;
 }
 
+// [art] the files drawing `looks` can use (resolveLook's search, every frame), plus anchors and
+// fit: what room-art.js loads before a room with this cricket shows
+export function lookFiles(id, looks) {
+  const base = `sprites/crickets/${id}`, out = new Set([`${base}/anchors.json`, `${base}/poses/fit.json`]);
+  for (const look of looks) {
+    if (look === 'glide') out.add('items/dryer-sheet.png'); // the sheet over a glider
+    let want = look || 'idle', guard = 0;
+    while (want && guard++ < 6) {
+      if (ANIMS.includes(want)) {
+        const fr = S.frames(`${base}/anim/${want}`);
+        if (fr.length) { fr.forEach((f) => out.add(f)); break; }
+        if (want === 'run') ['run-a', 'run-b'].forEach((k) => S.exists(`${base}/poses/${k}.png`) && out.add(`${base}/poses/${k}.png`));
+      }
+      if (want === 'base') { out.add(`${base}/base.png`); break; }
+      const p = `${base}/poses/${want}.png`;
+      if (S.exists(p)) { out.add(p); break; }
+      want = FALLBACK[want];
+    }
+  }
+  return [...out];
+}
+// every look a cricket can be drawn in
+export const LOOKS = [...ANIMS, 'leap', 'cling', 'hang', 'glide', 'pound', 'listen', 'dig', 'run-a', 'run-b', 'crouch', 'base'];
+
 // -> { img, key, idx, path } or null
 export function resolveLook(id, look, t = 0, frame) {
   const base = `sprites/crickets/${id}`;

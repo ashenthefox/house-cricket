@@ -32,7 +32,7 @@ export const ITEM_ART = {
 export const itemArt = (id) => `items/${ITEM_ART[id] || id}.png`;
 
 // Near-layer props per bg folder (zone modules may set `near: ['spool', ...]` instead).
-const NEAR = {
+export const NEAR = {
   'z00-tank': ['hide-log', 'water-dish', 'pebble'], 'z01-bedroom': ['sock', 'throw-pillow', 'book-spine'],
   'z02-bathroom': ['sponge', 'soap-dish', 'faucet-handle'], 'z03-kitchen': ['wooden-spoon', 'tongs', 'grape'],
   'z04-pantry': ['spice-rack', 'cork', 'dice'], 'z05-laundry': ['sock', 'spool', 'dryer-vent'],
@@ -67,7 +67,43 @@ export function zoneColors(zone) {
   colCache.set(key, col);
   return col;
 }
-const bgFolder = (zone) => zone?.bg || zone?.id || 'none';
+export const bgFolder = (zone) => zone?.bg || zone?.id || 'none';
+// a room's far painting: { v: 'a' | 'b', mirror, x, y } (see drawBackground)
+export function bgFor(room) {
+  const d = roomLook(room).bg;
+  const h = hash(room.id);
+  const o = { v: h & 1 ? 'b' : 'a', mirror: !!(h & 2), x: ((h >>> 3) % 100) / 100, y: ((h >>> 10) % 100) / 100 };
+  if (typeof d === 'string') o.v = d;
+  else if (d && typeof d === 'object') Object.assign(o, d);
+  return o;
+}
+// [art] The drawing rules room-art.js lists a room's files by (kept here, next to the drawing):
+// terrain swatches a room paints with (screenCanvas repaints as they arrive)
+export function terrainKinds(room) {
+  const d = roomLook(room), out = new Set(['cereal', 'soil']);
+  for (const v of Object.values(d.terrainKinds || {})) out.add(v);
+  for (const p of d.paint || []) if (p.kind) out.add(p.kind);
+  return [...out];
+}
+export const terrainPath = (kind) => `textures/terrain-${kind}.webp`;
+// near-layer silhouettes (drawNear). Room data: near: [{ prop, x: tiles, scale: 3..5, flip }] or
+// near: false; default: two props per screen from the zone's `near` list (or NEAR).
+export function nearList(room) {
+  const d = roomLook(room);
+  if (d.near === false || room.dark) return [];
+  if (d.near) return d.near;
+  const props = room.zone?.near || NEAR[bgFolder(room.zone)] || [];
+  if (!props.length) return [];
+  const rnd = seeded(room.id + ':near'), list = [];
+  for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
+  return list;
+}
+// a prop name ('spool') or any assets path ('carrier/lamp.png') -> its file
+export const propPath = (prop) => (prop.includes('/') ? prop : `props/${prop}.png`);
+// a hiding spot's art: entity art ('sock', a path, or 'none'); default the hide log, small spots none
+export const hideArtOf = (e, small = e?.type === 'hideSmall' || !!e?.small) => e?.art || (small ? null : 'hide-log');
+// an enemy's frames (drawEnemies): 0 and 1 walk, 2 flipped
+export const enemyFrames = (sprite) => [0, 1, 2].map((f) => `${sprite}/${f}.png`);
 
 // [polish] a room's render-only fields with data/look overlay merged in (memoised per room def).
 // Overlay paint regions come first (the first region that holds a tile wins); decor is appended.
@@ -121,22 +157,26 @@ export class Renderer {
     this.fx.touch = coarse;
   }
 
-  // ---- per-zone art: load the current zone's, release the last one's, preload neighbours ----
+  // ---- per-zone caches. [art] Loading, holding and releasing the art is src/room-art.js's job
+  // (main.js runs it on every room change): each room's art, its neighbours' in the background.
   syncZone(game) {
     const folder = bgFolder(game.zone);
     if (folder === this.zoneKey) return;
     this.zoneKey = folder;
-    S.setZone([`bg/${folder}/`, `textures/${folder}.webp`]);
     this.nearCache.clear();
-    S.preload([S.bgPath(folder, 'a'), S.bgPath(folder, 'b'), `textures/${folder}.webp`].filter(Boolean));
-    // the next zone preloads at its exit: any zone whose rooms border this room
-    try {
-      const w = game.world, r = game.room;
-      for (let y = r.cy - 1; y <= r.cy + r.sh; y++) for (let x = r.cx - 1; x <= r.cx + r.sw; x++) {
-        const nb = w.cells?.get?.(`${x},${y}`); const z = nb && (nb.zone || w.rooms?.[nb]?.zone);
-        if (z && bgFolder(z) !== folder) S.preload([S.bgPath(bgFolder(z), 'a')].filter(Boolean));
-      }
-    } catch { /* world without cells map */ }
+  }
+
+  // [art] the cover while a room's art loads (src/room-art.js): ink, then "Loading" if it lasts
+  drawCover(alpha, label) {
+    if (alpha <= 0) return;
+    const c = this.ctx;
+    c.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    c.fillStyle = `rgba(20,16,14,${Math.min(1, alpha)})`; c.fillRect(0, 0, VW, VH * 2); // [final-G] a wide phone's view is taller than VH
+    if (!label) return;
+    c.save(); c.globalAlpha = Math.min(1, alpha);
+    c.fillStyle = 'rgba(244,235,221,0.8)'; c.font = '28px "Patrick Hand", sans-serif'; c.textAlign = 'center';
+    c.fillText(label, VW / 2, VH / 2);
+    c.restore();
   }
 
   // ---- platform painter (cached per screen) ----
@@ -163,14 +203,8 @@ export class Renderer {
   terrainReady(game) {
     // repaint once terrain swatches arrive
     let n = 0;
-    for (const k of ['cereal', 'soil', ...(this.extraKinds(game))]) if (S.get(`textures/terrain-${k}.webp`)) n++;
+    for (const k of terrainKinds(game.room)) if (S.get(terrainPath(k))) n++;
     return n;
-  }
-  extraKinds(game) {
-    const d = roomLook(game.room), out = new Set();
-    for (const v of Object.values(d.terrainKinds || {})) out.add(v);
-    for (const p of d.paint || []) if (p.kind) out.add(p.kind);
-    return [...out];
   }
 
   // which paint class a tile belongs to (null = not solid)
@@ -459,14 +493,7 @@ export class Renderer {
   // ---- background: far painting per room ----
   // Room data (optional): bg: { v: 'a' | 'b', mirror: bool, x: 0..1, y: 0..1 } (x/y = where the
   // view sits in the painting). Default: a deterministic hash of the room id.
-  bgFor(room) {
-    const d = roomLook(room).bg;
-    const h = hash(room.id);
-    const o = { v: h & 1 ? 'b' : 'a', mirror: !!(h & 2), x: ((h >>> 3) % 100) / 100, y: ((h >>> 10) % 100) / 100 };
-    if (typeof d === 'string') o.v = d;
-    else if (d && typeof d === 'object') Object.assign(o, d);
-    return o;
-  }
+  bgFor(room) { return bgFor(room); }
   drawBackground(c, game, cam) {
     const zone = game.zone, col = zoneColors(zone), room = game.room;
     const folder = roomLook(room).bg?.folder || bgFolder(zone); // [builder A] a room may borrow another zone's painting (Duchess's tank)
@@ -563,14 +590,8 @@ export class Renderer {
     const room = game.room, d = roomLook(room);
     if (d.near === false || room.dark) return;
     const col = zoneColors(game.zone);
-    let list = d.near;
-    if (!list) {
-      const props = game.zone?.near || NEAR[bgFolder(game.zone)] || [];
-      if (!props.length) return;
-      const rnd = seeded(room.id + ':near');
-      list = [];
-      for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
-    }
+    const list = nearList(room);
+    if (!list.length) return;
     const z = cam.zoom;
     for (const n of list) {
       const sil = this.nearSilhouette(n.prop, col);
@@ -839,8 +860,7 @@ export class Renderer {
     }
   }
   drawProp(c, prop, x, y, h, o = {}) {
-    const path = prop.includes('/') ? prop : `props/${prop}.png`;
-    const img = S.get(path);
+    const img = S.get(propPath(prop));
     if (!img) return false;
     const w = h * img.width / img.height;
     c.save(); c.translate(x, y);
@@ -855,7 +875,7 @@ export class Renderer {
   // hiding-spot art: entity { type: 'hide', x, y, w, art?: 'sock' | 'props/x.png' | 'none' }
   hideArt(game, s) {
     const e = game.room.entities.find((en) => (en.type === 'hide' || en.type === 'hideSmall') && en.x * TILE === s.x);
-    return e?.art || (s.small ? null : 'hide-log');
+    return hideArtOf(e, s.small);
   }
   drawHideSpot(c, game, s, front) {
     const art = this.hideArt(game, s);
@@ -961,10 +981,10 @@ export class Renderer {
       const flipped = e.state === 'flipped';
       const rate = e.state === 'scurry' ? 4 : e.stun > 0 ? 9999 : (e.T.frameRate || 9);
       const fr = Math.floor(e.t / rate) % 2;
-      const dir = e.T.sprite;
+      const art = enemyFrames(e.T.sprite);
       let img = null, upside = false;
-      if (flipped) { img = S.get(`${dir}/2.png`); if (!img) { img = S.get(`${dir}/0.png`); upside = !!img; } }
-      else img = S.get(`${dir}/${fr}.png`) || S.get(`${dir}/0.png`);
+      if (flipped) { img = S.get(art[2]); if (!img) { img = S.get(art[0]); upside = !!img; } }
+      else img = S.get(art[fr]) || S.get(art[0]);
       if (e.dir > 0) c.scale(-1, 1); // sprites face LEFT
       if (upside || (flipped && !img)) { c.translate(0, -e.h / 2); c.scale(1, -1); c.translate(0, e.h / 2); }
       if (img) {

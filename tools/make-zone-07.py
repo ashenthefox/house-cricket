@@ -91,7 +91,9 @@ r.floor(16)
 r.clear(20, 16, 8, 1); r.plat(20, 17, 8)               # the hole down into the desk hutch
 r.clear(0, 12, 1, 4)                                   # the dark nook (stu-nook)
 r.clear(63, 8, 1, 8)                                   # the bookcase (stu-shelves)
-r.fill(40, 8, 6, 8, 'G')                               # the mantel clock: 8 glass tiles (Rubber Band)
+r.fill(40, 8, 6, 7, 'G')                               # the mantel clock: 8 glass tiles up (Rubber Band), on little feet:
+                                                       # [issue #4] a 1-tile crawl under it (row 15), the way back from the hutch top
+r.deco('pin', 40.5, 15, 0.8, layer='mid', rot=-1.5708); r.deco('pin', 45.5, 15, 0.8, layer='mid', rot=-1.5708)  # the clock's feet (push-pin heads)
 r.ent('secret', id='stu-crumbs-clock', x=42, y=7)
 r.fill(8, 13, 4, 3)                                    # a stack of books
 r.ent('hide', x=33, y=15, w=1, art='bottle-cap')       # the pen cup
@@ -162,6 +164,8 @@ r.put(15, 46, 'H')
 r.fill(20, 47, 5, 5)                                   # P2 (stand 46)
 r.fill(25, 45, 3, 7)                                   # P2's step (stand 44)
 r.put(31, 41, 'H')
+for y in (50, 48, 46):                                 # [issue #4] rails out of the pit under the pin (it was 7 deep) up to P2's step
+    r.plat(28, y, 3)
 r.fill(36, 42, 6, 10)                                  # P3 (stand 41)
 r.fill(39, 40, 3, 2)                                   # P3's step (stand 39)
 r.plat(33, 38, 6); r.plat(29, 36, 6)                   # rails up to the corridor

@@ -83,8 +83,26 @@ export function drawMech(c, game, t) {
   }
 }
 
+// [art] the drawing rules, shared with room-art.js through mechArt()
+const liftBase = (kind) => ({ steam: 'steam-vent', updraft: 'dryer-vent', mister: 'mister-nozzle' }[kind] || 'steam-vent');
+const chainSwitch = (def, by) => def?.draw !== false && (by === 'up' || by === 'touch');
+const pushProp = (def, kind) => def.prop || (kind === 'dice' ? 'dice' : kind === 'spool' ? 'spool' : null);
+// the props a mechanics entity (room data) draws, as props/ names
+export function mechArt(e) {
+  switch (e.type) {
+    case 'spring': return ['cushion'];
+    case 'gate': return e.card === 'damper' ? ['damper'] : [];
+    case 'piano': return ['piano-key'];
+    case 'thermostat': return ['thermostat-lock'];
+    case 'lift': return [liftBase(e.kind || 'steam'), 'steam-puff'];
+    case 'switch': return chainSwitch(e, e.by || 'kick') ? ['pull-chain'] : [];
+    case 'push': { const p = pushProp(e, e.kind || 'box'); return p ? [p] : []; }
+    default: return [];
+  }
+}
+
 function drawLift(c, L, t) {
-  const base = { steam: 'steam-vent', updraft: 'dryer-vent', mister: 'mister-nozzle' }[L.kind] || 'steam-vent';
+  const base = liftBase(L.kind);
   const bx = L.x + L.w / 2, by = L.y + L.h;
   if (L.kind === 'mister') prop(c, base, bx, L.y + TILE * 0.2, TILE * 0.9, { flipY: false });
   else prop(c, base, bx, by, TILE * 0.8);
@@ -102,7 +120,7 @@ function drawLift(c, L, t) {
 function drawSwitch(c, s, t) {
   if (s.def?.draw === false) return; // [builder C] invisible switches (Peeper's chirp-off)
   const x = s.x + s.w / 2;
-  if (s.by === 'up' || s.by === 'touch') {
+  if (chainSwitch(s.def, s.by)) {
     if (prop(c, 'pull-chain', x, s.y + s.h + (s.on ? 8 : 0), TILE * 1.6)) return;
   }
   c.strokeStyle = INK; c.lineWidth = 4; c.lineCap = 'round';
@@ -116,7 +134,7 @@ function drawSwitch(c, s, t) {
 // [fixer] a push block (dice / spool / box): drawn where it is sliding (b.anim px behind its tiles)
 function drawPush(c, b) {
   const T = TILE, x = b.x * T - b.adir * b.anim, y = b.y * T - b.fall, w = b.w * T, h = b.h * T;
-  const name = b.def.prop || (b.kind === 'dice' ? 'dice' : b.kind === 'spool' ? 'spool' : null);
+  const name = pushProp(b.def, b.kind);
   if (name) {
     const img = S.get(`props/${name}.png`);
     if (img) { c.drawImage(img, x - 2, y - 2, w + 4, h + 4); return; }

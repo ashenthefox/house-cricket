@@ -38,6 +38,7 @@ function setPlat(b, g, on) {
 }
 
 export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
+  art: () => ({ props: ['feeder-cup', 'feeder-cup-tipped', 'cup-tab', 'cup-tab-pulled'], crickets: { stripe: ['idle'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
  
   phases: 3, len: LEN,
   start(b, g) {

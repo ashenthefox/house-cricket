@@ -186,7 +186,7 @@ body:not(.title-ready) .menus:has(.panel-title) { opacity: 0; }
 .thermo[hidden] { display: none; }
 .thermo-tube { position: relative; width: 10px; height: 34px; border-radius: 6px; border: 2px solid var(--paper); overflow: hidden; background: rgba(244,235,221,.15); }
 .thermo-fill { position: absolute; left: 0; right: 0; bottom: 0; background: #C8564B; }
-.chirp-ind { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; pointer-events: none; transition: left .25s, top .25s, opacity .3s; --pu: 0; }
+.chirp-ind { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; z-index: 3; transition: left .25s, top .25s, opacity .3s; --pu: 0; }
 .chirp-ind[hidden] { display: none; }
 /* [final-S] an ear in a dark disc, three sound waves on the side the call comes from (they light up
    with each chirp), a glow and a ring that pulse in time; main.js scales it with loudness */
@@ -197,6 +197,22 @@ body:not(.title-ready) .menus:has(.panel-title) { opacity: 0; }
 .ci-waves path { fill: none; stroke: var(--gold); stroke-width: 3.2; stroke-linecap: round; }
 .ci-ring { position: absolute; inset: 6px; border-radius: 50%; border: 3px solid var(--gold); opacity: 0; }
 .ci-ring.go { animation: ring .55s ease-out; }
+/* [issue 3] the ear is a button (z-index: over the touch stick zone; hidden under menus and dialogs). Docked, it is
+   an .icon-btn in .hud-right; auto-chirp off ("When I call" / "Off") strikes the ear through (and dims it at the edge) */
+body.modal-open .chirp-ind { visibility: hidden; }
+.ci-strike { fill: none; stroke: #F4EBDD; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+.auto-off .ci-strike { opacity: 1; }
+.chirp-ind.auto-off .ci-ear, .chirp-ind.auto-off .ci-waves { opacity: .75; }
+.chirp-ind.auto-off .ci-strike { stroke: var(--gold); }
+.ear-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.ear-btn[hidden] { display: none; }
+.icon-btn.ear-btn svg { width: 30px; height: 30px; overflow: visible; }
+.ear-btn .ci-ear { fill: currentColor; stroke: currentColor; }
+.ear-btn .ci-curl { stroke: #2A201A; stroke-width: 2; }
+/* docked, auto-chirp off: the strike line carries it; the ear stays full strength (the button is translucent: dimmed, it fell under 3:1 on light rooms) */
+.ear-btn .ci-strike { stroke-width: 2.4; }
+.ci-gap { fill: none; stroke: #2A201A; stroke-width: 5.5; stroke-linecap: round; opacity: 0; }
+.auto-off .ci-gap { opacity: 1; }
 /* the Listen arrow (bigger, a soft gold glow) and the visual double: ripples at the screen edge, the rhythm strip */
 .beacon-ripples { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .ripple { position: absolute; width: calc(46vmin * var(--rs, 1)); height: calc(46vmin * var(--rs, 1)); border-radius: 50%; transform: translate(-50%, -50%) scale(.1); border: 4px solid rgba(232,184,90,.9); box-shadow: 0 0 14px rgba(232,184,90,.55), inset 0 0 14px rgba(232,184,90,.35); animation: ripple 1.3s ease-out forwards; }
@@ -324,3 +340,15 @@ gh-feedback::part(backdrop) { background: rgba(20,16,14,.55); }
 .title-links .tl-gallery { left: calc(10px + env(safe-area-inset-left)); }
 .title-links .tl-github { right: calc(10px + env(safe-area-inset-right)); }
 @media (max-height: 500px) { .title-links .tl { font-size: 13px; padding: 4px 6px; bottom: calc(4px + env(safe-area-inset-bottom)); } }
+/* [issue 3] the top row: with the ear docked the icon row holds crumbs + ear + mute / map / pause (~300 px), so the
+   centred sign banner keeps clear of it (the rules below restate style.css's narrow and phone sizes). On short touch
+   screens the crumbs drop under the icon row, which then needs ~200 px, and the banner gets what lies between. */
+.hint { max-width: min(60%, 640px, calc(100% - 640px)); }
+@media (max-width: 1000px) { .hint { max-width: min(64%, 560px); } }
+@media (max-height: 500px) and (pointer: coarse) {
+  .hud-right .crumbs { position: absolute; right: 0; top: 52px; height: 36px; font-size: 15px; padding: 0 10px 0 4px; }
+  .hud-right .crumb-icon { width: 26px; height: 22px; }
+  .hint { max-width: min(42%, 460px, calc(100% - 440px - 2 * max(env(safe-area-inset-left), env(safe-area-inset-right)))); }
+}
+/* a toggle with named values (Chirp indicator: Edge / Docked): neither value is "off", so neither is dimmed */
+.kind-toggle.named-vals[aria-pressed] .mb-val { color: var(--gold); }

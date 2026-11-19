@@ -40,7 +40,7 @@ export const TYPES = {
   vacuum:      E('vacuum',      { bonkable: false, behaviour: 'vacuum', w: 120, h: 44, speed: 110, damage: 0, loud: 2.5, caught: 'checkpoint', kick: 'none', chirp: 'none', flash: 'none', drawW: 150, name: 'Robot vacuum', color: '#3A3A42', dark: '#121216' }),
 };
 // friendlier spellings builders may use
-const ALIAS = { dustmites: 'mites', mite: 'mites', 'fruit-flies': 'fruitflies', soldier: 'antsoldier', moth: 'clothesmoth', bunny: 'dustbunny', centipedes: 'centipede', spider: 'wolfspider' };
+export const ALIAS = { dustmites: 'mites', mite: 'mites', 'fruit-flies': 'fruitflies', soldier: 'antsoldier', moth: 'clothesmoth', bunny: 'dustbunny', centipedes: 'centipede', spider: 'wolfspider' };
 
 const flipFrames = 80, scurryFrames = 90, goneFrames = 360;
 const f = (s) => Math.round(s * FPS);
