@@ -45,7 +45,7 @@ METHOD = 6
 SKIP = ['terrain/*', 'ui/app-icon-source.png', 'ui/blot-*.png']
 # art/max-size.json: {path or glob: the largest stored dimension in px}. From a drawn-size sweep at
 # 1920x1080 (issue #14: every solution replayed in the browser, recording the largest size each
-# picture is drawn at): 2x that (+5 %), for pictures that came out under 3/4 of their source. Pictures
+# picture is drawn at): 2x that (+15 %), for pictures that came out under 3/4 of their source. Pictures
 # not listed are kept at their source size. First match wins.
 SIZES = os.path.join(SRC, 'max-size.json')
 SCALE = json.load(open(SIZES)) if os.path.exists(SIZES) else {}
@@ -64,7 +64,14 @@ def skipped(rel):
     return any(fnmatch.fnmatch(rel, g) for g in SKIP)
 
 
+# Never downscaled, whatever max-size.json says: NPC pictures double as dialog portraits, and the
+# browser's <img> downsampling softened their ink lines visibly when shrunk (issue #14 review).
+FULL_SIZE = ['sprites/npcs/*']
+
+
 def max_dim(rel):
+    if any(fnmatch.fnmatch(rel, g) for g in FULL_SIZE):
+        return None
     for g, m in SCALE.items():
         if fnmatch.fnmatch(rel, g):
             return m

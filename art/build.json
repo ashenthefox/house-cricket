@@ -5596,11 +5596,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-210
+512,
+353
 ]
 },
 "sprites/npcs/beep.webp": {
@@ -5608,11 +5608,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-210
+512,
+353
 ]
 },
 "sprites/npcs/crumb-talk.webp": {
@@ -5620,11 +5620,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-243,
-256
+486,
+512
 ]
 },
 "sprites/npcs/crumb.webp": {
@@ -5632,11 +5632,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-243,
-256
+486,
+512
 ]
 },
 "sprites/npcs/dot-talk.webp": {
@@ -5644,11 +5644,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 280
+"max": null
 },
 "size": [
-280,
-260
+512,
+475
 ]
 },
 "sprites/npcs/dot.webp": {
@@ -5656,11 +5656,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 280
+"max": null
 },
 "size": [
-280,
-260
+512,
+475
 ]
 },
 "sprites/npcs/glim-talk.webp": {
@@ -5668,11 +5668,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-226
+512,
+381
 ]
 },
 "sprites/npcs/glim.webp": {
@@ -5680,11 +5680,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-226
+512,
+381
 ]
 },
 "sprites/npcs/lumen-talk.webp": {
@@ -5692,11 +5692,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-254,
-256
+507,
+512
 ]
 },
 "sprites/npcs/lumen.webp": {
@@ -5704,11 +5704,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-254,
-256
+507,
+512
 ]
 },
 "sprites/npcs/page-talk.webp": {
@@ -5716,11 +5716,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-238
+512,
+401
 ]
 },
 "sprites/npcs/page.webp": {
@@ -5728,11 +5728,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-238
+512,
+401
 ]
 },
 "sprites/npcs/peeper-talk.webp": {
@@ -5740,11 +5740,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-229
+512,
+386
 ]
 },
 "sprites/npcs/peeper.webp": {
@@ -5752,11 +5752,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-229
+512,
+386
 ]
 },
 "sprites/npcs/rolo-talk.webp": {
@@ -5764,11 +5764,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 360
+"max": null
 },
 "size": [
-360,
-197
+512,
+280
 ]
 },
 "sprites/npcs/rolo.webp": {
@@ -5776,11 +5776,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 360
+"max": null
 },
 "size": [
-360,
-197
+512,
+280
 ]
 },
 "sprites/npcs/shelly-talk.webp": {
@@ -5788,11 +5788,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-249
+512,
+419
 ]
 },
 "sprites/npcs/shelly.webp": {
@@ -5800,11 +5800,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-249
+512,
+419
 ]
 },
 "sprites/npcs/soot-talk.webp": {
@@ -5812,11 +5812,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-248,
-256
+497,
+512
 ]
 },
 "sprites/npcs/soot.webp": {
@@ -5824,11 +5824,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-248,
-256
+497,
+512
 ]
 },
 "sprites/npcs/velvet-talk.webp": {
@@ -5836,11 +5836,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-137,
-256
+274,
+512
 ]
 },
 "sprites/npcs/velvet.webp": {
@@ -5848,11 +5848,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 256
+"max": null
 },
 "size": [
-137,
-256
+274,
+512
 ]
 },
 "sprites/npcs/weft-talk.webp": {
@@ -5860,11 +5860,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-239
+512,
+402
 ]
 },
 "sprites/npcs/weft.webp": {
@@ -5872,11 +5872,11 @@
 "set": {
 "q": 90,
 "m": 6,
-"max": 304
+"max": null
 },
 "size": [
-304,
-239
+512,
+402
 ]
 },
 "ui/panel.webp": {
