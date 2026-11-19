@@ -275,7 +275,9 @@ export class UI {
         this.trio.append(b);
       });
     }
-    this.btnMute.innerHTML = this.muted ? ICON.speakerOff : ICON.speaker;
+    // only when it changes: replacing the svg every frame swapped the node under the pointer between
+    // mousedown and mouseup, so the browser dropped the click (issue #2)
+    if (this._muteK !== !!this.muted) { this._muteK = !!this.muted; this.btnMute.innerHTML = this.muted ? ICON.speakerOff : ICON.speaker; }
     // toasts
     const tKey = game.toasts.map((t) => t.f + t.text).join('|') + this.capKey(); // [polish-T] caps follow the input in use
     if (tKey !== this._toastKey) {
