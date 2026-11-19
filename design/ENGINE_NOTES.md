@@ -282,14 +282,29 @@ and mechanics". **Traps** ([issue #4]): in every state of the zone (one change a
 rescue, a switch, a side gate; from every entry state `data/zones.js` allows), every spot reached
 must reach a way out (an edge into another zone, a save crack, a door out, the Carrier, the tank's
 lid) or a way on (a change, a gecko fight's ground) with the abilities held then. Reach and escape
-use the pass's exact stats; the escape graph is strict (a wall kick goes away from its wall; a
-bounce edge into a room you can't enter yet is walkable but no jump, though since [issue #15] the game
-treats that edge as a floor: a pound, fall or wall-slide onto it lands, and you can jump off it). It exits 1 on any pocket that
-can't, in any pass. Never resolved by the fall-respawn or damage: deliberate hazards (walls over
-thorns) and the test zones are listed in `data/trap-exempt.js`, with the fights' ground.
-`tools/escape-test.mjs` puts the cricket on a reported spot in the headless sim and searches the
-controls for a way out (`--traps-json` writes the candidates). **Not done yet:** "no gate opens
-before its item" across zones, moving enemies, Duo's shove blocks. ([cracks] `tools/check-cracks.mjs` proves every save crack can be
+use the pass's exact stats; the strongest pass is the crickets home in that state ([issue #17]: each
+cricket nobody home beats on both rise and gap, any of whom can make a move; a rescue in the zone adds
+its cricket), and both passes start from every entry state that differs in the crickets the zone reads
+(its own, Frost for a thermostat, Duo for a push block, a rescue gate's) or, in the strongest pass, in
+the best crickets home (so the Laundry is judged without Frost and with her). The escape graph is
+strict: a wall kick goes away from its wall. The kick peaks at 2 for every cricket, Duo included;
+catching a wall again (kick to kick up a shaft) nets `reach.js` `wallClimb`, about 1.75 for every
+cricket (gen-reach measures both). The graph still counts a kick to another cling as up to 2 cells: a
+cling cell can't hold the quarter tile (kicked from the top of its cell, a cricket does reach the cell
+two up), and charging 1.75 an edge made the bath-sink floor read as stuck when the sim gets Duo, Pip
+and Stripe out. So a chain of four or more kicks up one shaft reads up to a tile better than it is
+(escape-test is the proof); a bounce edge into a room you can't enter yet is a floor, as in the game since [issue #15] (stand,
+walk, jump off it). It exits 1 on any pocket that can't, in any pass. Never resolved by the
+fall-respawn or damage: deliberate hazards (walls over thorns) and the test zones are listed in
+`data/trap-exempt.js`, with the fights' ground; every exempted pocket, the hazard-wall rule's
+included, prints an `exempt stuck` line. Duo's push blocks ([issue #17]) are solid where they are; with
+Duo home a shove (one tile, or on until it stops, then any fall) makes a state that is judged too
+(not searched on from, and not itself a way on). **Moving enemies are not modelled**: an enemy is
+never a step, a block or a way on, so a spot that only an enemy's back gets you out of reads as
+stuck, and one an enemy walls off reads as fine. `tools/escape-test.mjs` puts the cricket on a
+reported spot in the headless sim and searches the controls for a way out (`--traps-json` writes
+the candidates; strongest-pass pockets list each of the best crickets home). **Not done yet:** "no
+gate opens before its item" across zones. ([cracks] `tools/check-cracks.mjs` proves every save crack can be
 left on foot: see Builder changes.) The recorded
 solutions are the real proof of a route.
 
@@ -1049,7 +1064,7 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   falls. Heavy blocks (default) move only for the `shove` perk (Duo; others get a toast), `heavy: false` for anyone.
   Push speed `(1 + wt) / 2` tiles/s (`Mech.pushSpeed`: Duo 3, Pip 2, Frost 1). Position saved in
   `flags['push:<room>:<id>']`; push tiles are never "last safe ground". Event `shove`. check-world treats a block as
-  solid where it starts. Used: laun-shelf's detergent box (the `laun-duo` cubby behind it).
+  solid where it starts (reach); its trap check also judges each shove ([issue #17], see check-world). Used: laun-shelf's detergent box (the `laun-duo` cubby behind it).
 - [fixer] **Chip's Duet** (`{ type: 'duet', id, x, y, hear: 6, window: 2, then: [[event, data], ...] }`): a two-keyhole
   music box. A chirp by Pip or Chip within `hear` tiles lights its keyhole; the other one's chirp within `window` s
   (swap in between) opens it (`sw:<id>`, `unlock`, `duet` events, then the `then` events once). Anyone else's chirp

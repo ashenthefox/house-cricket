@@ -14,21 +14,27 @@
 //
 // Traps ([issue #4]): every spot reached must still be able to get out by playing.
 //   States: the zone's every state, one change at a time (an item, a rescue, a switch, a side gate,
-//     the tank's pebble), from every entry state data/zones.js allows (each smallest item set, with
-//     the fewest and the most crickets home), so "the thermostat set, the Glider not found yet" or
-//     "the Laundry without Frost" is judged on its own. Each change is searched on from where it
-//     happened. Capped at 48 states per entry (reported).
-//   Reach: the pass's cricket class at its exact stats (weakest: Jump 2; strongest: the best of all).
+//     the tank's pebble), from every entry state data/zones.js allows (see entryStates: every item
+//     set that comes with a different set of the crickets the zone reads, so "the thermostat set, the
+//     Glider not found yet", "the Laundry without Frost" and "the Laundry with Frost" are each judged
+//     on their own). Each change is searched on from where it happened. Capped at 48 states per entry
+//     (reported). A shove of a push block (Duo home) makes a state judged on its own (one tile, or on
+//     until it stops), not searched on from and not a way on.
+//   Reach: the pass's cricket class at its exact stats (weakest: Jump 2; strongest: the crickets home in
+//     that state, any of whom can make a move: issue #17).
 //   Escape: the same stats over a strict graph: a wall kick goes away from its wall (back over the
-//     wall's own top only if something stops the drift, or by gliding back with the Glider), and a
-//     bounce edge (a room you can't enter yet) is walkable but no jump (since issue #15 the game lands
-//     you on it and lets you jump; the escape graph still doesn't count on that).
+//     wall's own top only if something stops the drift, or by gliding back with the Glider); a kick to
+//     another cling counts 2 up (kick to kick nets reach.js wallClimb, about 1.75: see launches1, a cell
+//     can't hold the difference; long kick chains read up to a tile optimistic). A bounce edge (the bottom edge
+//     over a room you can't enter yet) is a floor, as in the game since issue #15: stand, walk, jump.
+//   Not modelled: moving enemies (they are never in the graph: neither a step nor a block).
 //   Ways out: an open edge into another zone's room, a save crack, a door out of the zone, the
 //     Carrier, the tank's lid; ways on: anything that changes the state, and a gecko fight's ground
 //     (listed in game/data/trap-exempt.js). A reverse search from those over the escape graph; spots
 //     that reach none are grouped into pockets and reported as `zone room (x,y)` with the nearest
 //     spot that does get out. Every pass counts. The fall-respawn and damage never count:
-//     game/data/trap-exempt.js lists the deliberate exceptions (walls over thorns, the test zones).
+//     game/data/trap-exempt.js lists the deliberate exceptions (walls over thorns, the test zones);
+//     every exempted pocket is printed as an `exempt stuck` line.
 //   A pocket is a candidate: tools/escape-test.mjs searches the real sim for a way out of each one
 //   (--traps-json FILE writes them). --no-traps skips the check. CW_DUMP=room:y0:y1 (debug) lists the
 //   spots reached in those rows at every state.
@@ -86,14 +92,39 @@ function glideEnv(dx, up, R, D, ratio) {
 // A pass's cricket class, then a margin in tiles (the reach check's: weakest -0.5, strongest +0.5, Pip 0).
 // [issue #4] The trap check reaches and gets out with the class's exact stats (no margin): a +0.5 reach
 // produced spots the weakest cricket can't actually get to.
-function passStats(pass, margin) {
-  const c = REACH.crickets;
-  const base = pass === 'weakest' ? { label: 'weakest (Jump 2 / Speed 2', rise: Math.min(c.duo.rise, c.digby.rise), gap: Math.min(c.duo.gap, c.digby.gap) }
-    : pass === 'strongest' ? { label: 'strongest (', rise: Math.max(...Object.values(c).map((x) => x.rise)), gap: Math.max(...Object.values(c).map((x) => x.gap)) }
-      : { label: 'Pip (', rise: c.pip.rise, gap: c.pip.gap };
+// A pass is one or more profiles (rise, gap, wall kick): the strongest pass with
+// `home` given is every cricket home that nobody home beats on both rise and gap ([issue #17]: the
+// player swaps between them, so a move counts if any of them can make it; not one made-up cricket
+// with the best rise of one and the best gap of another, and never a cricket not rescued yet).
+const C = REACH.crickets;
+const PROF = (ids, label) => {
+  const pick = (f, k) => f(...ids.map((id) => C[id][k]));
+  return { label, rise: pick(Math.min, 'rise'), gap: pick(Math.min, 'gap'), wallRise: pick(Math.min, 'wallRise') };
+};
+const bestOf = (ids) => {
+  const ps = [...new Set(ids)].filter((id) => C[id]).map((id) => ({ id, ...C[id] }));
+  const front = ps.filter((p) => !ps.some((q) => q !== p && q.rise >= p.rise && q.gap >= p.gap && (q.rise > p.rise || q.gap > p.gap)));
+  const sig = new Map();
+  for (const p of front) { const k = `${p.rise}/${p.gap}/${p.wallRise}`; if (!sig.has(k)) sig.set(k, p); }
+  return [...sig.values()];
+};
+function passStats(pass, margin, home) {
   const m = margin ?? (pass === 'weakest' ? -0.5 : pass === 'strongest' ? 0.5 : 0);
-  const name = pass === 'pip' && !m ? 'Pip' : `${base.label}${base.label.endsWith('(') ? '' : ', '}${m ? `${m > 0 ? '+' : ''}${m} tile` : 'exact'})`;
-  return { name, rise: base.rise + m, gap: base.gap + m, shrink: -m, key: `${pass}${m}` };
+  let profiles, label;
+  if (pass === 'weakest') { label = 'weakest (Jump 2 / Speed 2'; profiles = [PROF(['duo', 'digby'])]; }
+  else if (pass === 'strongest' && home) {
+    const front = bestOf(['pip', ...home]);
+    label = `strongest home (${front.map((p) => p.id).join('/')}`;
+    profiles = front.map((p) => PROF([p.id], p.id));
+  } else if (pass === 'strongest') {
+    label = 'strongest (';
+    const all = Object.keys(C), max = (k) => Math.max(...all.map((id) => C[id][k]));
+    profiles = [{ rise: max('rise'), gap: max('gap'), wallRise: max('wallRise') }];
+  } else { label = 'Pip ('; profiles = [PROF(['pip'])]; }
+  const name = pass === 'pip' && !m ? 'Pip' : `${label}${label.endsWith('(') ? '' : ', '}${m ? `${m > 0 ? '+' : ''}${m} tile` : 'exact'})`;
+  profiles = profiles.map((p) => ({ ...p, rise: p.rise + m, gap: p.gap + m }));
+  return { name, profiles, rise: Math.max(...profiles.map((p) => p.rise)), gap: Math.max(...profiles.map((p) => p.gap)), shrink: -m,
+    key: `${pass}${m}:${profiles.map((p) => `${p.rise}/${p.gap}`).join(',')}`, crickets: pass === 'strongest' && home ? profiles.map((p) => p.label) : null };
 }
 
 function check(zone, pass, startItems, startRescued = [], opts = {}) {
@@ -125,7 +156,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   for (const r of Object.values(world.rooms)) for (const e of r.entities) {
     const box = e.type === 'gate' ? [e.w || 1, e.h || 1] : e.type === 'spring' ? [e.w || 2, 1] : e.type === 'terrain' && e.kind === 'crumble' ? [e.w || 1, e.h || 1, '#']
       : e.type === 'piano' ? [(e.kw || 2) * (e.keys || Math.floor((e.w || 8) / (e.kw || 2))), 1]
-      : e.type === 'push' ? [e.w || 1, e.h || 1, 'G'] : null; // [fixer] push blocks: solid where they start
+      : null;
     if (!box) continue;
     const g = e.type === 'gate' ? { ...e, room: r } : null;
     for (let y = 0; y < box[1]; y++) for (let x = 0; x < box[0]; x++) overlay.set(`${r.cx * SCREEN_W + e.x + x},${r.cy * SCREEN_H + e.y + y}`, { gate: g, kind: TK[e.tile || box[2] || 'G'] ?? K.SLICK, spring: e.type === 'spring' ? e.power ?? 6 : null });
@@ -133,6 +164,18 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   // [issue #4] tiles a set piece adds (the tank's kicked pebble: a step where it lands)
   const placed = new Set();
   let kicked = false;
+  // [issue #17] Duo's Shove (src/mechanics.js push blocks): solid (never clingable) where they are now. A
+  // block's place is part of the state; heavy ones move only with Duo home (a light one for anyone).
+  const pushes = [];
+  for (const r of Object.values(world.rooms)) for (const e of r.entities) if (e.type === 'push') pushes.push({ id: `${r.id}:${e.id || `${e.x},${e.y}`}`, r, w: e.w || 1, h: e.h || 1, heavy: e.heavy !== false, x0: e.x, y0: e.y });
+  const boxAt = new Map(); // id -> [x, y] room tiles, once moved
+  let boxCells = new Map();
+  const boxPos = (b) => boxAt.get(b.id) || [b.x0, b.y0];
+  const rebox = () => {
+    boxCells = new Map();
+    for (const b of pushes) { const [x, y] = boxPos(b); for (let j = 0; j < b.h; j++) for (let i = 0; i < b.w; i++) boxCells.set(`${b.r.cx * SCREEN_W + x + i},${b.r.cy * SCREEN_H + y + j}`, b); }
+  };
+  rebox();
   // world tile helpers
   // (cached per state: tcache is cleared whenever the state changes)
   const tcache = new Map();
@@ -148,6 +191,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     if (!r) return null;
     let k = r.base[(wy - r.cy * SCREEN_H) * r.tw + (wx - r.cx * SCREEN_W)];
     if (placed.has(`${wx},${wy}`)) return { r, k: K.SOLID };
+    if (k === K.EMPTY && boxCells.has(`${wx},${wy}`)) return { r, k: K.SLICK }; // a push block (K.PROP in the game)
     const o = overlay.get(`${wx},${wy}`);
     if (o && k === K.EMPTY && !(o.gate && gateOpenCW(o.gate))) return { r, k: o.kind, spring: o.spring };
     if (o?.spring && k !== K.EMPTY) return { r, k, spring: o.spring }; // [issue #4] a spring set on a solid tile (liv-armchair) bounces too
@@ -158,7 +202,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   const allowed = (t, x, y) => t && (!t.r.needs || has(t.r.needs)) && (!inLoud(x, y) || has('earplugs'));
   const standOn = (t, x, y) => {
     if (!t) return false;
-    if (t.r.needs && !has(t.r.needs)) return true; // [issue #4] a room you can't enter yet stops you at its edge (src/game.js checkExits): walkable; the escape graph allows no jumps (launches) there, though since issue #15 the game lands you on it and you can jump
+    if (t.r.needs && !has(t.r.needs)) return true; // [issue #4] a room you can't enter yet stops you at its edge (src/game.js checkExits): since issue #15 that bottom edge is a floor (game.edgeFloor): stand, walk and jump off it
     if ([K.SOLID, K.SLICK, K.CRACK, K.SOIL, K.ONEWAY].includes(t.k)) return true;
     if (t.k === K.CEREAL) return !has('thimble') || true;
     if (t.k === K.WATER) { const above = tileAt(x, y - 1); return has('raft') && above && above.k !== K.WATER; }
@@ -223,23 +267,32 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   // [mech] syrup halves jump height (and so most of the gap); springs and aphids bounce
   const syrup = ents.filter((e) => e.type === 'terrain' && e.kind === 'syrup');
   const aphids = ents.filter((e) => e.type === 'aphid' || TYPES[e.type]?.spring);
-  function launches(n) {
+  // (every profile's launches: the strongest pass's crickets home, any of whom can make the move)
+  const launches = (n) => st.profiles.flatMap((pr) => launches1(n, pr));
+  function launches1(n, pr) {
     const L = [];
-    let R = st.rise, D = st.gap - HIT_W;
-    if (n.kind === 'spot' && n.bounce && st.strict) return L; // on a bounce edge: walk, or grab a wall, but no jump (strict)
+    let R = pr.rise, D = pr.gap - HIT_W;
+    // [issue #15/#17] a bounce edge (the bottom edge over a room you can't enter yet) is a floor in the game
+    // (game.edgeFloor): you stand, walk and jump off it like any ground
     if (n.kind === 'spot') {
       const below = tileAt(n.x, n.y + 1);
       if (syrup.some((e) => n.x >= e.wx && n.x < e.wx + (e.w || 1) && n.y + 1 >= e.wy && n.y + 1 < e.wy + (e.h || 1))) { R *= 0.5; D *= 0.7; }
-      if (below?.spring) L.push({ R: below.spring - st.shrink, D: (st.gap - HIT_W) * Math.sqrt(below.spring / st.rise) });
+      if (below?.spring) L.push({ R: below.spring - st.shrink, D: (pr.gap - HIT_W) * Math.sqrt(below.spring / pr.rise) });
       const aph = aphids.find((e) => Math.abs(e.wx - n.x) <= 1 && e.wy === n.y);
-      if (aph) { const pw = aph.spring ?? TYPES[aph.type]?.spring ?? 5; L.push({ R: pw - st.shrink, D: (st.gap - HIT_W) * Math.sqrt(pw / st.rise) }); }
+      if (aph) { const pw = aph.spring ?? TYPES[aph.type]?.spring ?? 5; L.push({ R: pw - st.shrink, D: (pr.gap - HIT_W) * Math.sqrt(pw / pr.rise) }); }
       L.push({ R, D });
       if (has('feather')) L.push({ R: R + MOVES.flutter.rise, D: D + 2 });
       if (has('band')) L.push({ R: REACH.moves.superJump.rise - st.shrink, D: REACH.moves.superJump.gap - HIT_W });
       if (has('glider')) L.push({ R, D, glide: REACH.moves.glide.ratio });
     } else if (n.kind === 'cling') {
-      L.push({ R: REACH.crickets.pip.wallRise - st.shrink, D: 4, from: { x: n.x, y: n.y } });
-      if (has('feather')) L.push({ R: REACH.crickets.pip.wallRise + MOVES.flutter.rise - st.shrink, D: 5 });
+      // [issue #17] the kick peaks wallRise (2) up for every cricket, Duo too (gen-reach, with each cricket's
+      // own stats). Catching a wall again nets less, reach.js wallClimb (about 1.75 a kick up a shaft, every
+      // cricket alike), but a cling cell can't hold that: a kick from the top of its cell still reaches the
+      // cell two up, and charging 1.75 per edge (so one cell up) made the bath-sink floor read as stuck
+      // when the sim gets every cricket out (jump to the wall high, then kick). So cling to cling stays 2:
+      // a chain of four or more kicks up one shaft reads up to a tile better than it is (escape-test).
+      L.push({ R: pr.wallRise - st.shrink, D: 4, from: { x: n.x, y: n.y } });
+      if (has('feather')) L.push({ R: pr.wallRise + MOVES.flutter.rise - st.shrink, D: 5 });
       if (has('glider')) L.push({ R: 2, D: 4, glide: REACH.moves.glide.ratio });
     } else if (n.kind === 'hook') {
       L.push({ R: 2, D: REACH.moves.swing.fling - HIT_W - st.shrink });
@@ -263,7 +316,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   // Exit pseudo-nodes (kind 'exit') stand on the far side of every open edge into another zone's
   // room; they have no out-edges and are what the trap check searches back from.
   const gmemo = new Map();
-  const stateKey = () => JSON.stringify([[...items].sort(), [...rescued].sort(), [...switches].sort(), [...sides].map((g) => `${g?.room?.id}:${g?.x},${g?.y}`).sort(), [...placed].sort()]);
+  const stateKey = () => JSON.stringify([[...items].sort(), [...rescued].sort(), [...switches].sort(), [...sides].map((g) => `${g?.room?.id}:${g?.x},${g?.y}`).sort(), [...placed].sort(), [...boxAt].map(([k, v]) => `${k}@${v}`).sort()]);
   function graph(stats = st) {
     const mk = stats.key + stateKey();
     if (gmemo.has(mk)) return gmemo.get(mk);
@@ -379,6 +432,23 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
         const [lx, ly, lw = 1, lh = 1] = e.land;
         for (let i = 0; i < lw; i++) for (let j = 0; j < lh; j++) placed.add(`${e.room.cx * SCREEN_W + lx + i},${e.room.cy * SCREEN_H + ly + j}`);
       } });
+      if (e.type === 'push') {
+        // [issue #17] a shove: from the ground beside the block, one tile, or on until it stops (both judged)
+        const b = pushes.find((q) => q.r === e.room && q.x0 === e.x && q.y0 === e.y);
+        if (b && (!b.heavy || rescued.has('duo')) && !boxAt.has(b.id)) for (const dir of [-1, 1]) for (const far of [false, true]) {
+          const [x, y] = boxPos(b), ox = b.r.cx * SCREEN_W, oy = b.r.cy * SCREEN_H;
+          const freeCol = (bx, by) => { const c = dir > 0 ? bx + b.w : bx - 1; if (c < 0 || c >= b.r.tw) return false; for (let j = 0; j < b.h; j++) { const t = tileAt(ox + c, oy + by + j); if (!t || t.k !== K.EMPTY) return false; } return true; };
+          if (!freeCol(x, y)) continue;
+          const cells = []; for (let j = 0; j < b.h; j++) cells.push([ox + (dir > 0 ? x - 1 : x + b.w), oy + y + j]);
+          P.push({ label: `shove ${b.id} ${dir > 0 ? 'right' : 'left'}${far ? ' all the way' : ''}`, cells, push: true, apply: () => {
+            let bx = x, by = y;
+            do bx += dir; while (far && freeCol(bx, by));
+            const fall = () => { if (by + b.h >= b.r.th) return false; for (let i = 0; i < b.w; i++) { const t = tileAt(ox + bx + i, oy + by + b.h); if (!t || t.k !== K.EMPTY) return false; } return true; };
+            boxAt.set(b.id, [bx, by]); rebox(); tcache.clear();
+            while (fall()) { by++; boxAt.set(b.id, [bx, by]); rebox(); tcache.clear(); }
+          } });
+        }
+      }
       if (e.type === 'item' && !items.has(e.item) && !denied.has(e.item)) P.push({ label: `${e.item} (${e.room.id})`, cells: box(e, 1), apply: () => items.add(e.item) });
       if (e.type === 'cage' && !rescued.has(e.cricket)) P.push({ label: `rescue ${e.cricket}`, cells: box(e, 1), apply: () => rescued.add(e.cricket) });
       if (e.type === 'boss' && e.cricket && !rescued.has(e.cricket)) P.push({ label: `rescue ${e.cricket} (boss)`, cells: box(e, 3), apply: () => rescued.add(e.cricket) });
@@ -412,8 +482,9 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   }
   // [issue #4] Trap check: every spot reached in a state must still get to a way out or a way on, over
   // the same edges, with the abilities held then. A reverse search from those targets (escape stats).
-  const trapped = new Map(); // key -> { n, items, rescued, state, G, ok }
-  function trapCheck(seen, G, P, label) {
+  const trapped = new Map(); // key -> { n, items, rescued, state, G, ok, crickets }
+  const hazard = new Map(); // [issue #17] the same, for cling spots the hazard-wall rule exempts (printed, not failed)
+  function trapCheck(seen, G, P, label, stats) {
     const isOut = new Set();
     for (const n of G.list) if (n.kind === 'exit') isOut.add(n.key);
     for (const cells of [...outs, ...P.map((t) => t.cells)]) for (const [x, y] of cells) { const k = `${x},${y}`; if (G.nodes.has(k)) isOut.add(k); }
@@ -422,9 +493,10 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     while (q.length) { const k = q.pop(); for (const p of G.rev.get(k) || []) if (!ok.has(p)) { ok.add(p); q.push(p); } }
     for (const k of seen) {
       const n = G.nodes.get(k);
-      if (!n || n.kind === 'exit' || ok.has(k) || trapped.has(k)) continue;
-      if (hazardWalls && n.kind === 'cling' && overHazard(n)) continue; // data/trap-exempt.js: a wall over thorns
-      trapped.set(k, { n, items: [...items].sort(), rescued: [...rescued].sort(), state: label, G, ok });
+      if (!n || n.kind === 'exit' || ok.has(k) || trapped.has(k) || hazard.has(k)) continue;
+      const rec = { n, items: [...items].sort(), rescued: [...rescued].sort(), state: label, G, ok, crickets: stats?.crickets };
+      if (hazardWalls && n.kind === 'cling' && overHazard(n)) { hazard.set(k, rec); continue; } // data/trap-exempt.js: a wall over thorns
+      trapped.set(k, rec);
     }
   }
   // a cling spot over a hazard: let go (or slide) and you fall straight onto thorns, water or a bottomless
@@ -446,11 +518,12 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     for (const k of res.seen) { const n = res.nodes.get(k); if (!n || !r.containsCell(Math.floor(n.x / SCREEN_W), Math.floor(n.y / SCREEN_H))) continue; const y = n.y - r.cy * SCREEN_H; if (y >= +y0 && y <= +y1) out.push(`${n.x - r.cx * SCREEN_W},${y}`); }
     console.log(`stage ${iter}: ${out.sort().join(' ')}`);
   };
-  const snap = () => ({ items: [...items], rescued: [...rescued], switches: [...switches], sides: [...sides], placed: [...placed], kicked });
+  const snap = () => ({ items: [...items], rescued: [...rescued], switches: [...switches], sides: [...sides], placed: [...placed], kicked, boxAt: [...boxAt] });
   const load = (S) => {
     items = new Set(S.items); rescued.clear(); for (const x of S.rescued) rescued.add(x);
     switches.clear(); for (const x of S.switches) switches.add(x); sides.clear(); for (const x of S.sides) sides.add(x);
-    placed.clear(); for (const x of S.placed) placed.add(x); kicked = S.kicked; tcache.clear();
+    placed.clear(); for (const x of S.placed) placed.add(x); kicked = S.kicked;
+    boxAt.clear(); for (const [k, v] of S.boxAt) boxAt.set(k, v); rebox(); tcache.clear();
   };
 
   if (opts.traps) {
@@ -458,29 +531,38 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     // not found yet" is judged on its own, not only after both): reach with the generous stats from the
     // start and from where each change happened, judge with the exact stats, then each reached change
     // alone makes a child state. Capped; the cap is reported.
-    const fwd = passStats(pass, 0), esc = { ...fwd, strict: true, key: fwd.key + 'strict' };
-    const done = new Set(), queue = [{ S: snap(), seeds: [startKey], path: [] }];
-    let states = 0, capped = false;
-    while (queue.length) {
-      const { S, seeds, path } = queue.shift();
+    // [issue #17] The strongest pass reaches and gets out with the crickets home in each state (a rescue in the
+    // zone adds its cricket). A shove (Duo's push blocks) makes a state that is judged but not searched on from
+    // (its block one tile on, or on until it stops), and is not a way on itself: the spots are judged again
+    // with the block moved.
+    const statsNow = () => { const fwd = passStats(pass, 0, pass === 'strongest' ? [...rescued] : null); return { fwd, esc: { ...fwd, strict: true, key: fwd.key + 'strict' } }; };
+    const names = new Set(), done = new Set(), queue = [{ S: snap(), seeds: [startKey], path: [] }], leaves = [];
+    let states = 0, shoves = 0, capped = false;
+    const judge = ({ S, seeds, path, leaf }) => {
       load(S);
       const key = stateKey();
-      if (done.has(key)) continue;
+      if (done.has(key)) return;
       done.add(key);
-      if (++states > (opts.cap || 48)) { capped = true; break; }
+      if (leaf) shoves++;
+      else if (++states > (opts.cap || 48)) { capped = true; queue.length = 0; return; }
+      const { fwd, esc } = statsNow();
+      names.add(`${fwd.name} in, ${esc.name} out`);
       const res = search(seeds, fwd);
       dump(states - 1, res);
       const P = pending();
-      trapCheck(res.seen, graph(esc), P, path.join(' -> ') || 'entry');
+      trapCheck(res.seen, graph(esc), P.filter((t) => !t.push), path.join(' -> ') || 'entry', fwd);
+      if (leaf) return;
       for (const t of P) {
         if (t.wayOnly) continue;
         const at = t.cells.map(([x, y]) => `${x},${y}`).filter((k) => res.seen.has(k));
         if (!at.length) continue;
         load(S); t.apply();
-        queue.push({ S: snap(), seeds: [...seeds, ...at], path: [...path, t.label] });
+        (t.push ? leaves : queue).push({ S: snap(), seeds: [...seeds, ...at], path: [...path, t.label], leaf: !!t.push });
       }
-    }
-    return { pass: `${fwd.name} in, ${esc.name} out`, states: Math.min(states, opts.cap || 48), capped, traps: trapReport(trapped, zone) };
+    };
+    while (queue.length) judge(queue.shift());
+    for (const l of leaves) judge(l);
+    return { pass: [...names].join(' | '), states: Math.min(states, opts.cap || 48), shoves, capped, traps: trapReport(trapped, zone), hazards: trapReport(hazard, zone) };
   }
 
   const order = [];
@@ -494,7 +576,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     // a change happens where it is reached: search on from there too (the pebble's step can cut the way
     // back to the start, but the player is on the ledge when it lands)
     for (const t of P) {
-      if (t.wayOnly) continue;
+      if (t.wayOnly || t.push) continue; // (a shove is not an ability: the reach check keeps every block where it starts)
       const at = t.cells.map(([x, y]) => `${x},${y}`).filter((k) => res.seen.has(k));
       if (at.length) { t.apply(); order.push(t.label); changed = true; seeds.push(...at); }
     }
@@ -539,7 +621,7 @@ function trapReport(trapped, zone) {
     const low = best?.n.kind === 'spot' ? best.n : spots.filter((n) => n.kind === 'spot').sort((a, b) => b.y - a.y)[0] || spots[0];
     const lr = roomOf(low);
     const near = t.G.list.filter((m) => m.kind !== 'exit' && m.kind !== 'hook' && t.ok.has(m.key) && spots.some((n) => Math.abs(m.x - n.x) <= 16 && Math.abs(m.y - n.y) <= 16));
-    pockets.push({ zone: zone.id, room: r.id, at: loc(spots[0]), spots: spots.map(loc), cells: spots.map(cell), good: near.map(cell), items: t.items, rescued: t.rescued, state: t.state, why,
+    pockets.push({ zone: zone.id, room: r.id, at: loc(spots[0]), spots: spots.map(loc), cells: spots.map(cell), good: near.map(cell), items: t.items, rescued: t.rescued, crickets: t.crickets, state: t.state, why,
       try: { room: lr.id, x: low.x - lr.cx * SCREEN_W, y: low.y - lr.cy * SCREEN_H } });
   }
   return pockets;
@@ -634,26 +716,35 @@ function exemptFor(t) {
   const hits = t.cells.map(inside);
   return hits.every(Boolean) ? hits[0] : null;
 }
-// [issue #4] The states a zone can be entered in (data/zones.js exploreRoutes, every valid route order): each
-// smallest item set (a superset only adds moves), with the fewest crickets home (thermostats need Frost, rescue
-// gates their cricket) and with the most. Zones outside the route graph: their minItems sets.
+// [issue #4] The states a zone can be entered in (data/zones.js exploreRoutes, every valid route order).
+// [issue #17] Each entry is boiled down to what the zone can feel: its item set, and of the crickets home only
+// those it reads (its own cricket, Frost for a thermostat, Duo for a push block, a rescue gate's cricket, a
+// rescue count) and, in the strongest pass, the best of them (passStats). Of the entries alike in that, only the
+// smallest item sets are kept (a superset only adds moves); a bigger item set that comes with more crickets
+// home (the Laundry with the Band, and so Frost) is kept and judged. Zones outside the route graph: their
+// minItems sets.
 let routes = null;
-function entryStates(zone, info) {
+function entryStates(zone, info, pass) {
   const sets = (info.minItems || [[]]).map((m) => ({ items: m, rescued: info.rescued || [] }));
   if (typeof zone.n !== 'number' || zone.n < 1 || zone.n > 10) return sets;
   routes ||= exploreRoutes();
   const ent = routes.entries[zone.n] || [];
   const key = (a) => [...a].sort().join(',');
-  const itemSets = [...new Map(ent.map((e) => [key(e.items), e.items])).values()];
-  const minimal = itemSets.filter((a) => !itemSets.some((b) => b !== a && b.length < a.length && b.every((x) => a.includes(x))));
-  const out = new Map();
-  for (const it of minimal) {
-    const same = ent.filter((e) => key(e.items) === key(it));
-    const fewest = same[0].rescued.filter((c) => same.every((e) => e.rescued.includes(c)));
-    const most = [...new Set(same.flatMap((e) => e.rescued))];
-    for (const rs of [fewest, most]) out.set(key(it) + '|' + key(rs), { items: [...it].sort(), rescued: [...rs].sort() });
+  const zents = zone.rooms.flatMap((r) => world.rooms[r.id]?.entities || []);
+  const rel = new Set([info.cricket]), counts = [];
+  for (const e of zents) {
+    if (e.type === 'thermostat') rel.add('frost');
+    if (e.type === 'push' && e.heavy !== false) rel.add('duo');
+    if (e.type === 'gate' && e.opens?.rescued) rel.add(e.opens.rescued);
+    if (e.type === 'gate' && e.opens?.rescues != null) counts.push(e.opens.rescues);
   }
-  return [...out.values()];
+  const proj = (e) => key(e.rescued.filter((c) => rel.has(c))) + '#' + counts.map((k) => (e.rescued.filter((c) => c !== 'pip').length >= k ? 1 : 0)).join('')
+    + (pass === 'strongest' ? '#' + bestOf(['pip', ...e.rescued]).map((p) => `${p.rise}/${p.gap}`).sort().join(',') : '');
+  const groups = new Map();
+  for (const e of ent) { const p = proj(e), k = key(e.items) + '|' + p; if (!groups.has(k)) groups.set(k, { items: [...e.items].sort(), rescued: [...e.rescued].sort(), p }); }
+  const all = [...groups.values()];
+  return all.filter((a) => !all.some((b) => b !== a && b.p === a.p && b.items.length < a.items.length && b.items.every((x) => a.items.includes(x))))
+    .map(({ items, rescued }) => ({ items, rescued }));
 }
 const onlyPlan = args.includes('--plan'), onlyGraph = args.includes('--graph');
 if (onlyZone == null || onlyPlan || onlyGraph) {
@@ -682,18 +773,24 @@ for (const zone of ZONES) {
     if (verbose) console.log(`   rooms not reached: ${r.rooms.filter((x) => !r.roomsReached.includes(x)).join(', ') || 'none'}`);
   }
   if (!trapsOn) continue;
-  // [issue #4] traps: the main pass from every entry state (data/zones.js PREREQ over every route order: each
-  // smallest item set, with the fewest and with the most crickets home), the other pass from the usual entry
+  // [issue #4] traps: both passes from every entry state (data/zones.js PREREQ over every route order, see
+  // entryStates); with --pass, that pass from the usual entry
   const reported = new Set();
+  const hazardRule = TRAP_EXEMPT.find((e) => e.rule === 'hazard-wall');
   for (const pass of passes) {
-    const entries = pass === passes[0] && !passArg ? entryStates(zone, info) : [{ items: info.minItems?.[0] || [], rescued: info.rescued || [] }];
+    const entries = !passArg ? entryStates(zone, info, pass) : [{ items: info.minItems?.[0] || [], rescued: info.rescued || [] }];
     for (const en of entries) {
       const r = check(zone, pass, [...en.items, ...extraItems], [...en.rescued, ...extraRescued], { traps: true });
       const fresh = r.traps.filter((t) => !reported.has(`${pass}:${t.cells[0]}`));
       for (const t of fresh) reported.add(`${pass}:${t.cells[0]}`);
+      // [issue #17] the hazard-wall rule's spots are printed too, so new ones show up in review
+      const freshHaz = r.hazards.filter((t) => !reported.has(`${pass}:${t.cells[0]}`));
+      for (const t of freshHaz) reported.add(`${pass}:${t.cells[0]}`);
       const bad = fresh.filter((t) => !exemptFor(t));
-      console.log(`${zone.id} traps [${r.pass}; entered with ${en.items.join(',') || 'nothing'}${en.rescued.length ? `; home: ${en.rescued.join(',')}` : ''}] ${bad.length ? 'FAIL' : 'OK'}: ${r.states} state(s)${r.capped ? ' (CAPPED: not every state judged)' : ''}`);
+      console.log(`${zone.id} traps [${r.pass}; entered with ${en.items.join(',') || 'nothing'}${en.rescued.length ? `; home: ${en.rescued.join(',')}` : ''}] ${bad.length ? 'FAIL' : 'OK'}: ${r.states} state(s)${r.shoves ? ` + ${r.shoves} shove(s)` : ''}${r.capped ? ' (CAPPED: not every state judged)' : ''}`);
       for (const t of fresh) trapsOut.push({ ...t, pass, exempt: !!exemptFor(t), label: `${t.zone} ${t.room} ${t.at} [${pass}]`, bad: r.traps.flatMap((x) => x.cells) });
+      for (const t of freshHaz) trapsOut.push({ ...t, pass, exempt: true, label: `${t.zone} ${t.room} ${t.at} [${pass}; hazard wall]`, bad: r.hazards.flatMap((x) => x.cells) });
+      for (const t of freshHaz) console.log(`   exempt stuck: ${t.zone} ${t.room} ${t.at}${t.spots.length > 1 ? ` (+${t.spots.length - 1})` : ''}: ${hazardRule.why} [hazard-wall; state: ${t.state}]`);
       // a stuck pocket fails the run (any pass) unless game/data/trap-exempt.js lists it
       for (const t of fresh) {
         const ex = exemptFor(t);
@@ -707,8 +804,9 @@ for (const zone of ZONES) {
 const trapsJson = opt('--traps-json', null);
 if (trapsJson) {
   // [issue #4] for tools/escape-test.mjs: one entry per pocket and pass, the lowest spot to try from
+  // (the strongest pass: each of the crickets home it judged with, the best of them)
   const crickets = { weakest: ['duo'], strongest: ['hump'], pip: ['pip'] };
-  const out = trapsOut.filter((t) => args.includes('--with-exempt') || !t.exempt).flatMap((t) => crickets[t.pass].map((c) => ({ label: t.label, room: t.try.room, x: t.try.x, y: t.try.y, items: t.items, rescued: t.rescued, cricket: c, bad: t.bad, good: t.good })));
+  const out = trapsOut.filter((t) => args.includes('--with-exempt') || !t.exempt).flatMap((t) => (t.crickets || crickets[t.pass]).map((c) => ({ label: t.label, room: t.try.room, x: t.try.x, y: t.try.y, items: t.items, rescued: t.rescued, cricket: c, bad: t.bad, good: t.good })));
   writeFileSync(trapsJson, JSON.stringify(out, null, 1));
 }
 process.exit(failed ? 1 : 0);

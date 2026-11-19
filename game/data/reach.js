@@ -36,6 +36,7 @@ export const REACH = {
       "gap": 5,
       "wallRise": 2,
       "wallOut": 2.01,
+      "wallClimb": 1.7,
       "flutter": 2.5
     },
     "stripe": {
@@ -45,6 +46,7 @@ export const REACH = {
       "gap": 6,
       "wallRise": 2,
       "wallOut": 2.01,
+      "wallClimb": 1.7,
       "flutter": 2.5
     },
     "katy": {
@@ -54,6 +56,7 @@ export const REACH = {
       "gap": 5,
       "wallRise": 2,
       "wallOut": 2.01,
+      "wallClimb": 1.7,
       "flutter": 2.5
     },
     "duo": {
@@ -63,6 +66,7 @@ export const REACH = {
       "gap": 3.51,
       "wallRise": 2,
       "wallOut": 2,
+      "wallClimb": 1.78,
       "flutter": 2.5
     },
     "frost": {
@@ -72,6 +76,7 @@ export const REACH = {
       "gap": 5.52,
       "wallRise": 2,
       "wallOut": 2.05,
+      "wallClimb": 1.67,
       "flutter": 2.5
     },
     "hump": {
@@ -81,6 +86,7 @@ export const REACH = {
       "gap": 6.04,
       "wallRise": 2,
       "wallOut": 1.99,
+      "wallClimb": 1.64,
       "flutter": 2.5,
       "leapRise": 5,
       "leapGap": 6.04
@@ -92,6 +98,7 @@ export const REACH = {
       "gap": 6,
       "wallRise": 2,
       "wallOut": 2.01,
+      "wallClimb": 1.7,
       "flutter": 2.5,
       "wallRun": 3
     },
@@ -102,6 +109,7 @@ export const REACH = {
       "gap": 4.51,
       "wallRise": 2,
       "wallOut": 2.04,
+      "wallClimb": 1.66,
       "flutter": 2.5
     },
     "digby": {
@@ -111,6 +119,7 @@ export const REACH = {
       "gap": 3.51,
       "wallRise": 2,
       "wallOut": 2,
+      "wallClimb": 1.78,
       "flutter": 2.5
     },
     "mote": {
@@ -120,6 +129,7 @@ export const REACH = {
       "gap": 5.5,
       "wallRise": 2,
       "wallOut": 2.01,
+      "wallClimb": 1.7,
       "flutter": 2.5
     },
     "chip": {
@@ -129,6 +139,7 @@ export const REACH = {
       "gap": 5,
       "wallRise": 2,
       "wallOut": 2.01,
+      "wallClimb": 1.7,
       "flutter": 2.5
     }
   },
