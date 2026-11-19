@@ -29,6 +29,10 @@ const ICON = {
   triangle: '<svg viewBox="0 0 20 20" aria-label="triangle"><path d="M10 4l6.5 11h-13z" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>',
 };
 
+// the ear of the chirp indicator (the floating one and the docked HUD button share it)
+const EAR_PATHS = '<path class="ci-ear" d="M0.5 -11.5 C7.5 -11.5 10.5 -6 9.5 -1 C8.8 2.5 6 3.8 5 6.5 C3.8 10 1.5 12 -1.5 11.5 C-4 11 -4.5 8.5 -6.5 6.5 C-9.5 3 -9.5 -11.5 0.5 -11.5 Z"/>'
+  + '<path class="ci-curl" d="M-3.5 -2 C-3.5 -7.5 5 -7.5 5 -2.5 C5 0.5 2 0.8 1.5 3.5 M-1 -1.5 C-1 -3.5 2 -3.5 2 -1.5"/>';
+
 export class UI {
   constructor(root, input) {
     this.root = root; this.input = input;
@@ -52,15 +56,17 @@ export class UI {
     this.crumbs.append(h('span', { class: 'crumb-icon' }), h('span', { class: 'crumb-n', text: '0' }));
     this.thermo = h('div', { class: 'thermo', hidden: '' }, h('span', { class: 'thermo-tube' }, h('span', { class: 'thermo-fill' })), h('span', { class: 'thermo-read', text: '70°F' }));
     // [final-S] the chirp indicator: an ear with sound waves that pulse with each beacon chirp and grow with loudness
-    this.indicator = h('div', { class: 'chirp-ind', id: 'chirp-indicator', hidden: '', 'aria-hidden': 'true' });
-    this.indicator.innerHTML = '<span class="ci-ring"></span><svg viewBox="-32 -32 64 64" class="ci-svg">'
+    // [issue 3] a button: tap it to dock it in the HUD (this.earDock), double-tap to toggle auto-chirp
+    this.indicator = h('button', { type: 'button', class: 'chirp-ind', id: 'chirp-indicator', hidden: '', tabindex: '-1', 'aria-label': 'Chirp indicator' });
+    this.indicator.innerHTML = '<span class="ci-ring"></span><svg viewBox="-32 -32 64 64" class="ci-svg" aria-hidden="true">'
       + '<g class="ci-waves"><path class="w1" d="M19.5 -11.3 A22.5 22.5 0 0 1 19.5 11.3"/><path class="w2" d="M24.2 -14 A28 28 0 0 1 24.2 14"/><path class="w3" d="M28.6 -16.5 A33 33 0 0 1 28.6 16.5"/></g>'
-      + '<circle class="ci-disc" r="16"/>'
-      + '<path class="ci-ear" d="M0.5 -11.5 C7.5 -11.5 10.5 -6 9.5 -1 C8.8 2.5 6 3.8 5 6.5 C3.8 10 1.5 12 -1.5 11.5 C-4 11 -4.5 8.5 -6.5 6.5 C-9.5 3 -9.5 -11.5 0.5 -11.5 Z"/>'
-      + '<path class="ci-curl" d="M-3.5 -2 C-3.5 -7.5 5 -7.5 5 -2.5 C5 0.5 2 0.8 1.5 3.5 M-1 -1.5 C-1 -3.5 2 -3.5 2 -1.5"/></svg>';
+      + '<circle class="ci-disc" r="16"/>' + EAR_PATHS + '<path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
+    this.earDock = h('button', { type: 'button', class: 'icon-btn ear-btn', hidden: '', tabindex: '-1', 'aria-label': 'Chirp indicator (docked)' });
+    this.earDock.innerHTML = '<svg viewBox="-14 -14 28 28" aria-hidden="true">' + EAR_PATHS + '<path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
+    this.earTaps(this.indicator); this.earTaps(this.earDock);
     this.ripples = h('div', { class: 'beacon-ripples', 'aria-hidden': 'true' });
     this.strip = h('canvas', { class: 'beacon-strip', hidden: '', 'aria-hidden': 'true', width: '300', height: '44' });
-    const right = h('div', { class: 'hud-right' }, this.crumbs, this.btnMute, this.btnMap, this.btnPause);
+    const right = h('div', { class: 'hud-right' }, this.crumbs, this.earDock, this.btnMute, this.btnMap, this.btnPause);
     this.prompt = h('div', { class: 'prompt', hidden: '' });
     this.hint = h('div', { class: 'hint', hidden: '' });
     this.listen = h('div', { class: 'listen', hidden: '' }, h('div', { class: 'listen-arrow' }));
@@ -141,7 +147,7 @@ export class UI {
     if (it.sub) b.append(h('span', { class: 'mb-sub', text: it.sub }));
     const val = h('span', { class: 'mb-val' });
     const show = () => {
-      if (kind === 'toggle') { val.textContent = it.get() ? 'On' : 'Off'; b.setAttribute('aria-pressed', it.get() ? 'true' : 'false'); }
+      if (kind === 'toggle') { val.textContent = it.get() ? it.onLabel || 'On' : it.offLabel || 'Off'; b.setAttribute('aria-pressed', it.get() ? 'true' : 'false'); }
       else if (kind === 'slider') {
         val.innerHTML = '';
         const v = it.get(), max = it.max ?? 1, min = it.min ?? 0;
@@ -375,7 +381,22 @@ UI.prototype.updateMetaHUD = function (info) {
   } else this.thermo.hidden = true;
   const ind = info.indicator, bc = info.beacon;
   this._beaconPulse = bc?.show ? bc.pulse || 0 : 0;
-  if (ind && ind.on) {
+  // [issue 3] docked (Settings > Chirp indicator off): a HUD button instead of the ear at the edge, only
+  // while the ear would show. Classes and labels change only on a change (never rebuild clickable nodes).
+  const docked = !!info.docked, auto = info.autoChirp !== false;
+  const dockOn = !!(ind && ind.on && docked);
+  if (this.earDock.hidden === dockOn) this.earDock.hidden = !dockOn;
+  const ek = `${docked}|${auto}`;
+  if (this._earK !== ek) {
+    this._earK = ek;
+    for (const e of [this.indicator, this.earDock]) e.classList.toggle('auto-off', !auto);
+    const dbl = `double-click to turn auto-chirp ${auto ? 'off' : 'on'}`;
+    this.indicator.setAttribute('aria-label', `Chirp indicator, auto-chirp ${auto ? 'on' : 'off'}`);
+    this.indicator.title = `Click to dock the ear, ${dbl}`;
+    this.earDock.setAttribute('aria-label', `Docked chirp indicator, auto-chirp ${auto ? 'on' : 'off'}`);
+    this.earDock.title = `Click to show the ear at the screen edge, ${dbl}`;
+  }
+  if (ind && ind.on && !docked) {
     this.indicator.hidden = false;
     // sit on an ellipse inside the screen edge, in the beacon's direction; the waves face the call
     const a = ind.angle, rx = 45, ry = 38, pu = ind.pulseV ?? (ind.pulse ? 1 : 0), ld = ind.strength;
@@ -432,3 +453,30 @@ UI.prototype.drawStrip = function (bc) {
 // [polish-T] {left} {right} (with anything but words between) is one Move chip, {swapPrev} {swapNext} one Swap chip
 export function pairTokens(text) { return String(text).replace(/\{left\}\s*(?:\/|or)?\s*\{right\}/g, '{move}').replace(/\{swapPrev\}\s*(?:\/|or)?\s*\{swapNext\}/g, '{swap}'); }
 export { ICON };
+// [issue 3] taps on the ear (floating or docked): one click or tap docks / undocks it once the
+// double-tap window has passed, two in a row toggle auto-chirp (and never also dock). The window runs from
+// the first release to the second press (as a native double-click does), so a slow second press still
+// counts. Pointer events with capture, so a tap on the moving ear still counts if it slides between down
+// and up; nothing reaches the game (the stage's dialog tap, the touch stick under it) and the button
+// never takes focus.
+const EAR_DOUBLE_MS = 300, EAR_HOLD_MS = 700;
+UI.prototype.earTaps = function (el) {
+  el.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    if (e.button !== 0) return;
+    try { el.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    const second = !!this._earTimer; // a press inside the window: this is the double
+    if (second) { clearTimeout(this._earTimer); this._earTimer = null; }
+    this._earDown = { id: e.pointerId, t: performance.now(), second };
+  });
+  el.addEventListener('pointerup', (e) => {
+    e.stopPropagation();
+    const d = this._earDown; if (!d || d.id !== e.pointerId) return;
+    this._earDown = null;
+    if (d.second) this.handlers.earAuto?.();
+    else if (performance.now() - d.t < EAR_HOLD_MS) this._earTimer = setTimeout(() => { this._earTimer = null; this.handlers.earDock?.(); }, EAR_DOUBLE_MS);
+  });
+  el.addEventListener('pointercancel', (e) => { if (this._earDown?.id === e.pointerId) this._earDown = null; });
+  el.addEventListener('mousedown', (e) => e.preventDefault()); // keep focus off it: Space / Enter stay with the game
+  el.addEventListener('click', (e) => { e.stopPropagation(); if (e.detail === 0) this.handlers.earDock?.(); }); // keyboard / assistive activation
+};

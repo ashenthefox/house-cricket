@@ -186,7 +186,7 @@ body:not(.title-ready) .menus:has(.panel-title) { opacity: 0; }
 .thermo[hidden] { display: none; }
 .thermo-tube { position: relative; width: 10px; height: 34px; border-radius: 6px; border: 2px solid var(--paper); overflow: hidden; background: rgba(244,235,221,.15); }
 .thermo-fill { position: absolute; left: 0; right: 0; bottom: 0; background: #C8564B; }
-.chirp-ind { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; pointer-events: none; transition: left .25s, top .25s, opacity .3s; --pu: 0; }
+.chirp-ind { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; z-index: 3; transition: left .25s, top .25s, opacity .3s; --pu: 0; }
 .chirp-ind[hidden] { display: none; }
 /* [final-S] an ear in a dark disc, three sound waves on the side the call comes from (they light up
    with each chirp), a glow and a ring that pulse in time; main.js scales it with loudness */
@@ -197,6 +197,20 @@ body:not(.title-ready) .menus:has(.panel-title) { opacity: 0; }
 .ci-waves path { fill: none; stroke: var(--gold); stroke-width: 3.2; stroke-linecap: round; }
 .ci-ring { position: absolute; inset: 6px; border-radius: 50%; border: 3px solid var(--gold); opacity: 0; }
 .ci-ring.go { animation: ring .55s ease-out; }
+/* [issue 3] the ear is a button (z-index: over the touch stick zone; hidden under menus and dialogs). Docked, it is
+   an .icon-btn in .hud-right; auto-chirp off ("When I call" / "Off") dims the ear and strikes it through */
+body.modal-open .chirp-ind { visibility: hidden; }
+.ci-strike { fill: none; stroke: #F4EBDD; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+.auto-off .ci-strike { opacity: 1; }
+.chirp-ind.auto-off .ci-ear, .chirp-ind.auto-off .ci-waves { opacity: .5; }
+.chirp-ind.auto-off .ci-strike { stroke: var(--gold); }
+.ear-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.ear-btn[hidden] { display: none; }
+.icon-btn.ear-btn svg { width: 30px; height: 30px; overflow: visible; }
+.ear-btn .ci-ear { fill: currentColor; stroke: currentColor; }
+.ear-btn .ci-curl { stroke: #2A201A; stroke-width: 2; }
+.ear-btn.auto-off .ci-ear { opacity: .5; }
+.ear-btn .ci-strike { stroke-width: 2.4; }
 /* the Listen arrow (bigger, a soft gold glow) and the visual double: ripples at the screen edge, the rhythm strip */
 .beacon-ripples { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .ripple { position: absolute; width: calc(46vmin * var(--rs, 1)); height: calc(46vmin * var(--rs, 1)); border-radius: 50%; transform: translate(-50%, -50%) scale(.1); border: 4px solid rgba(232,184,90,.9); box-shadow: 0 0 14px rgba(232,184,90,.55), inset 0 0 14px rgba(232,184,90,.35); animation: ripple 1.3s ease-out forwards; }

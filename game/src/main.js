@@ -115,8 +115,19 @@ ui.handlers = {
   map: () => { if (screen === 'play' && !dialog.active && !story.active) { if (ui.screen === 'map') resume(); else if (ui.screen) { if (PAUSE_TABS.has(ui.screen)) Screens.pause(A, 'map'); } else pause(null, 'map'); } }, // [final-S] not from a card
   promptTap: () => { if (game?.inCarrier) hub.tapPrompt(); else if (game) { input._press(['up'], 'touch'); input._release(['up']); } },
   mute: () => toggleMute(),
+  // [issue 3] the ear: a tap docks / undocks it (Settings > Chirp indicator), a double tap flips auto-chirp
+  // (Settings > Beacon chirps: Always <-> When I call; Off goes to Always)
+  earDock: () => { if (!earLive()) return; setEarSetting('indicator', !settings.indicator); measureAvoid(); },
+  earAuto: () => {
+    if (!earLive()) return;
+    const on = settings.beaconChirps !== 'always';
+    setEarSetting('beaconChirps', on ? 'always' : 'call');
+    game.toast(on ? 'Auto-chirp on: the trapped cricket chirps by itself.' : 'Auto-chirp off: it chirps back when you call.', 150);
+  },
   swapTo: (i) => { if (game && i !== game.player.active) game.player.queuedSwap = i; },
 };
+const earLive = () => screen === 'play' && !!game && !ui.screen && !story.active;
+function setEarSetting(k, v) { if (Audio.setSetting) Audio.setSetting(k, v); else { settings[k] = v; Save.saveSettings(settings); } }
 function toggleMute() { settings.muted = !settings.muted; Audio.setMuted(settings.muted); ui.muted = settings.muted; Save.saveSettings(settings); }
 
 // ---- screens (meta and UI: src/menus/screens.js, story.js, dialog.js, hub.js, meta-run.js) ----
@@ -430,16 +441,16 @@ function updateMetaHUD() {
   const p = game.player, m = game.meta || {};
   let ind = null;
   const d = !game.inCarrier ? A.indicator() : null; // [final-S] also feeds the ripples and the rhythm strip
-  if (settings.indicator && !game.inCarrier && !game.inFight()) { // [polish-V] not in an arena once the fight starts (it sat on the geckos)
+  if (!game.inCarrier && !game.inFight()) { // [polish-V] not in an arena once the fight starts (it sat on the geckos)
     if (d && d.show) ind = { on: true, angle: d.angle, strength: d.loudness ?? 0.5, pulse: (d.pulse || 0) > 0.3, pulseV: d.pulse || 0, chirpAt: d.lastChirpFrame };
     else if (!Audio.indicator) { const t = game.beaconTarget?.(); if (t) ind = { on: true, angle: Math.atan2(t.y - p.cy, t.x - p.cx), strength: 0.6, pulse: game.frame % 90 < 12 }; }
     // [final-S] explain the indicator once, the first time it shows in the Bedroom (after the first call)
-    if (ind && ind.on && game.zone?.n === 1 && !m.flags?.firstChirp && m.flags && !m.flags.indicatorHint && !ui.screen && !dialog.active && !frozen) {
+    if (ind && ind.on && settings.indicator && game.zone?.n === 1 && !m.flags?.firstChirp && m.flags && !m.flags.indicatorHint && !ui.screen && !dialog.active && !frozen) {
       m.flags.indicatorHint = true; game.toast(line('ui.indicatorHint'), 360);
     }
   }
   const temp = p.stats?.perk === 'thermometer' && !game.inCarrier ? Math.round(tempAt(game.room, p.cx)) : null;
-  ui.updateMetaHUD({ crumbs: m.crumbs || 0, temp, indicator: ind, beacon: d && d.show ? d : null, listening: !!p.listening, alwaysRipples: !!settings.ripples });
+  ui.updateMetaHUD({ crumbs: m.crumbs || 0, temp, indicator: ind, docked: !settings.indicator, autoChirp: settings.beaconChirps === 'always', beacon: d && d.show ? d : null, listening: !!p.listening, alwaysRipples: !!settings.ripples }); // [issue 3] indicator off = docked in the HUD
 }
 function logFrame(name) {
   const l = frameLog[frameLog.length - 1];
