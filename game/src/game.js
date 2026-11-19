@@ -35,7 +35,7 @@ export class Game {
     this.ctx = { grid: null, hooks: [], hideSpots: [], currents: [], emit: (t, d) => this.emit(t, d), breakUnder: (p) => this.breakUnder(p),
       // [mech] what the player reads from the room's mechanics
       surface: (p) => Mech.surfaceAt(this, p), liftAt: (p) => Mech.liftAt(this, p), springUnder: (p) => Mech.springUnder(this, p), dig: (p, dir) => Mech.dig(this, p, dir),
-      unsafeTile: (tx, ty) => Mech.unsafeTile(this, tx, ty) };
+      unsafeTile: (tx, ty) => Mech.unsafeTile(this, tx, ty), edgeFloor: (p) => this.edgeFloor(p) };
     this.projectiles = [];
     // [mech] shut gates in a neighbouring room are solid across the shared edge too
     // [fixer] ... and broken cereal / dug soil there is open too (the hearth plug seen from chim-ash)
@@ -317,13 +317,28 @@ export class Game {
     if (next.needs && !p.has(next.needs)) {
       // gate by kind: bounce back with a hint
       if (cx < 0) p.x = 0; else if (cx >= room.pw) p.x = room.pw - p.w;
-      if (cy < 0) { p.y = 0; p.vy = Math.max(p.vy, 0); } else if (cy >= room.ph) { p.y = room.ph - p.h; p.vy = Math.min(p.vy, 0); }
+      if (cy < 0) { p.y = 0; p.vy = Math.max(p.vy, 0); } else if (cy >= room.ph) {
+        p.y = room.ph - p.h;
+        // [issue #15] the bottom edge is a floor: land on it (a pound used to stay a pound here for good)
+        if (p.vy >= 0) p.landOnEdge(this.ctx, this.inp || { held: {} });
+        p.vy = Math.min(p.vy, 0);
+      }
       p.vx = 0; p.dashT = 0;
       this.toast(next.needsMsg || `You need the ${ITEMS[next.needs]?.name || next.needs} to go on.`, 150);
       return;
     }
     // keep the upward momentum through a top exit so you land on the ledge above
     this.enterRoom(next, room.wx + p.x, room.wy + p.y, 'edge');
+  }
+
+  // [issue #15] Standing on the bottom edge of the room over one the cricket can't enter yet
+  // (checkExits stops it there): that edge holds it up like a floor. Tiles as groundUnder gives them.
+  edgeFloor(p) {
+    const room = this.room;
+    if (!room || Math.abs(p.y + p.h - room.ph) > 0.5) return null;
+    const n = this.world.roomAtPoint(room.wx + p.cx, room.wy + room.ph);
+    if (!n || n === room || !n.needs || p.has(n.needs)) return null;
+    return [{ tx: Math.floor(p.cx / TILE), ty: room.th, kind: K.SLICK }];
   }
 
   // Ground-pound landing: break every cereal clump under the feet.

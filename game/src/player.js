@@ -248,7 +248,7 @@ export class Player {
   // ---- ground ----
   _ground(inp, dir, ctx) {
     const H = inp.held, Pr = inp.pressed;
-    const g = groundUnder(ctx.grid, this.body);
+    const g = this._under(ctx);
     if (!g) { this._toAir(ctx, true); return this._air(inp, dir, ctx); }
     this.onRaft = g.every((t) => t.kind === K.WATER);
     this.canFlutter = true;
@@ -311,7 +311,21 @@ export class Player {
     this._dy = 0;
     this._moveBody(ctx);
     // walking off an edge
-    if (!groundUnder(ctx.grid, this.body)) this._toAir(ctx, true);
+    if (!this._under(ctx)) this._toAir(ctx, true);
+  }
+  // What the feet stand on: tiles, or (issue #15) the floor edge over a room you can't enter yet.
+  _under(ctx) { return groundUnder(ctx.grid, this.body) || (ctx.edgeFloor ? ctx.edgeFloor(this) : null); }
+  // [issue #15] game.checkExits stopped us at the bottom edge of a room we can't enter yet: that edge
+  // is a floor. Any falling state ends there as a landing (a pound ends as a pound landing), never
+  // held in its state while gravity pulls it over the edge again every frame.
+  landOnEdge(ctx, inp) {
+    const st = this.state;
+    if (st === 'pound') {
+      this.poundT = 0;
+      ctx.emit('pound', { x: this.cx, y: this.y + this.h, broke: false });
+      this.state = 'ground'; this.vy = 0; this.recover = F.poundRecover; this.squash = FEEL.squashLand * 1.4; this.prof = this.P.fall;
+    } else if (st === 'air' && this.vy >= 0) this._land(ctx, inp);
+    else if (st === 'cling' || st === 'wallrun') { this.state = 'ground'; this.vy = 0; ctx.emit('land', { x: this.cx, y: this.y + this.h, hard: false, v: 0 }); }
   }
   _toAir(ctx, coyote) {
     this.state = 'air'; this.prof = this.P.fall; this.cutDone = true; this.vy = Math.max(this.vy, 0);
@@ -343,7 +357,7 @@ export class Player {
       this.launch(this.P.sup, ctx, 'superjump', dir);
       return this._air(inp, dir, ctx);
     }
-    if (!groundUnder(ctx.grid, this.body)) this._toAir(ctx, false);
+    if (!this._under(ctx)) this._toAir(ctx, false);
   }
 
   // ---- air ----

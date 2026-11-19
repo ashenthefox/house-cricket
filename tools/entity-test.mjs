@@ -209,6 +209,41 @@ section('terrain', () => {
   ok(tile(g, 11, 16) === K.SOIL, 'nobody else digs');
 });
 
+// [issue #15] The bottom edge of a room over one the cricket can't enter yet (dark, no Glow Bead) is a
+// floor: a pound, a fall or a wall-slide onto it lands there and the cricket can jump back out. It used
+// to bounce off it every frame: a pound stayed a pound for good, a fall stayed in the air (no jump).
+section('closed-edge', () => {
+  const hole = '###############..###############'; // a 2-deep hole (cols 15-16) down into the dark room
+  const rows = { 16: hole, 17: hole };
+  for (let y = 0; y < 16; y++) rows[y] = '..............#'; // a clingable wall down to the hole's left lip
+  const a = mkRoom('ce-a', Array.from({ length: 18 }, (_, y) => rows[y] ?? ''));
+  const z = zoneOf([a, mkRoom('ce-b', [], [], { x: a.x, y: a.y + 1, dark: true, needs: 'glow' })]);
+  const drop = (items, held = {}, how) => {
+    const t = game(z, 'ce-a', { x: 20, y: 15, items });
+    settle(t.step);
+    t.p.x = 16 * TILE - t.p.w / 2; t.p.y = 8 * TILE; t.p.vx = 0; t.p.vy = 0; t.p.state = 'air';
+    if (how === 'pound') { t.step({}, 2); t.step({ down: true, jump: true }, 1); }
+    if (how === 'cling') t.p.x = 15 * TILE + 1;
+    const seen = new Set();
+    for (let i = 0; i < 150; i++) { t.step(held, 1); if (i >= 90) seen.add(t.p.state); }
+    return { ...t, seen };
+  };
+  const out = (t) => { let top = 1e9; t.step({}, 4); for (let i = 0; i < 40; i++) { t.step({ jump: true, right: i > 3 }, 1); top = Math.min(top, t.p.y + t.p.h); } t.step({ right: true }, 30); return top <= 16 * TILE && t.p.y + t.p.h <= 16 * TILE + 0.01; };
+  let t = drop(['thimble'], {}, 'pound');
+  ok(fxCount(t.g, 'poundStart') === 1, 'the pound starts over the hole');
+  ok(t.g.room.id === 'ce-a' && t.p.state === 'ground' && !t.seen.has('pound'), `a pound onto the closed room's edge lands (state ${[...t.seen]})`);
+  ok(Math.abs(t.p.y + t.p.h - t.g.room.ph) < 0.5, 'standing on the edge');
+  ok(fxCount(t.g, 'pound') >= 1, 'it lands as a pound');
+  ok(out(t), 'and jumps back out of the hole');
+  t = drop([]);
+  ok(t.p.state === 'ground' && !t.seen.has('air'), `a plain fall onto it lands too (state ${[...t.seen]})`);
+  ok(out(t), 'and jumps back out');
+  t = drop(['booties'], { left: true, down: true }, 'cling');
+  ok(t.p.state === 'ground' && !t.seen.has('cling'), `a wall-slide down onto it lands (state ${[...t.seen]})`);
+  t = drop(['thimble', 'glow'], {}, 'pound');
+  ok(t.g.room.id === 'ce-b', 'with the Glow Bead the pound goes on down into the room');
+});
+
 section('thermostat', () => {
   let { g, p, step } = game(null, 'et-thermo', { party: ['frost'] });
   settle(step);

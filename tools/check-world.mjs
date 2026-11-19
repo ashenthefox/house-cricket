@@ -21,7 +21,8 @@
 //   Reach: the pass's cricket class at its exact stats (weakest: Jump 2; strongest: the best of all).
 //   Escape: the same stats over a strict graph: a wall kick goes away from its wall (back over the
 //     wall's own top only if something stops the drift, or by gliding back with the Glider), and a
-//     bounce edge (a room you can't enter yet) is walkable but no jump.
+//     bounce edge (a room you can't enter yet) is walkable but no jump (since issue #15 the game lands
+//     you on it and lets you jump; the escape graph still doesn't count on that).
 //   Ways out: an open edge into another zone's room, a save crack, a door out of the zone, the
 //     Carrier, the tank's lid; ways on: anything that changes the state, and a gecko fight's ground
 //     (listed in game/data/trap-exempt.js). A reverse search from those over the escape graph; spots
@@ -157,7 +158,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   const allowed = (t, x, y) => t && (!t.r.needs || has(t.r.needs)) && (!inLoud(x, y) || has('earplugs'));
   const standOn = (t, x, y) => {
     if (!t) return false;
-    if (t.r.needs && !has(t.r.needs)) return true; // [issue #4] a room you can't enter yet bounces you back (src/game.js checkExits): walkable, but you are in the air there, so no jumps (launches)
+    if (t.r.needs && !has(t.r.needs)) return true; // [issue #4] a room you can't enter yet stops you at its edge (src/game.js checkExits): walkable; the escape graph allows no jumps (launches) there, though since issue #15 the game lands you on it and you can jump
     if ([K.SOLID, K.SLICK, K.CRACK, K.SOIL, K.ONEWAY].includes(t.k)) return true;
     if (t.k === K.CEREAL) return !has('thimble') || true;
     if (t.k === K.WATER) { const above = tileAt(x, y - 1); return has('raft') && above && above.k !== K.WATER; }

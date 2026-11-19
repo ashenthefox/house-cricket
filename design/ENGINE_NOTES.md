@@ -283,7 +283,8 @@ rescue, a switch, a side gate; from every entry state `data/zones.js` allows), e
 must reach a way out (an edge into another zone, a save crack, a door out, the Carrier, the tank's
 lid) or a way on (a change, a gecko fight's ground) with the abilities held then. Reach and escape
 use the pass's exact stats; the escape graph is strict (a wall kick goes away from its wall; a
-bounce edge into a room you can't enter yet is walkable but no jump). It exits 1 on any pocket that
+bounce edge into a room you can't enter yet is walkable but no jump, though since [issue #15] the game
+treats that edge as a floor: a pound, fall or wall-slide onto it lands, and you can jump off it). It exits 1 on any pocket that
 can't, in any pass. Never resolved by the fall-respawn or damage: deliberate hazards (walls over
 thorns) and the test zones are listed in `data/trap-exempt.js`, with the fights' ground.
 `tools/escape-test.mjs` puts the cricket on a reported spot in the headless sim and searches the
