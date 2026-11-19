@@ -24,8 +24,8 @@
 //     that state, any of whom can make a move: issue #17).
 //   Escape: the same stats over a strict graph: a wall kick goes away from its wall (back over the
 //     wall's own top only if something stops the drift, or by gliding back with the Glider); a kick to
-//     another cling counts 2 up (kick to kick nets reach.js wallClimb, about 1.75: see launches1, a cell
-//     can't hold the difference; long kick chains read up to a tile optimistic). A bounce edge (the bottom edge
+//     another cling counts 2 up (kick to kick nets reach.js wallClimb, about 1.64-1.78: see launches1, a
+//     cell can't hold the difference; only a long chain's final hop can read a little optimistic). A bounce edge (the bottom edge
 //     over a room you can't enter yet) is a floor, as in the game since issue #15: stand, walk, jump.
 //   Not modelled: moving enemies (they are never in the graph: neither a step nor a block).
 //   Ways out: an open edge into another zone's room, a save crack, a door out of the zone, the
@@ -286,11 +286,12 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
       if (has('glider')) L.push({ R, D, glide: REACH.moves.glide.ratio });
     } else if (n.kind === 'cling') {
       // [issue #17] the kick peaks wallRise (2) up for every cricket, Duo too (gen-reach, with each cricket's
-      // own stats). Catching a wall again nets less, reach.js wallClimb (about 1.75 a kick up a shaft, every
-      // cricket alike), but a cling cell can't hold that: a kick from the top of its cell still reaches the
+      // own stats). Catching a wall again nets less, reach.js wallClimb (about 1.64-1.78 a kick up a shaft,
+      // depending on the cricket), but a cling cell can't hold that: a kick from the top of its cell still reaches the
       // cell two up, and charging 1.75 per edge (so one cell up) made the bath-sink floor read as stuck
       // when the sim gets every cricket out (jump to the wall high, then kick). So cling to cling stays 2:
-      // a chain of four or more kicks up one shaft reads up to a tile better than it is (escape-test).
+      // the climb keeps gaining, so only the final hop of a long chain to a ledge can read a little better than
+      // it is (escape-test is the proof).
       L.push({ R: pr.wallRise - st.shrink, D: 4, from: { x: n.x, y: n.y } });
       if (has('feather')) L.push({ R: pr.wallRise + MOVES.flutter.rise - st.shrink, D: 5 });
       if (has('glider')) L.push({ R: 2, D: 4, glide: REACH.moves.glide.ratio });
@@ -493,9 +494,9 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     while (q.length) { const k = q.pop(); for (const p of G.rev.get(k) || []) if (!ok.has(p)) { ok.add(p); q.push(p); } }
     for (const k of seen) {
       const n = G.nodes.get(k);
-      if (!n || n.kind === 'exit' || ok.has(k) || trapped.has(k) || hazard.has(k)) continue;
+      if (!n || n.kind === 'exit' || ok.has(k) || trapped.has(k)) continue; // a hazard spot is judged again in every state (water with the Raft, gates, a moved block)
       const rec = { n, items: [...items].sort(), rescued: [...rescued].sort(), state: label, G, ok, crickets: stats?.crickets };
-      if (hazardWalls && n.kind === 'cling' && overHazard(n)) { hazard.set(k, rec); continue; } // data/trap-exempt.js: a wall over thorns
+      if (hazardWalls && n.kind === 'cling' && overHazard(n)) { if (!hazard.has(k)) hazard.set(k, rec); continue; } // data/trap-exempt.js: a wall over thorns
       trapped.set(k, rec);
     }
   }
@@ -784,8 +785,8 @@ for (const zone of ZONES) {
       const fresh = r.traps.filter((t) => !reported.has(`${pass}:${t.cells[0]}`));
       for (const t of fresh) reported.add(`${pass}:${t.cells[0]}`);
       // [issue #17] the hazard-wall rule's spots are printed too, so new ones show up in review
-      const freshHaz = r.hazards.filter((t) => !reported.has(`${pass}:${t.cells[0]}`));
-      for (const t of freshHaz) reported.add(`${pass}:${t.cells[0]}`);
+      const freshHaz = r.hazards.filter((t) => !reported.has(`haz:${pass}:${t.cells[0]}`)); // own key: an exempt pocket never hides a real one
+      for (const t of freshHaz) reported.add(`haz:${pass}:${t.cells[0]}`);
       const bad = fresh.filter((t) => !exemptFor(t));
       console.log(`${zone.id} traps [${r.pass}; entered with ${en.items.join(',') || 'nothing'}${en.rescued.length ? `; home: ${en.rescued.join(',')}` : ''}] ${bad.length ? 'FAIL' : 'OK'}: ${r.states} state(s)${r.shoves ? ` + ${r.shoves} shove(s)` : ''}${r.capped ? ' (CAPPED: not every state judged)' : ''}`);
       for (const t of fresh) trapsOut.push({ ...t, pass, exempt: !!exemptFor(t), label: `${t.zone} ${t.room} ${t.at} [${pass}]`, bad: r.traps.flatMap((x) => x.cells) });

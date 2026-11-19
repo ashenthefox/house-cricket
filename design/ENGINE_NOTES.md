@@ -288,12 +288,12 @@ its cricket), and both passes start from every entry state that differs in the c
 (its own, Frost for a thermostat, Duo for a push block, a rescue gate's) or, in the strongest pass, in
 the best crickets home (so the Laundry is judged without Frost and with her). The escape graph is
 strict: a wall kick goes away from its wall. The kick peaks at 2 for every cricket, Duo included;
-catching a wall again (kick to kick up a shaft) nets `reach.js` `wallClimb`, about 1.75 for every
-cricket (gen-reach measures both). The graph still counts a kick to another cling as up to 2 cells: a
+catching a wall again (kick to kick up a shaft) nets `reach.js` `wallClimb`, about 1.64-1.78
+depending on the cricket (gen-reach measures both). The graph still counts a kick to another cling as up to 2 cells: a
 cling cell can't hold the quarter tile (kicked from the top of its cell, a cricket does reach the cell
 two up), and charging 1.75 an edge made the bath-sink floor read as stuck when the sim gets Duo, Pip
-and Stripe out. So a chain of four or more kicks up one shaft reads up to a tile better than it is
-(escape-test is the proof); a bounce edge into a room you can't enter yet is a floor, as in the game since [issue #15] (stand,
+and Stripe out. The climb keeps gaining, so only the final hop of a long chain to a ledge can read a little better
+than it is (escape-test is the proof); a bounce edge into a room you can't enter yet is a floor, as in the game since [issue #15] (stand,
 walk, jump off it). It exits 1 on any pocket that can't, in any pass. Never resolved by the
 fall-respawn or damage: deliberate hazards (walls over thorns) and the test zones are listed in
 `data/trap-exempt.js`, with the fights' ground; every exempted pocket, the hazard-wall rule's
