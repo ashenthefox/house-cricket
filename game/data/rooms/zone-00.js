@@ -39,6 +39,7 @@ function decor() {
   g.box(16, 30, 8, 4, '#');                    // the water dish
   g.box(24, 32, 6, 2, '#');                    // [final-G] a sand bank between the dish and the glass (2 below the dish: no trap)
   g.row(25, 28, 4, '=').row(25, 26, 4, '=').row(25, 24, 4, '=');   // fake-plant leaves
+  g.row(25, 22, 4, '=');                       // [issue #4] a top leaf: back up past the kicked pebble's step (2 up, 2 across onto it)
   g.row(18, 22, 6, '#');                       // the ledge under the pebble
   g.row(24, 18, 6, '#');                       // the ledge one tile too high (the pebble on its edge)
   g.row(20, 16, 4, '=').row(25, 14, 4, '=').row(20, 12, 4, '=').row(25, 10, 4, '=').row(20, 8, 4, '=');
