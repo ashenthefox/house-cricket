@@ -405,6 +405,10 @@ function step() {
     menuInputWithSound(f); return;
   }
   if (screen === 'play') {
+    // [issue 18] a dialog or card that opens as a room comes in (a gecko's opening lines, a Ready?
+    // card, a talk on entry) doesn't freeze the room's fade or wipe on its first, black frame: the
+    // transition is visual only, so it runs on under the modal (not while the art is held)
+    if ((dialog.active || ui.screen) && game?.trans && !gate.holding) { const tr = game.trans; if (++tr.f >= tr.dur) game.trans = null; }
     if (dialog.active) { dialog.step(f); return; }
     if (ui.screen) {
       // the map button toggles the map tab; pause closes the pause menu (its tabs). [final-S] In a
