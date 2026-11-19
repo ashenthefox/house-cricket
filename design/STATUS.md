@@ -18,6 +18,7 @@
 13. `--publish`
 14. #10: The ear swings wildly and points backwards; rest it and bring it out when it helps (https://github.com/zeveck/house-cricket/issues/10). `The mechanics of the ear are confusing. In the first room it swings wildly about, and it has no clear purpose and it often points backwards. Instead it should probably sit at rest and come out when it helps guide or find things maybe?`
 15. #7: Tank sand: Duchess gets stuck for good, ignores Pip, and hiding never matters (https://github.com/zeveck/house-cricket/issues/7). `It's weird that the first hiding place there's no reason to hide because Duchess is stick, and also, that if I just walk back over to Duchess nothing happens. It feels like she should roar and I should skitter away or something, but really, she shouldn't able to get stuck so easily and my hiding should matter?`
+16. #9: Tutorial signs look like floating signposts; put them on the path and centre their text (https://github.com/zeveck/house-cricket/issues/9). `I don't like that the tutorial signs look like signs just floating sometimes. Why have a stand? They should be on the path or something? Their popup should be more centered.`
 ## Settings
 
 - Platform: both (default)

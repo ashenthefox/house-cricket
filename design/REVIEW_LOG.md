@@ -134,3 +134,25 @@ Player and Builder reviewed (no new art or sound; existing growl/snore reused).
 | Signs, text, snore preload, header comments | should-fix (Builder) | Taken into the build |
 | Rewind and determinism; the checker can't see the gate | should-fix (Builder) | Taken into the build: plain fields, seeded RNG only, new rewind cases, a headless gate test |
 | Staging of the sniff; one-time wake line | nice | Taken |
+
+## Change: issue #9, tutorial notes on the path (one round, 2026-11-19)
+
+Player and Builder reviewed (art is drawn in code, so no art director).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Trigger zones up to 14 tiles wide, note at the zone's left edge | must-fix (Player) | Fixed: about 2 tiles around the note, minimum show time, wide zones become notes where the lesson starts |
+| The card covers the tongs in the first ten seconds | must-fix (Player) | Fixed: hazards and the gecko's tell are kept clear; per-tip lower slot (the tongs tip) |
+| The card lands on the toasts | must-fix (both) | Fixed: one centred column, card first, toasts under it |
+| A flat paper is a 2 px line from the side | must-fix (Player) | Fixed: a propped paper card with a "!" scribble, an outline and a shadow |
+| "First solid ground" undefined for ~25 of 111 signs | must-fix (Builder) | Fixed: an anchor rule (spot or nx, at most 1 tile down, never water or hazard) plus data fixes in generators and a build check |
+| Notes on breakable or gated ground float afterwards | must-fix (Builder) | Fixed: read from the live grid; the note retires when its ground breaks |
+| Nana's moving hint isn't a note | must-fix (Builder) | Fixed: a card-only kind |
+| The card jumps around mid-climb or mid-fight | should-fix (both) | Fixed: its slot is chosen once and it fades instead of moving; fights use the taller free band |
+| Appear and disappear behaviour unspecified | should-fix (Player) | Fixed: dwell, calm fade, minimum time, hysteresis |
+| The ear guide's spot collides with the card | should-fix (both) | Fixed: the ear avoids the card's rectangle |
+| Dark rooms hide notes | should-fix (Builder) | Fixed: the unread glint draws through the darkness |
+| "Read" undefined; storage | should-fix (both) | Fixed: 1.5 s fully shown; saved with the slot outside play state |
+| Long tips on phones; the old width rules; held frames | should-fix (both) | Fixed: a wider card, 2 lines max with a build check, one card rule, hidden during transitions |
+| Prompts taking over abruptly | nice | Fixed: a 300 ms fade, counted as read |
+| Notes beside other floor props; test hooks | nice | Fixed: a sideways step; a sign check, a `__game.tips()` hook and sample screenshots in the build |
