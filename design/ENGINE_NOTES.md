@@ -1151,10 +1151,20 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   darkening). main.js: `viewFrac`/`resize()` fill and `phoneZoom()` 1.1 (marked [final-G] lines); `fx.drawScreen` and the near
   layer use the real view height. The camera is never read by the sim, so replays are unchanged.
 - [final-G] `text.js geckos.<name>.hint` (all ten geckos + barty): one line on the Ready? card; `screens.js lairReady` renders it
-  (`p.nana-rule.boss-hint`, a marked line). Also `opening.tank.waitTell`, `signs.berm`, `geckos.peridot.flicker`,
+  (`p.nana-rule.boss-hint`, a marked line). Also `signs.berm`, `geckos.peridot.flicker`,
   `geckos.gargy.again/otherSide`.
-- [final-G] `bosses/tank.js`: decor `land: [x, y, w, h]` (a 2x2 rock of `K.PROP` tiles); sand: Duchess catches up, lunges into each
-  berm once, and the exit (`e.exit`, col 60) holds you until her second lunge. zone-00 tank-decor: a sand bank at cols 24-29.
+- [final-G] `bosses/tank.js`: decor `land: [x, y, w, h]` (a 2x2 rock of `K.PROP` tiles). zone-00 tank-decor: a sand bank at cols 24-29.
+- [issue 7] `bosses/tank.js` sand, **Duchess hunts** (design: Screens, Opening, beat 3): a state machine of plain fields on the beat
+  (no closures, no randomness). Real lunges after the tell (`TELL` from base.js: Gentle Mode's longer tell, `'tell'` with `frames`),
+  the end fixed at the lunge's start and stopped at a berm face (`e.berms`: the berms' middle columns); only the snout box catches:
+  a roar (`gecko-growl` at rate 0.7) and **`player.shove(dir, ctx, {vx, vy, lock})`** (a plain push: state air, fall profile, lock,
+  no event, no damage, no flash; not `daze()`, whose event shows the earplugs toast, nor `hurt()`), a roar cooldown, the skitter
+  clamped 1.5 tiles from the left edge. Hidden in the log ('h') while she's awake: she comes, tells and lunges into it if she hasn't
+  lunged yet, sniffs 2 s and shrugs; the beat sets **`player.hideHold`** each step while she's awake and he's hidden (player.js
+  `_hide`: only Jump leaves; ui.js prompts "Jump to leave"). A Chirp in the log (the `'reveal'` event, read from `game.fx`) or a Jump
+  out while she's at it: a recoil, no skitter. The shrug adds `'duchess-asleep'` to `g.rs('tank-sand').taken`: the exit hold
+  (`e.exit`, col 60) and a quiet nap on coming back read that flag, never her mode. The "Hide in the log!" sign is pushed into
+  `g.signs` by the script. Checks: `tools/tank-test.mjs`; rewind cases in tools/rewind-test.mjs.
 - [final-G] `chikchak.js`: `b.away` (2.5 s facing away at every phase start: no sight), knock-back clamp at x 2 tiles.
   `peridot.js` phase 1: two tugs (`b.half`, `b.needFloor`, lamp flicker). `gargy.js` phase 1: two bonks, the second from the
   other side cushion (`b.once`, `b.side1`).
@@ -1179,7 +1189,7 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   jump or super-jump, flutter at the apex, rise beside a lip and land on it); design/solutions/full-run.json re-recorded.
 - [fullrun] **Absolute game.frame in the sim:** gargy.js phase 1 sways with `sin(game.frame / 90)` (and peridot's tap toast uses
   `frame % 150`), so a headless model must start on the browser's game frame: full-run.mjs sets the RunAuthor's
-  `game.frame` to G0 (2884, the frame the Bedroom starts on after the opening and the tank; `--g0` to change) and the
+  `game.frame` to G0 (3123, the frame the Bedroom starts on after the opening and the tank; `--g0` to change) and the
   browser part checks it. Without this the browser's Gargy fight diverged (phase lost, rescue never came).
 - [final-2] **No refights:** every gecko's `start()` ends the fight at once when its cricket is already rescued
   (`b.done = true`, as duchess/chikchak/bigtok did): Lashes dozes on his shelf (`b.dozing`, `lashes-stairs` set), Peridot
