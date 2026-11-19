@@ -32,7 +32,7 @@ export const ITEM_ART = {
 export const itemArt = (id) => `items/${ITEM_ART[id] || id}.png`;
 
 // Near-layer props per bg folder (zone modules may set `near: ['spool', ...]` instead).
-const NEAR = {
+export const NEAR = {
   'z00-tank': ['hide-log', 'water-dish', 'pebble'], 'z01-bedroom': ['sock', 'throw-pillow', 'book-spine'],
   'z02-bathroom': ['sponge', 'soap-dish', 'faucet-handle'], 'z03-kitchen': ['wooden-spoon', 'tongs', 'grape'],
   'z04-pantry': ['spice-rack', 'cork', 'dice'], 'z05-laundry': ['sock', 'spool', 'dryer-vent'],
@@ -67,7 +67,16 @@ export function zoneColors(zone) {
   colCache.set(key, col);
   return col;
 }
-const bgFolder = (zone) => zone?.bg || zone?.id || 'none';
+export const bgFolder = (zone) => zone?.bg || zone?.id || 'none';
+// a room's far painting: { v: 'a' | 'b', mirror, x, y } (see drawBackground)
+export function bgFor(room) {
+  const d = roomLook(room).bg;
+  const h = hash(room.id);
+  const o = { v: h & 1 ? 'b' : 'a', mirror: !!(h & 2), x: ((h >>> 3) % 100) / 100, y: ((h >>> 10) % 100) / 100 };
+  if (typeof d === 'string') o.v = d;
+  else if (d && typeof d === 'object') Object.assign(o, d);
+  return o;
+}
 
 // [polish] a room's render-only fields with data/look overlay merged in (memoised per room def).
 // Overlay paint regions come first (the first region that holds a tile wins); decor is appended.
@@ -121,22 +130,26 @@ export class Renderer {
     this.fx.touch = coarse;
   }
 
-  // ---- per-zone art: load the current zone's, release the last one's, preload neighbours ----
+  // ---- per-zone caches. [art] Loading, holding and releasing the art is src/room-art.js's job
+  // (main.js runs it on every room change): each room's art, its neighbours' in the background.
   syncZone(game) {
     const folder = bgFolder(game.zone);
     if (folder === this.zoneKey) return;
     this.zoneKey = folder;
-    S.setZone([`bg/${folder}/`, `textures/${folder}.webp`]);
     this.nearCache.clear();
-    S.preload([S.bgPath(folder, 'a'), S.bgPath(folder, 'b'), `textures/${folder}.webp`].filter(Boolean));
-    // the next zone preloads at its exit: any zone whose rooms border this room
-    try {
-      const w = game.world, r = game.room;
-      for (let y = r.cy - 1; y <= r.cy + r.sh; y++) for (let x = r.cx - 1; x <= r.cx + r.sw; x++) {
-        const nb = w.cells?.get?.(`${x},${y}`); const z = nb && (nb.zone || w.rooms?.[nb]?.zone);
-        if (z && bgFolder(z) !== folder) S.preload([S.bgPath(bgFolder(z), 'a')].filter(Boolean));
-      }
-    } catch { /* world without cells map */ }
+  }
+
+  // [art] the cover while a room's art loads (src/room-art.js): ink, then "Loading" if it lasts
+  drawCover(alpha, label) {
+    if (alpha <= 0) return;
+    const c = this.ctx;
+    c.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    c.fillStyle = `rgba(20,16,14,${Math.min(1, alpha)})`; c.fillRect(0, 0, VW, VH * 2); // [final-G] a wide phone's view is taller than VH
+    if (!label) return;
+    c.save(); c.globalAlpha = Math.min(1, alpha);
+    c.fillStyle = 'rgba(244,235,221,0.8)'; c.font = '28px "Patrick Hand", sans-serif'; c.textAlign = 'center';
+    c.fillText(label, VW / 2, VH / 2);
+    c.restore();
   }
 
   // ---- platform painter (cached per screen) ----
@@ -459,14 +472,7 @@ export class Renderer {
   // ---- background: far painting per room ----
   // Room data (optional): bg: { v: 'a' | 'b', mirror: bool, x: 0..1, y: 0..1 } (x/y = where the
   // view sits in the painting). Default: a deterministic hash of the room id.
-  bgFor(room) {
-    const d = roomLook(room).bg;
-    const h = hash(room.id);
-    const o = { v: h & 1 ? 'b' : 'a', mirror: !!(h & 2), x: ((h >>> 3) % 100) / 100, y: ((h >>> 10) % 100) / 100 };
-    if (typeof d === 'string') o.v = d;
-    else if (d && typeof d === 'object') Object.assign(o, d);
-    return o;
-  }
+  bgFor(room) { return bgFor(room); }
   drawBackground(c, game, cam) {
     const zone = game.zone, col = zoneColors(zone), room = game.room;
     const folder = roomLook(room).bg?.folder || bgFolder(zone); // [builder A] a room may borrow another zone's painting (Duchess's tank)

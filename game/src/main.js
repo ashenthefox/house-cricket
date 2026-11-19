@@ -24,6 +24,7 @@ import { tempAt } from './beacon.js';
 import * as HOUSE from '../data/house.js';
 import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
 import { drawMech } from './mech-draw.js'; // [mech] engine mechanics drawing
+import { ArtGate } from './room-art.js'; // [art] a room shows once its art is in (issue #5)
 
 const STEP_MS = 1000 / FPS;
 const PAUSE_TABS = new Set(['pause', 'map', 'crickets', 'sounds']); // [final-S] the pause menu's own tabs
@@ -32,6 +33,8 @@ const canvas = document.getElementById('view');
 const input = new Input();
 const renderer = new Renderer(canvas);
 renderer.drawMech = drawMech; // [mech] render.js calls it after the enemies
+const gate = new ArtGate(); // [art] loads each room's art before it shows, then its neighbours'
+window.__gate = { info: () => gate.info() }; // read-only
 const ui = new UI(document.getElementById('overlay'), input);
 const settings = Save.loadSettings();
 Audio.configure(settings, Save.saveSettings); ui.muted = settings.muted; // [audio] volumes, mute, beacon options (persisted)
@@ -372,6 +375,7 @@ function step() {
     if (f.pressed.pause) { pause(); return; }
     if (f.pressed.map) { pause(null, 'map'); return; }
     if (f.pressed.mute) toggleMute();
+    if (gate.check(game) && !frozen) return; // [art] the room's art is still loading: the sim waits (tests' __game.step don't)
     hub.update(game, f);
     game.update(f);
     Audio.tick(game); // [audio] effects from game.fx, music, beacon, game-clock cues (100 ms lookahead)
@@ -463,8 +467,15 @@ function tick(now) {
     while (acc >= STEP_MS && n < 8) { step(); acc -= STEP_MS; n++; }
     if (n === 8) acc = 0;
   }
+  if (screen === 'play' && game) gate.check(game, !story.active); // [art] under a story panel the room's art starts loading
   if (screen === 'play' && game && !story.active) {
-    if (game.inCarrier) hub.draw(renderer, game); else { renderer.draw(game, { shake: settings.shake }); drawMetaWorld(); }
+    if (game.inCarrier) hub.draw(renderer, game);
+    else {
+      S.setDrawing(game.room?.id || null, gate.holding); // [art] ?artcheck logs misses against this room
+      renderer.draw(game, { shake: settings.shake }); drawMetaWorld();
+      S.setDrawing(null);
+      const cv = gate.cover(); if (cv) renderer.drawCover(cv.alpha, cv.label); // [art] ink until the room's art is in
+    }
     ui.updateHUD(game); if (now - avoidAt > 500) measureAvoid(); updateMetaHUD(); // [polish-V]
   } else if (!story.active) renderer.draw({ room: null }, {});
   paused = screen === 'play' && (!!ui.screen || dialog.active || story.active);

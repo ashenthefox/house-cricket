@@ -6,7 +6,9 @@
 //
 // Memory (design: "Phones and memory"): per-zone art (paintings, textures, gecko art) is
 // released when the zone changes: setZone(paths) keeps the listed prefixes and drops every
-// earlier zone's prefixes. Phones get the -phone painting copies (bgPath()).
+// earlier zone's prefixes. Phones get the -phone painting copies (bgPath()). [art] main.js's
+// room-art gate (src/room-art.js) loads each room's files before showing it and sets the zone
+// set on every room change (the current zone plus the neighbouring rooms' zones).
 import { ASSET_FILES } from '../data/assets.js';
 
 const have = new Set(ASSET_FILES);
@@ -15,32 +17,87 @@ const forceShapes = typeof location !== 'undefined' && new URLSearchParams(locat
 
 export function exists(path) { return !forceShapes && have.has(path); }
 
+// [art] a cache entry: the image, ok/bad, and `done` (a promise settled either way). Marked ok
+// after decode(), so the first draw doesn't stall decoding a big painting.
+function entry(path, priority) {
+  let e = cache.get(path);
+  if (e) return e;
+  e = { img: new Image(), ok: false, bad: false, done: null };
+  e.done = new Promise((res) => {
+    e.img.onload = () => {
+      const fin = () => { e.ok = cache.get(path) === e; res(); };
+      if (e.img.decode) e.img.decode().then(fin, fin); else fin();
+    };
+    e.img.onerror = () => { e.bad = true; res(); };
+  });
+  e.img.decoding = 'async';
+  if (priority) e.img.fetchPriority = priority; // [art] a room's own files 'high', its neighbours' 'low'
+  e.img.src = 'assets/' + path;
+  cache.set(path, e);
+  if (watching) watching.add(path);
+  return e;
+}
+
 export function get(path) {
   if (!exists(path)) return null;
-  let e = cache.get(path);
-  if (!e) {
-    e = { img: new Image(), ok: false, bad: false };
-    e.img.onload = () => { e.ok = true; };
-    e.img.onerror = () => { e.bad = true; };
-    e.img.decoding = 'async';
-    e.img.src = 'assets/' + path;
-    cache.set(path, e);
-  }
+  const fresh = !cache.has(path);
+  const e = entry(path);
+  if (!e.ok && !e.bad && artCheck && drawing) missed(path, fresh);
   return e.ok ? e.img : null;
 }
 // start loading without drawing (next zone at its exit, a boss's frames before the fight)
-export function preload(paths) { for (const p of paths) get(p); }
+export function preload(paths) { for (const p of paths) if (exists(p)) entry(p); }
 // true once every listed (existing) file has loaded
 export function ready(paths) { return paths.every((p) => !exists(p) || get(p)); }
+
+// [art] Room art (src/room-art.js) asks for a room's files through need(), so they count as
+// expected. With ?artcheck in the URL, a draw that misses a file nobody listed is logged once
+// (the room-art list is missing something), and so is a miss on a listed file (it was late).
+const artCheck = typeof location !== 'undefined' && new URLSearchParams(location.search).has('artcheck');
+const expected = new Set(), logged = new Set();
+let drawing = null, covered = false, watching = null;
+export function need(paths) {
+  for (const p of paths) {
+    if (!exists(p)) continue;
+    expected.add(p);
+    if (p.endsWith('.json')) getJSON(p); else entry(p, 'high');
+  }
+}
+// the room being drawn (null between frames): ?artcheck logs misses against it. hidden: the
+// frame is under the loading cover (a listed file still loading there is expected)
+export function setDrawing(roomId, hidden = false) { drawing = roomId; covered = hidden; }
+// add every file requested for the first time to `set` (null stops): draws the list missed
+export function watch(set) { watching = set; }
+function missed(path, fresh) {
+  const listed = expected.has(path), k = (listed ? 'late ' : 'unlisted ') + path;
+  if (logged.has(k) || (listed && covered)) return;
+  logged.add(k);
+  if (listed) console.info(`[artcheck] ${drawing}: ${path} was preloaded but is still loading`);
+  else console.warn(`[artcheck] ${drawing}: drew ${path}${fresh ? '' : ' (still loading)'}, which src/room-art.js does not list`);
+}
+// loaded or failed (a file that isn't in the asset list counts as settled)
+export function settled(path) {
+  if (!exists(path)) return true;
+  if (path.endsWith('.json')) { const j = json.get(path); return !!j && j.settled; }
+  const e = cache.get(path);
+  return !!e && (e.ok || e.bad);
+}
+// start loading; resolves once settled (loaded or failed)
+export function load(path) {
+  if (!exists(path)) return Promise.resolve();
+  if (path.endsWith('.json')) { getJSON(path); return json.get(path).done; }
+  return entry(path, 'low').done;
+}
 
 const json = new Map();
 export function getJSON(path) {
   if (!exists(path)) return null;
   let e = json.get(path);
   if (!e) {
-    e = { data: null };
+    e = { data: null, settled: false, done: null };
     json.set(path, e);
-    fetch('assets/' + path).then((r) => (r.ok ? r.json() : null)).then((d) => { e.data = d; }).catch(() => {});
+    e.done = fetch('assets/' + path).then((r) => (r.ok ? r.json() : null)).then((d) => { e.data = d; }).catch(() => {}).finally(() => { e.settled = true; });
+    if (watching) watching.add(path);
   }
   return e.data;
 }
