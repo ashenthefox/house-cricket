@@ -32,6 +32,7 @@ const litFor = (phase, done) => (done ? [false, false, false] : [phase < 2, phas
 function onFloor(p) { return Math.abs(p.y + p.h - FLOOR) < 6 && p.state !== 'air'; }
 
 export default makeBoss('peridot', {
+  sfx: ['crinkle', 'gecko-chomp', 'gecko-growl', 'gecko-snore', 'hinge-creak'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ props: ['pull-chain'], crickets: { hump: ['idle', 'kick'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {

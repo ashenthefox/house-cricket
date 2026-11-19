@@ -45,6 +45,7 @@ const gazeAngle = (b) => gazeAt(b.sweepT);
 export const EYE = E, GAZE_HALF = HALF;
 
 export default makeBoss('barty', {
+  sfx: ['crinkle', 'dragon-hiss', 'gecko-growl'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ props: Object.values(IMG) }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: 900,
   focus() { return { x0: E.x - 230, y0: E.y - 150, x1: E.x + 230, y1: E.y + 130 }; }, // [polish-V] the arena camera frames his eye

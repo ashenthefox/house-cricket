@@ -4,6 +4,13 @@
 // - Music: looping AudioBuffers (never <audio>), at most 3 decoded at once (the current track plus
 //   the Carrier and boss tracks if they were used); others are released on a track change. On decode
 //   the last 1.5 s are crossfaded into the start so the loop is seamless; tracks crossfade.
+// - Sound effects [issue 14]: fetched ahead of need, never all up front. Music comes first: warm()
+//   (main.js, at load) fetches the title track, then the effects every room uses (sfxFirst(): the
+//   cricket's moves, menus, pickups...). The rest belong to zones (src/zone-sfx.js: ambience loops,
+//   decoys, a gecko's growl, Big Tok's bellow...) and are asked for with needSfx() as the art for a
+//   zone is (room-art.js's gate: on entering a zone, for its neighbours and for rooms loaded ahead).
+//   Bytes are fetched before the AudioContext exists and decoded once it does. A sound played
+//   before it is in is skipped and fetched for next time (?artcheck logs it: "[sfxcheck]").
 // - Buses: master (mute) <- music (volume <- Listen/pause duck <- peaking cut at the zone's beacon
 //   voice, -6 dB Q 1.5) | sfx (volume; effects, ambience, own chirp, decoys) | beacon (volume; the
 //   trapped cricket: distance gain -> low-pass -> pan -> dry + reverb).
@@ -16,12 +23,17 @@
 //   unlock(), configure(settings, save), setSetting(k, v), setMuted(m), isMuted(),
 //   play(name, {gain, rate, pan, detune}), cue(frame, name, opts), clearCues(),
 //   music(nameOrNull) (override), setCarrierVoices(ids), setLoops(names),
-//   tick(game), frame({screen, paused, game}), indicator(), audioState(), beacon(), renderChirp(v)
+//   tick(game), frame({screen, paused, game}), indicator(), audioState(), beacon(), renderChirp(v),
+//   warm(track), needSfx(names), sfxFirst(), fxSound(event)
 import * as Chirps from './chirps.js';
 import { beaconSpec, measure, FLOOR_DB, info as zoneInfo, listenGainDb } from './beacon.js';
 
 const MUSIC_DIR = 'assets/audio/music/', SFX_DIR = 'assets/audio/sfx/';
 export const SFX_NAMES = ['bat-squeaks', 'beetle-plod', 'bigtok-bellow', 'bonk', 'crinkle', 'crumb', 'dialog-blip', 'dragon-hiss', 'dryer-hum', 'floss-swing', 'furnace', 'gecko-chomp', 'gecko-growl', 'gecko-snore', 'glide-whoosh', 'glow-flash', 'ground-pound', 'hinge-creak', 'hop', 'hurt', 'item-get', 'kick', 'land', 'menu-back', 'menu-move', 'menu-select', 'pillow-bonk', 'raft-splash', 'rain-roof', 'rubber-band-twang', 'save-crack', 'seed-heart', 'splat', 'squeak-toy', 'swap-puff', 'swift-chitter', 'unlock', 'vacuum', 'wall-cling', 'wall-jump'];
+// [issue 14] Effects only some zones use (src/zone-sfx.js asks for them; beetle-plod is unused). Every
+// other effect is in sfxFirst(), loaded right after the title music.
+export const ZONED_SFX = ['bat-squeaks', 'beetle-plod', 'bigtok-bellow', 'dragon-hiss', 'dryer-hum', 'furnace', 'gecko-chomp', 'gecko-growl', 'gecko-snore', 'rain-roof', 'squeak-toy', 'swift-chitter', 'vacuum'];
+export const sfxFirst = () => SFX_NAMES.filter((n) => !ZONED_SFX.includes(n));
 // Loop gains from design/ASSETS.md (the files are quiet on purpose).
 const LOOP_DB = { vacuum: 12, 'dryer-hum': 25, 'rain-roof': 18, furnace: 16 };
 const AMBIENCE_LEVEL = 0.35;
@@ -45,7 +57,9 @@ const st = {
   loopsWanted: [], carrier: [], lastFxObj: null, glide: false, raft: false,
 };
 const mus = { decoded: new Map(), loading: new Map(), cur: null, fading: [] };
-const sfx = { buf: new Map(), norm: new Map(), loading: false, live: new Map() };
+const sfx = { buf: new Map(), norm: new Map(), asked: new Set(), decoding: new Set(), live: new Map(), late: new Set() };
+const bytes = new Map();                  // url -> Promise<ArrayBuffer | null> until decoded [issue 14]
+const sfxCheck = typeof location !== 'undefined' && new URLSearchParams(location.search).has('artcheck');
 const synthCache = new Map();
 const loops = new Map();                  // name -> {src, g}
 let cues = [];                            // [{frame, name, opts}]
@@ -62,8 +76,9 @@ export function unlock() {
       if (!AC) return;
       ac = new AC({ latencyHint: 'interactive' });
       buildGraph();
-      loadSfx();
       if (st.want) startTrack(st.want, true);
+      for (const name of sfx.asked) decodeSfx(name); // fetched before the context existed
+      warmSfx();
       applyLoops();
     }
     if (ac.state === 'suspended') ac.resume();
@@ -144,24 +159,56 @@ function seamless(buf, fadeS) {
   }
   return out;
 }
-async function fetchDecode(url, priority) {
-  const r = await fetch(url, priority ? { priority } : undefined); // [art] sfx 'low': a room's art goes first on a slow line
-  if (!r.ok) throw new Error(`${url}: ${r.status}`);
-  const bytes = await r.arrayBuffer();
-  return await new Promise((res, rej) => { const p = ac.decodeAudioData(bytes, res, rej); if (p && p.then) p.then(res, rej); });
-}
-function loadSfx() {
-  if (sfx.loading) return; sfx.loading = true;
-  for (const name of SFX_NAMES) {
-    fetchDecode(SFX_DIR + name + '.mp3', 'low').then((b) => {
-      const isLoop = name in LOOP_DB;
-      const buf = isLoop ? seamless(b, 0.3) : b;
-      sfx.buf.set(name, buf);
-      // loudness levelling: one-shots to a common RMS (at most +12 dB), loops use LOOP_DB
-      if (!isLoop) { const d = buf.getChannelData(0); let s = 0, c = 0; for (let i = 0; i < d.length; i += 4) { if (Math.abs(d[i]) > 0.003) { s += d[i] * d[i]; c++; } } const rms = Math.sqrt(s / Math.max(1, c)) || 0.1; sfx.norm.set(name, Math.min(db(12), 0.18 / rms)); }
-      if (isLoop && st.loopsWanted.includes(name)) applyLoops();
-    }).catch((e) => console.warn('sfx', name, e.message));
+// [issue 14] a file's bytes, fetched once (before the AudioContext exists too); dropped once decoded
+function fetchBytes(url, priority) {
+  if (!bytes.has(url)) {
+    bytes.set(url, fetch(url, priority ? { priority } : undefined) // [art] sfx 'low': a room's art goes first on a slow line
+      .then((r) => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.arrayBuffer(); })
+      .catch((e) => { bytes.delete(url); throw e; }));
   }
+  return bytes.get(url);
+}
+async function fetchDecode(url, priority) {
+  const data = await fetchBytes(url, priority);
+  bytes.delete(url); // decodeAudioData takes the buffer: a later load fetches again (from the HTTP cache)
+  return await new Promise((res, rej) => { const p = ac.decodeAudioData(data, res, rej); if (p && p.then) p.then(res, rej); });
+}
+// [issue 14] Music first: the track (the title's) is fetched now, the effects every room uses after it.
+let warmed = false;
+export function warm(track = 'title') {
+  if (warmed) return; warmed = true;
+  const done = () => { warmSfx(); };
+  if (typeof fetch === 'undefined') return;
+  fetchBytes(MUSIC_DIR + track + '.mp3').then(done, done);
+}
+let sfxWarm = false;
+function warmSfx() { if (!sfxWarm) { sfxWarm = true; needSfx(sfxFirst()); } }
+/** Fetch (and, once audio is unlocked, decode) these effects ahead of need; unknown names are ignored. */
+export function needSfx(names, priority = 'low') {
+  if (typeof fetch === 'undefined') return;
+  for (const name of names || []) {
+    if (sfx.asked.has(name) || !SFX_NAMES.includes(name)) continue;
+    sfx.asked.add(name);
+    fetchBytes(SFX_DIR + name + '.mp3', priority).catch((e) => { sfx.asked.delete(name); console.warn('sfx', name, e.message); });
+    if (ac) decodeSfx(name);
+  }
+}
+function decodeSfx(name) {
+  if (sfx.buf.has(name) || sfx.decoding.has(name)) return;
+  sfx.decoding.add(name);
+  fetchDecode(SFX_DIR + name + '.mp3', 'low').then((b) => {
+    const isLoop = name in LOOP_DB;
+    const buf = isLoop ? seamless(b, 0.3) : b;
+    sfx.buf.set(name, buf);
+    // loudness levelling: one-shots to a common RMS (at most +12 dB), loops use LOOP_DB
+    if (!isLoop) { const d = buf.getChannelData(0); let s = 0, c = 0; for (let i = 0; i < d.length; i += 4) { if (Math.abs(d[i]) > 0.003) { s += d[i] * d[i]; c++; } } const rms = Math.sqrt(s / Math.max(1, c)) || 0.1; sfx.norm.set(name, Math.min(db(12), 0.18 / rms)); }
+    if (isLoop && st.loopsWanted.includes(name)) applyLoops();
+  }).catch((e) => { sfx.asked.delete(name); console.warn('sfx', name, e.message); }).finally(() => sfx.decoding.delete(name));
+}
+// a sound wanted before it was in: fetch it for next time (and say so under ?artcheck)
+function lateSfx(name) {
+  needSfx([name]);
+  if (sfxCheck && !sfx.late.has(name)) { sfx.late.add(name); console.warn(`[sfxcheck] ${name} was played before it loaded (src/zone-sfx.js or sfxFirst() should ask for it)`); }
 }
 function synthBuffer(name, opts = {}) {
   const easier = !!settings.easyPitch;
@@ -186,6 +233,7 @@ export function play(name, opts = {}) {
   if (!running()) return null;
   let buf = sfx.buf.get(name), g = opts.gain ?? 1;
   if (buf) g *= (sfx.norm.get(name) || 1) * db(TRIM_DB[name] || 0);
+  else if (SFX_NAMES.includes(name)) { lateSfx(name); return null; }
   else {
     const v = opts.chord ? 'chord' : Chirps.voiceFor(name);
     if (!v) return null;
@@ -219,6 +267,7 @@ export function chirp(khz = 4.8) { play(khz ? 'house' : 'knock', { bus: 'sfx', p
  *  For the finale (chorus voices, 'brush' beat), bosses' tells, anything rhythmic. */
 export function cue(frame, name, opts = {}) { cues.push({ frame, name, opts }); }
 export function clearCues() { cues = []; }
+export const queuedCues = () => cues.map((c) => c.name); // [issue 14] read-only, for tools/sfx-check.mjs
 
 // ---------------------------------------------------------------- music
 function trackFor(game) {
@@ -293,7 +342,7 @@ function applyLoops() {
   for (const [name, l] of loops) if (!st.loopsWanted.includes(name)) { l.g.gain.setTargetAtTime(0, t, 0.3); l.src.stop(t + 1.5); loops.delete(name); }
   for (const name of st.loopsWanted) {
     if (loops.has(name)) continue;
-    const buf = sfx.buf.get(name); if (!buf) continue;
+    const buf = sfx.buf.get(name); if (!buf) { lateSfx(name); continue; }
     const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
     const g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.setTargetAtTime(db(LOOP_DB[name] || 0), t, 0.4);
     src.connect(g); g.connect(N.amb); src.start(t);
@@ -333,6 +382,19 @@ const FX = {
   cloak: 'crinkle', uncloak: 'crinkle', // [builder C] the Cellophane Cloak
   shove: 'clonk', duet: 'chime', // [fixer] Duo's shove, Chip's duet
 };
+// [issue 14] The recorded effect (SFX_NAMES) or synth voice an fx event plays, or null: what onFx
+// below plays, for tools/sfx-check.mjs (keep the two in step).
+export function fxSound(e) {
+  const d = e.d || {};
+  switch (e.type) {
+    case 'leap': return 'rubber-band-twang';
+    case 'crumble': return 'crinkle';
+    case 'decoy': return d.voice || null;
+    case 'sfx': return d.name || null;
+    case 'chirp': case 'tell': case 'tailSweep': case 'tap': case 'rescue': case 'note': return null; // synthesized
+    default: return FX[e.type] || (e.type === 'land' ? 'land' : null);
+  }
+}
 function onFx(e, game) {
   const d = e.d || {};
   switch (e.type) {
@@ -555,7 +617,7 @@ export function audioState() {
     track: mus.cur?.name || null, wantTrack: st.want, decoded: mus.decoded.size, decodedTracks: [...mus.decoded.keys()],
     listenDuck: st.listen, duckDb: (st.listen ? LISTEN_DUCK_DB : 0) + (st.paused ? PAUSE_DUCK_DB : 0), paused: st.paused,
     cutHz: st.cutHz ? Math.round(st.cutHz) : null, cutDb: st.cutHz ? CUT_DB : 0, cutQ: CUT_Q,
-    loops: [...loops.keys()], sfxLoaded: sfx.buf.size, cues: cues.length,
+    loops: [...loops.keys()], sfxLoaded: sfx.buf.size, sfxAsked: sfx.asked.size, sfxLate: [...sfx.late], cues: cues.length,
   };
 }
 export function beaconState() {

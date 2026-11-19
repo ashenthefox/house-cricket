@@ -157,7 +157,7 @@ export class BossBase {
 // A boss module from a spec (see the top of this file). Register it in bosses/index.js.
 export function makeBoss(name, spec = {}) {
   const full = constant({ name, ...spec }); // [issue 11] frozen: shared, never copied, by a rewind
-  return { create(game, e) { return new BossBase(game, e, full); }, art: (e, game) => bossArt(name, spec, e, game) };
+  return { create(game, e) { return new BossBase(game, e, full); }, art: (e, game) => bossArt(name, spec, e, game), sfx: spec.sfx || [] }; // [issue 14] sfx: src/zone-sfx.js
 }
 // [art] What a fight draws, for src/room-art.js to load before the lair shows:
 //   { gecko: the rig's name or null, props: ['props/ names or paths'], crickets: { id: [looks] } }

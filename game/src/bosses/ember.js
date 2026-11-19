@@ -36,6 +36,7 @@ function hear(b, x, y, radius, loud = false) {
 }
 
 export default makeBoss('ember', {
+  sfx: ['gecko-growl'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ crickets: { mote: ['idle', 'peek'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: 300,
   start(b, g) {

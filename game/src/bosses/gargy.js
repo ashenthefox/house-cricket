@@ -26,6 +26,7 @@ const REMOTE = constant({ x: 49.8 * T, y: 13 * T });
 const head = (b) => b.x + b.facing * LEN * 0.4;
 
 export default makeBoss('gargy', {
+  sfx: ['gecko-growl', 'pillow-bonk'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ props: ['throw-pillow', 'tv-remote'], crickets: { jam: ['idle', 'chirp'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {

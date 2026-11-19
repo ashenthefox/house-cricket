@@ -308,6 +308,7 @@ function cricketsTab(A, common, sel) {
 function soundsTab(A, common) {
   const g = A.game, m = ensure(g);
   const ids = [...new Set([...m.sounds, ...RESCUABLE.filter((id) => g.rescued.has(id))])];
+  A.warmSongs?.(ids); // [issue 14] its recorded voices load as the book opens
   const body = h('div', { class: 'sound-book' });
   const fact = h('p', { class: 'sound-fact' });
   const grid = h('div', { class: 'sound-grid' });

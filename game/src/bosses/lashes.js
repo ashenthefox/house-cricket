@@ -37,6 +37,7 @@ function makeFruit(phase) {
 }
 
 export default makeBoss('lashes', {
+  sfx: ['gecko-chomp', 'pillow-bonk', 'splat', 'unlock'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ props: ['grape', 'banana-slice', 'jam-blob'], crickets: { frost: ['idle', 'chirp'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {

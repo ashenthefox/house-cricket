@@ -37,6 +37,7 @@ function cloudsOn(b, g) {
 const inCloud = (p, list) => list.some((v) => p.cx > v.x - v.w / 2 && p.cx < v.x + v.w / 2 && p.cy > v.y0 && p.cy < v.y1);
 
 export default makeBoss('chikchak', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
+  sfx: ['gecko-chomp', 'raft-splash'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ props: ['steam-puff', 'faucet-handle'], crickets: { katy: ['idle'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
  
   phases: 3, len: LEN,

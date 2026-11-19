@@ -26,6 +26,7 @@ import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
 import { drawMech } from './mech-draw.js'; // [mech] engine mechanics drawing
 import { ArtGate } from './room-art.js'; // [art] a room shows once its art is in (issue #5)
 import { Rewinder, BACK } from './rewind.js'; // [issue 11] debug: Backspace rewinds about 5 s
+import { zoneSfx, SONG_SFX } from './zone-sfx.js'; // [issue 14] a zone's sound effects load with its art
 
 const STEP_MS = 1000 / FPS;
 const PAUSE_TABS = new Set(['pause', 'map', 'crickets', 'sounds']); // [final-S] the pause menu's own tabs
@@ -35,6 +36,8 @@ const input = new Input();
 const renderer = new Renderer(canvas);
 renderer.drawMech = drawMech; // [mech] render.js calls it after the enemies
 const gate = new ArtGate(); // [art] loads each room's art before it shows, then its neighbours'
+gate.onZones = (zones) => { for (const z of zones) Audio.needSfx(zoneSfx(z)); }; // [issue 14] and their zones' sound effects
+Audio.warm('title'); // [issue 14] music first: the title track, then the effects every room uses
 window.__gate = { info: () => gate.info() }; // read-only
 const ui = new UI(document.getElementById('overlay'), input);
 const settings = Save.loadSettings();
@@ -172,7 +175,8 @@ const A = {
   continueGame: (e) => continueGame(e),
   quitToTitle: () => quitToTitle(),
   credits: (back) => { ui.closeMenu(); story.credits({ onDone: back }); },
-  playSong: (id) => { try { Audio.play(({ soot: 'swift-chitter', velvet: 'bat-squeaks', tokay: 'bigtok-bellow', beep: 'alarm' })[id] || id, { bus: 'sfx', seed: 'book:' + id }); } catch { /* not loaded */ } },
+  playSong: (id) => { try { Audio.play(SONG_SFX[id] || ({ beep: 'alarm' })[id] || id, { bus: 'sfx', seed: 'book:' + id }); } catch { /* not loaded */ } },
+  warmSongs: (ids) => Audio.needSfx(ids.map((id) => SONG_SFX[id]).filter(Boolean)), // [issue 14] the song book's recorded voices, as it opens
   playMusic: (name) => { try { Audio.music?.(name); } catch { /* ignore */ } },
   dialogSay: (lines, onDone) => { ui.closeMenu(); dialog.open(lines, { onDone: () => { onDone && onDone(); if (!metaRun.handoff()) afterModal(); } }); }, // [polish-T] handoff: the next screen opens as the dialog closes
   here: () => (game ? { room: game.room.id, tx: Math.floor(game.player.cx / 40), ty: Math.floor((game.player.y + game.player.h - 1) / 40) } : null),

@@ -65,6 +65,7 @@ function nanaArt(g) {
 }
 
 export default makeBoss('nana', {
+  sfx: ['bat-squeaks', 'gecko-growl', 'gecko-snore', 'swift-chitter'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: (e, o) => nanaArt(o.game), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: 980,
   focus() { return null; }, // [polish-V] she is painted on the far wall relative to the view (always in frame)

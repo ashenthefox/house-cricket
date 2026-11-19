@@ -34,6 +34,10 @@
 //                           bossWaiting(game): the boss's rig isn't loaded (main.js keeps the
 //                           boss from acting until it can be seen; game.bossWait).
 //
+//   gate.onZones         [issue 14] called with the zones whose art the gate starts on (a room's own and
+//                           its neighbours' on entering it, the rooms loaded ahead): main.js asks
+//                           audio.js for those zones' sound effects (src/zone-sfx.js) at the same time.
+//
 // Memory (design: "Phones and memory"): on each room change the zone set (sprites.setZone) is
 // the current room's zone plus its neighbours' (and prefetch rooms') zones (paintings, textures,
 // the geckos of those zones), so leaving a zone still releases its art, but never anything on
@@ -186,7 +190,9 @@ export class ArtGate {
     this.t0 = null; this.enteredAt = 0; this.lastProgress = 0; this.fade = 0; this.last = null;
     this.gen = 0; this.bg = []; this.bgBusy = new Set(); this.extra = []; this.nbs = [];
     this.early = []; this.zoneMemo = null; this.heldAs = null; this.drawn = null;
+    this.onZones = null;
   }
+  zonesOf(rooms) { if (this.onZones) this.onZones([...new Set(rooms.filter(Boolean).map((r) => r.zone))]); }
   // Call with the live game every step and before every frame. visible = false while a story
   // panel covers the game: the room's art starts loading, but the timeouts don't run yet.
   // Returns true while the room is held (the sim should wait).
@@ -210,6 +216,7 @@ export class ArtGate {
     if (game && room) {
       const near = nbs ? neighbours(game.world, room) : [];
       for (const p of zoneKeep(game.world, [room, ...near])) S.zoneHold(p);
+      this.zonesOf([room, ...near]);
       items.push({ key: 'r:' + room.id, get: () => allArt(game, room), pri: 'auto' });
       if (zone) items.push({ key: 'zl:' + room.zone.id, get: () => this.zoneList(game, room.zone).lairs, pri: 'auto' }, { key: 'zr:' + room.zone.id, get: () => this.zoneList(game, room.zone).rest, pri: 'auto' });
       for (const r of near) items.push({ key: 'r:' + r.id, get: () => allArt(game, r), pri: 'low' });
@@ -244,6 +251,7 @@ export class ArtGate {
     this.extra = this.extra.filter((r) => r !== game.room);
     const nbs = neighbours(game.world, game.room);
     S.setZone(zoneKeep(game.world, [game.room, ...nbs, ...this.extra]));
+    this.zonesOf([game.room, ...nbs, ...this.extra]);
     this.nbs = nbs;
     const a = roomArt(game, game.room);
     this.need = a.gate; S.need(this.need);

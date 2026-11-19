@@ -250,5 +250,6 @@ const ART = {
 };
 export default {
   create(game, e) { return (BEATS[e.beat] || cup)(game, e); },
+  sfx: ['bonk', 'crinkle', 'gecko-chomp', 'gecko-growl', 'hinge-creak', 'splat', 'squeak-toy'], // [issue 14] the recorded effects the beats play (src/zone-sfx.js)
   art(e) { return { crickets: {}, ...(ART[e.beat] || ART.cup) }; },
 };

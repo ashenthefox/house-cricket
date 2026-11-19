@@ -13,7 +13,7 @@
 //   tank ahead  what the title loads in the background for a new game (the tank's critical art
 //               and its neighbours: room-art.js gate.ahead), counted apart
 //   lair        a boss room as the gate waits for it plus its near layer (as zoneArt's lairs), the
-//               boss music and the zone's sound effects (audio.js: sfxForZone)
+//               boss music and the zone's sound effects (src/zone-sfx.js)
 //   total       every file under game/ (the published service worker caches all of them)
 // --draws: a JSON {draws: {path: {nw, nh, w, h}}} of the largest size each picture was drawn at (in
 // screen pixels at 1920x1080), e.g. from a browser sweep; pictures stored more than 2x larger than
@@ -53,7 +53,8 @@ const all = walk(game);
 // the page itself: everything outside assets/ but the icons, the social card and the sw (loaded later or never)
 const page = all.filter((f) => !f.startsWith('assets/') && !/^(icon-|apple-touch|social-card|favicon|robots|sitemap|sw\.js|fonts\/OFL)/.test(f));
 const sfxFirst = Audio.sfxFirst ? Audio.sfxFirst() : Audio.SFX_NAMES;              // before: every effect at start
-const sfxZone = (zone) => (Audio.sfxForZone ? Audio.sfxForZone(zone) : []);          // before: none per zone (all up front)
+const ZS = await import('../game/src/zone-sfx.js').catch(() => null);
+const sfxZone = (zone) => (ZS ? ZS.zoneSfx(zone) : []);                            // before: none per zone (all up front)
 const sfxFile = (n) => `assets/audio/sfx/${n}.mp3`;
 
 const newGame = (room, opts = {}) => { const g = new Game(ZONES); g.startAt(room, undefined, undefined, { party: ['pip'], items: [], ...opts }); return g; };
@@ -71,7 +72,7 @@ const ahead = [...za.lairs, ...za.rest, ...RA.neighbours(g0.world, g0.room).flat
 
 // ---- lairs
 const lairs = [];
-for (const z of ZONES) {
+for (const z of [...ZONES].sort((a, b) => (typeof a.n === "number" ? a.n : 50) - (typeof b.n === "number" ? b.n : 50))) {
   if (z.n >= 98) continue;
   for (const r of z.rooms) {
     if (!r.entities?.some((e) => e.type === 'boss')) continue;
@@ -79,7 +80,7 @@ for (const z of ZONES) {
     const g = newGame(r.id, { items: info.minItems?.[0] || [], rescued: info.rescued || [] });
     const a = RA.roomArt(g, g.room);
     const art = [...a.gate, ...a.soon].map(asset);
-    const music = [`assets/audio/music/${z.n === 0 ? 'title' : 'boss'}.mp3`];
+    const music = [`assets/audio/music/${r.music || (z.id === 'lair' ? 'lair' : z.n === 0 ? 'title' : 'boss')}.mp3`]; // as audio.js trackFor
     const sfx = sfxZone(g.room.zone).map(sfxFile);
     const geckoArt = art.filter((f) => f.includes('/geckos/'));
     lairs.push({ zone: z.n, room: r.id, art: sum(art), gecko: sum(geckoArt), files: new Set(art).size, music: sum(music), sfx: sum(sfx), total: sum([...art, ...music, ...sfx]) });
@@ -107,7 +108,7 @@ out(`  = first room                                       ${MB(sum(firstRoom))}`
 out(`  (+ loaded ahead during the title: the tank's other art and neighbours ${MB(sum(ahead))})`);
 out();
 out('Lairs (the boss room\'s art + near layer, boss music, the zone\'s sound effects):');
-for (const l of lairs) out(`  ${String(l.zone).padStart(2)} ${l.room.padEnd(14)} art ${MB(l.art)} (gecko ${MB(l.gecko)}, ${String(l.files).padStart(3)} files)  music ${MB(l.music)}  sfx ${MB(l.sfx)}  = ${MB(l.total)}`);
+for (const l of lairs) out(`  ${String(l.zone).padStart(4)} ${l.room.padEnd(12)} art ${MB(l.art)} (gecko ${MB(l.gecko)}, ${String(l.files).padStart(3)} files)  music ${MB(l.music)}  sfx ${MB(l.sfx)}  = ${MB(l.total)}`);
 out();
 out(`Total under game/ (the service worker caches it all): ${MB(total)} in ${all.length} files`);
 for (const [k, s] of Object.entries(groups).sort((a, b) => b[1].b - a[1].b)) out(`  ${k.padEnd(20)} ${MB(s.b)}  ${String(s.n).padStart(4)} files  ${Object.entries(s.ext).map(([e, n]) => `${n} ${e}`).join(', ')}`);

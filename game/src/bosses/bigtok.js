@@ -34,6 +34,7 @@ const JAR = constant({ x: 3.6 * T, y: SHELF[3] });
 const reach = (p) => p.cx > 10 * T && p.cx < 52 * T;
 
 export default makeBoss('bigtok', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
+  sfx: ['bigtok-bellow', 'gecko-chomp', 'gecko-growl', 'raft-splash'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
   art: () => ({ props: DECOYS.filter(Boolean).map((d) => d.kind), crickets: { duo: ['idle'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
  
   phases: 3, len: LEN,
