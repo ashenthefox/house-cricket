@@ -41,6 +41,7 @@ import { pickupFile } from './meta.js';
 
 const STALL_MS = 6000;   // nothing new arrived for this long: show the room anyway (missing art then draws its stand-in until it lands)
 const CAP_MS = 10000;   // never hold longer than this: a short wait beats a long ink screen on a slow line
+const BOSS_WAIT_MS = 30000; // a gecko waits for its art at most this long in a room, then acts (drawn or not)
 const LABEL_MS = 600;    // "Loading" appears on the cover after this
 const FADE = 12;         // frames the cover fades over after a hold (when no transition runs)
 const BG_SLOTS = 2;      // background loads at a time, so the next room never queues behind them
@@ -172,7 +173,12 @@ export class ArtGate {
     if (!game?.boss || !game.room) return false;
     const e = game.room.entities.find((x) => x.type === 'boss');
     const g = e && bossArt(e, game).gecko;
-    return !!g && !Geckos.ready(g);
+    if (!g) return false;
+    // wait only until every rig file has settled (loaded OR failed: a 404 must never freeze the fight),
+    // and never longer than BOSS_WAIT_MS in a room (a request that never answers)
+    if (this._bwRoom !== game.room) { this._bwRoom = game.room; this._bwT = performance.now(); }
+    if (performance.now() - this._bwT > BOSS_WAIT_MS) return false;
+    return !geckoArt(g).every(S.settled);
   }
   enter(game) {
     this.game = game; this.room = game.room; this.gen++;
