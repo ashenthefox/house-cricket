@@ -83,8 +83,8 @@ function glideEnv(dx, up, R, D, ratio) {
 }
 
 // A pass's cricket class, then a margin in tiles (the reach check's: weakest -0.5, strongest +0.5, Pip 0).
-// [issue #4] The trap check reaches generously (+0.5: anywhere such a cricket might get to) and gets out
-// exactly (the class's own stats, no margin), so a spot only a lucky jump reaches is still judged.
+// [issue #4] The trap check reaches and gets out with the class's exact stats (no margin): a +0.5 reach
+// produced spots the weakest cricket can't actually get to.
 function passStats(pass, margin) {
   const c = REACH.crickets;
   const base = pass === 'weakest' ? { label: 'weakest (Jump 2 / Speed 2', rise: Math.min(c.duo.rise, c.digby.rise), gap: Math.min(c.duo.gap, c.digby.gap) }
@@ -329,7 +329,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
         if (st.strict && n.kind === 'cling') {
           const back = n.back ? 1 : has('glider') ? 2 : -1;
           if (Math.sign(dx) === n.d && Math.abs(dx) > back) continue;
-          if (dx === 0 && up > 0 && back < 0) continue;
+          if (dx === 0 && up > 0 && (back < 0 || !n.back)) continue; // climbing its own wall needs a real way back (n.back); the Glider only glides back over the top
         }
         // walking along the floor / sliding down a wall
         if (n.kind !== 'hook' && up === 0 && Math.abs(dx) === 1) ok = true;
