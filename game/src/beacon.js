@@ -106,8 +106,11 @@ function graph(world) {
       const at = e.at || [2, to.th - 3];
       const b = add(to.wx + (at[0] + 0.5) * TILE, to.wy + (at[1] + 0.5) * TILE, [to.id]);
       links.push([a, b]);
+      nodes[a].door = 'src'; nodes[b].door = 'dst'; nodes[a].partner = b; nodes[b].partner = a; // [issue 10]
     }
   }
+  // [issue 10] twins: the same opening seen from both rooms (one node per room's exits, ~0 apart)
+  for (let i = 0; i < nodes.length; i++) for (let j = 0; j < nodes.length; j++) if (i !== j && isTwin(nodes[i], nodes[j])) nodes[i].twin = j;
   // adjacency: every pair of nodes sharing a room (straight distance), plus door links (0)
   const adj = nodes.map(() => []);
   for (const ids of Object.values(byRoom)) for (const a of ids) for (const b of ids) if (a !== b) adj[a].push([b, Math.hypot(nodes[a].wx - nodes[b].wx, nodes[a].wy - nodes[b].wy)]);
@@ -116,22 +119,28 @@ function graph(world) {
   return world._portalGraph;
 }
 
-// Dijkstra from the target to every portal node; plus the zone's far-side distance.
+function isTwin(a, b) {
+  return !a.door && !b.door && a.rooms.length === 2 && b.rooms.length === 2 && a.rooms[0] === b.rooms[1] && a.rooms[1] === b.rooms[0]
+    && Math.hypot(a.wx - b.wx, a.wy - b.wy) < 2 * TILE;
+}
+
+// Dijkstra from the target to every portal node (dist, and next: the node after it on the way to
+// the target, -1 straight to the target); plus the zone's far-side distance.
 function field(world, spec) {
   const key = `${spec.target.room}@${spec.target.wx},${spec.target.wy}`;
   world._beaconFields ||= {};
   if (world._beaconFields[key]) return world._beaconFields[key];
   const { nodes, byRoom, adj } = graph(world);
-  const dist = new Float64Array(nodes.length).fill(Infinity), done = new Uint8Array(nodes.length);
+  const dist = new Float64Array(nodes.length).fill(Infinity), done = new Uint8Array(nodes.length), next = new Int32Array(nodes.length).fill(-1);
   for (const i of byRoom[spec.target.room] || []) dist[i] = Math.hypot(nodes[i].wx - spec.target.wx, nodes[i].wy - spec.target.wy);
   for (;;) {
     let u = -1, best = Infinity;
     for (let i = 0; i < nodes.length; i++) if (!done[i] && dist[i] < best) { best = dist[i]; u = i; }
     if (u < 0) break;
     done[u] = 1;
-    for (const [v, w] of adj[u]) if (dist[u] + w < dist[v]) dist[v] = dist[u] + w;
+    for (const [v, w] of adj[u]) if (dist[u] + w < dist[v]) { dist[v] = dist[u] + w; next[v] = u; }
   }
-  const f = { dist, maxDist: 1 };
+  const f = { dist, next, maxDist: 1 };
   // far side: the farthest corner of any room in the target's zone
   const tz = world.rooms[spec.target.room].zone;
   for (const r of Object.values(world.rooms)) {
@@ -170,6 +179,46 @@ export function measure(game, spec = beaconSpec(game)) {
   const wp = via ? { x: via.wx - room.wx, y: via.wy - room.wy } : { x: spec.target.wx - room.wx, y: spec.target.wy - room.wy };
   return { pathDist: reach ? Math.round(d) : null, maxDist: Math.round(f.maxDist), frac, gainDb: FLOOR_DB * frac, waypoint: wp, sameRoom: !via && reach };
 }
+
+// [issue 10] The ear guide's aim: from a portal node `n` of room `roomId` on the path, walk on while
+// the path stays in the room (a twin, or another opening of this room: the same doorway, or a
+// doorway you stand at that the path only passes), and stop at the doorway the path leaves the room
+// by. A door is aimed at itself, never at where it leads. Returns a node index.
+export function aimFrom(world, f, roomId, n) {
+  const { nodes } = graph(world);
+  for (let k = 0; k < 64; k++) {
+    if (nodes[n].door === 'src') return n;
+    const s = f.next[n];
+    if (s < 0) return n;
+    if (nodes[s].rooms.includes(roomId)) { n = s; continue; } // a twin, or another opening of this room
+    return n;
+  }
+  return n;
+}
+
+/**
+ * [issue 10] The way to walk (the ear guide and the Listen direction): the next doorway on the path
+ * out of the player's room, or the target itself in its own room, in the room's coordinates.
+ * keep: the last `via` (a portal node index); it stays unless another is better by more than a tile.
+ * Returns {via, node, aim: {x, y}, door (an interior door), target (aiming at the beacon)} or null.
+ */
+export function route(game, spec = beaconSpec(game), keep = null) {
+  if (!spec || !game.room) return null;
+  const world = game.world, room = game.room, p = game.player;
+  if (room.id === spec.target.room) return { via: null, node: null, aim: { x: spec.target.wx - room.wx, y: spec.target.wy - room.wy }, door: false, target: true };
+  const f = field(world, spec), { nodes, byRoom } = graph(world);
+  const wx = room.wx + p.cx, wy = room.wy + p.cy, ids = byRoom[room.id] || [];
+  const cost = (i) => Math.hypot(nodes[i].wx - wx, nodes[i].wy - wy) + f.dist[i];
+  let via = -1, bd = Infinity;
+  for (const i of ids) { const c = cost(i); if (c < bd) { bd = c; via = i; } }
+  if (via < 0 || !Number.isFinite(bd)) return null;
+  if (keep != null && keep !== via && ids.includes(keep) && cost(keep) <= bd + TILE) via = keep;
+  const node = aimFrom(world, f, room.id, via), nd = nodes[node];
+  return { via, node, aim: { x: nd.wx - room.wx, y: nd.wy - room.wy }, door: nd.door === 'src', target: false };
+}
+/** [issue 10] Read-only views for the tests: the portal graph and the field of a beacon. */
+export function portalGraph(world) { return graph(world); }
+export function beaconField(world, spec) { return field(world, spec); }
 
 /** The Listen arrow's target in the current room's coordinates (game.beaconTarget delegates here). */
 export function targetInRoom(game) {
