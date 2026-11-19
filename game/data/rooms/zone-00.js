@@ -12,7 +12,7 @@ function cup() {
   const g = grid(1, 1);
   g.clear(2, 1, 29, 15).clear(31, 12, 1, 4);
   g.box(0, 0, 2, 16, 'G');                     // the tank glass
-  g.box(6, 10, 16, 6, '#');                    // Duchess's rock
+  g.box(2, 10, 20, 6, '#');                    // Duchess's rock, right up to the glass (no pit to fall in: issue #1)
   g.box(11, 8, 1, 2, 'G').box(16, 8, 1, 2, 'G'); // the feeder cup's walls (2 tiles: a held jump clears them)
   g.box(22, 14, 3, 2, '#');                    // a sand berm
   g.put(13, 9, 'P');

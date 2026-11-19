@@ -4,7 +4,7 @@ export default {
   // ---- zone 0: the Tank ----
   'tank-cup': {
     paint: [
-      { obj: 'stone', x: 6, y: 10, w: 16, h: 4, color: '#A89A86' },               // Duchess's basking rock (its foot is sand)
+      { obj: 'stone', x: 2, y: 10, w: 20, h: 4, color: '#A89A86' },               // Duchess's basking rock, up to the glass (its foot is sand)
       { obj: 'metal', x: 2, y: 0, w: 30, h: 1, color: '#6F7782', axis: 'h', bands: 0 }, // the tank's top rim
     ],
   },
