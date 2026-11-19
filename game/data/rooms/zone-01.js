@@ -98,6 +98,7 @@ function bedtop() {
   for (const [r, a, b] of steps) g.box(a, r, b - a + 1, 26 - r, '#');
   g.row(46, 8, 9, 'G');                       // the window sill (8 tiles above the headboard)
   g.box(14, 22, 6, 4, '#');                   // a folded quilt
+  g.box(12, 24, 2, 2, '#');                   // [issue #4] a rolled sock: back up onto the quilt from the bed's foot (was 4 up)
   g.row(4, 21, 6, '=');                       // the foot rail
   g.put(10, 25, 'k').put(30, 25, 'k').put(58, 15, 'k');
   return g.rows();
@@ -130,6 +131,7 @@ function lair() {
   g.box(28, 12, 8, 4, '#');                   // Duchess's rock (Stripe's cup on top)
   // fake-plant leaves up to the right rim (the way on after the rescue)
   g.row(50, 13, 4, '=').row(54, 11, 4, '=').row(50, 9, 4, '=').row(54, 7, 4, '=');
+  g.row(60, 12, 2, '=').row(60, 10, 2, '=').row(60, 8, 2, '='); // [issue #4] rungs outside the right glass, back up to the rim (before the rescue the gate is shut: you were stuck there)
   g.row(54, 14, 3, '='); // [playtest] a low leaf: the row-13 leaf was a 3-tile rise from the floor (Pip peaked 0.002 px short; Jump 2 crickets were stuck in the lair)
   g.put(6, 15, 'h');                          // the hide log
   return g.rows();

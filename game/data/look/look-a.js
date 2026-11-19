@@ -72,6 +72,7 @@ export default {
       pillow(36, 24, 6, 2, '#E9D2C8', 'stripe'), pillow(42, 22, 4, 4, '#C9D6EC', 'dots'), pillow(46, 20, 4, 6, '#E6C9A8'),
       pillow(50, 18, 4, 8, '#D7B4C8', 'stripe'), { obj: 'wood', x: 54, y: 16, w: 10, h: 10, color: '#8A6444', doors: 2 },  // the headboard
       { obj: 'fabric', x: 14, y: 22, w: 6, h: 4, color: '#C8564B', pattern: 'plaid', accent: '#F2C46D' }, // a folded quilt
+      { obj: 'fabric', x: 12, y: 24, w: 2, h: 2, color: '#B7A6D3', pattern: 'dots', accent: '#F4EBDD' }, // a rolled sock
       { obj: 'fabric', x: 1, y: 26, w: 62, h: 10, color: '#8DA2D0', pattern: 'quilt', accent: '#F4EBDD' }, // the bedspread
     ],
   },
