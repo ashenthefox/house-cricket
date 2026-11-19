@@ -557,6 +557,68 @@ section('fixer', () => {
   ok(ensure(g).barty && calls.some((c) => c[0] === 'save') && calls.some((c) => c[0] === 'toast' && /sent a gift/.test(c[1])), 'Barty: autosave + "sent a gift to the Carrier"');
 });
 
+// [issue 20] The Bottle-Cap Raft floats: no wading along a flood's bottom. In water below the
+// surface with the Raft, a cricket bobs up to it (passive); an overhang stops him under it and he
+// drifts out and on up; without the Raft the water is still a pit.
+section('raft-float', () => {
+  const W = '..........~~~~~~~~~~~...........';
+  const zone = zoneOf([
+    mkRoom('et-flood', ['', '', '', '', '', '', '', '', '', '', '', '', '', W, W, W], [{ type: 'start', x: 4, y: 15 }]),
+    mkRoom('et-current', ['', '', '', '', '', '', '', '', '', '', '', '', '', W, W, W],
+      [{ type: 'start', x: 4, y: 15 }, { type: 'current', x: 10, y: 12, w: 11, h: 4, vx: 1.2 }]),
+    mkRoom('et-overhang', ['', '', '', '', '', '', '', '', '', '', '', '........#########...............', W, W, W, W], [{ type: 'start', x: 4, y: 15 }]),
+  ]);
+  const inWater = (g, p) => p.overlapKinds(g.grid).has(K.WATER);
+  // walk in at the bottom: every frame in the water is a rise, he ends afloat on the surface (row 13)
+  for (const who of ['pip', 'duo', 'digby', 'mote']) {
+    const { g, p, step } = game(zone, 'et-flood', { items: ['raft'], party: [who] });
+    settle(step);
+    let wet = 0, wade = 0, lastFeet = 1e9, sank = 0;
+    for (let i = 0; i < 150; i++) {
+      step({ right: true }, 1);
+      if (!inWater(g, p)) continue;
+      wet++;
+      if (p.state === 'ground') wade++;
+      if (p.y + p.h > lastFeet + 0.01) sank++;
+      lastFeet = p.y + p.h;
+    }
+    ok(wet > 0 && wet < 45 && wade <= 1 && sank === 0, `${who} with the Raft walks in at the bottom and bobs straight up (${wet} frames in the water, ${wade} on the bottom (the step in), ${sank} sinking)`);
+    ok(p.state === 'ground' && p.onRaft && Math.abs(p.y + p.h - 13 * TILE) < 0.01 && p.health === p.maxHealth, `${who} is afloat on the surface after (feet ${((p.y + p.h) / TILE).toFixed(2)})`);
+    ok(g.fx.filter((e) => e.type === 'bob').length === 1, `${who}: one bob splash`);
+  }
+  // standing still at the bottom is impossible: put him there, he rises without any input
+  let { g, p, step } = game(zone, 'et-flood', { items: ['raft'] });
+  at(p, 15, 15); p.state = 'ground'; step({}, 60);
+  ok(p.state === 'ground' && Math.abs(p.y + p.h - 13 * TILE) < 0.01, 'placed on the flood\'s floor: up to the surface on its own');
+  // no jumping from under the water: he only rises
+  ({ g, p, step } = game(zone, 'et-flood', { items: ['raft'] }));
+  at(p, 15, 15); p.state = 'ground'; let minFeet = 1e9;
+  for (let i = 0; i < 60; i++) { step({ jump: i % 2 === 0 }, 1); minFeet = Math.min(minFeet, p.y + p.h); if (p.state === 'ground') break; }
+  ok(minFeet >= 13 * TILE - 0.01, 'Jump held under the water does not launch him past the surface');
+  // falling in from the side (moving right below the surface level)
+  ({ g, p, step } = game(zone, 'et-flood', { items: ['raft'] }));
+  at(p, 9, 13); p.vy = 200; step({ right: true }, 90);
+  ok(p.state === 'ground' && p.onRaft && Math.abs(p.y + p.h - 13 * TILE) < 0.01, 'fallen in from the side: up to the surface');
+  // mid-current, from the side: rises and is carried along
+  ({ g, p, step } = game(zone, 'et-current', { items: ['raft'] }));
+  settle(step); step({ right: true }, 60); const x0 = p.x; step({}, 90);
+  ok(p.state === 'ground' && p.onRaft && Math.abs(p.y + p.h - 13 * TILE) < 0.01 && p.x > x0 + 20, 'into a current from the side: up to the surface and carried');
+  // under an overhang: pinned under it while it covers him, never stuck: out sideways and on up
+  ({ g, p, step } = game(zone, 'et-overhang', { items: ['raft'] }));
+  at(p, 12, 15); p.state = 'ground'; step({}, 60);
+  ok(p.bobbing && Math.abs(p.y - 12 * TILE) < 0.01, `under the overhang he floats up to its underside (top ${(p.y / TILE).toFixed(2)})`);
+  step({ right: true }, 90);
+  ok(p.state === 'ground' && p.onRaft && Math.abs(p.y + p.h - 12 * TILE) < 0.01 && p.cx > 17 * TILE, 'he drifts out from under it and up to the surface');
+  ({ g, p, step } = game(zone, 'et-overhang', { items: ['raft'] }));
+  at(p, 12, 15); p.state = 'ground'; step({}, 60); step({ left: true }, 120);
+  ok(p.state === 'ground' && !inWater(g, p) && p.cx < 10 * TILE, 'or back out to the left, onto the floor');
+  // without the Raft the flood is still a pit
+  ({ g, p, step } = game(zone, 'et-flood', { items: [] }));
+  settle(step); step({ right: true }, 80);
+  ok(g.fx.some((e) => e.type === 'pit' && e.d.why === 'water') && p.health < p.maxHealth, 'without the Raft, water is a pit (a heart, back on dry ground)');
+  ok(g.fx.every((e) => e.type !== 'bob'), 'without the Raft, no bob');
+});
+
 console.log(`entity-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
 void existsSync;

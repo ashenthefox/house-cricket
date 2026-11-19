@@ -108,7 +108,7 @@ A room:
 | `=` | one-way platform: jump up through it; Down+Jump drops through |
 | `C` | cereal wall/floor: solid; a ground-pound landing on it breaks the **whole connected clump** (Thimble) |
 | `%` | crack: solid for everyone except Mote (Tiny) |
-| `~` | water: a pit without the Raft; its top surface is a floor with it |
+| `~` | water: a pit without the Raft; its top surface is a floor with it, and in it below the surface the Raft bobs you up to it (issue 20: no wading along the bottom; an overhang stops you under it until you drift out) |
 | `^` | tacks/thorns: 1 heart, back on the last solid ground |
 | `s` | soft soil: solid (Digby's dig is a later perk) |
 

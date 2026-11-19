@@ -71,6 +71,9 @@ export const FEEL = {
   wallSlide: 80,                // px/s while clinging
   wallSlideFast: 280,           // holding down
   raftSpeed: 0.6,               // run speed multiplier on the raft
+  // [issue 20] the Raft floats: in water below the surface, bob up to it (player.js _bob). px/s:
+  // the rise eases from `speed` to `min` over the last speed/ease px; accel takes the fall out of a dive
+  bob: { speed: 320, min: 120, ease: 10, accel: 2400 },
   hurtInvuln: 1.0,              // s
   hurtKnock: { vx: 260, vy: -320, lock: 0.18 },
   hitStop: 0.06,                // s (design: 60 ms hit-pause)
