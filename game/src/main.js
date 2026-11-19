@@ -77,7 +77,7 @@ let avoidRects = [], avoidAt = -1e9;
 function measureAvoid() {
   const sr = stage.getBoundingClientRect(); if (!sr.width || !sr.height) return avoidRects;
   const out = [], fr = (r, kind) => { if (r && r.width > 0 && r.height > 0) out.push({ kind, x0: (r.left - sr.left) / sr.width, y0: (r.top - sr.top) / sr.height, x1: (r.right - sr.left) / sr.width, y1: (r.bottom - sr.top) / sr.height }); };
-  for (const sel of ['.hud .hud-left .hud-row', '.hud .hud-left .trio', '.hud .hud-right']) for (const e of document.querySelectorAll(sel)) fr(e.getBoundingClientRect(), 'hud');
+  for (const sel of ['.hud .hud-left .hud-row', '.hud .hud-left .trio', '.hud .hud-right', '.hud .crumbs'] /* [issue 3] the crumbs sit under the icon row on phones */) for (const e of document.querySelectorAll(sel)) fr(e.getBoundingClientRect(), 'hud');
   if (isTouch && document.querySelector('.touch-layer.on')) {
     let u = null;
     for (const b of document.querySelectorAll('.touch-layer .touch-btn')) { const r = b.getBoundingClientRect(); if (!r.width) continue; u = u ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; }
@@ -117,17 +117,16 @@ ui.handlers = {
   mute: () => toggleMute(),
   // [issue 3] the ear: a tap docks / undocks it (Settings > Chirp indicator), a double tap flips auto-chirp
   // (Settings > Beacon chirps: Always <-> When I call; Off goes to Always)
-  earDock: () => { if (!earLive()) return; setEarSetting('indicator', !settings.indicator); measureAvoid(); },
+  earDock: () => { if (!earLive()) return; A.setSetting('indicator', !settings.indicator); measureAvoid(); },
   earAuto: () => {
     if (!earLive()) return;
     const on = settings.beaconChirps !== 'always';
-    setEarSetting('beaconChirps', on ? 'always' : 'call');
+    A.setSetting('beaconChirps', on ? 'always' : 'call');
     game.toast(on ? 'Auto-chirp on: the trapped cricket chirps by itself.' : 'Auto-chirp off: it chirps back when you call.', 150);
   },
   swapTo: (i) => { if (game && i !== game.player.active) game.player.queuedSwap = i; },
 };
 const earLive = () => screen === 'play' && !!game && !ui.screen && !story.active;
-function setEarSetting(k, v) { if (Audio.setSetting) Audio.setSetting(k, v); else { settings[k] = v; Save.saveSettings(settings); } }
 function toggleMute() { settings.muted = !settings.muted; Audio.setMuted(settings.muted); ui.muted = settings.muted; Save.saveSettings(settings); }
 
 // ---- screens (meta and UI: src/menus/screens.js, story.js, dialog.js, hub.js, meta-run.js) ----

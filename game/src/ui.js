@@ -60,9 +60,9 @@ export class UI {
     this.indicator = h('button', { type: 'button', class: 'chirp-ind', id: 'chirp-indicator', hidden: '', tabindex: '-1', 'aria-label': 'Chirp indicator' });
     this.indicator.innerHTML = '<span class="ci-ring"></span><svg viewBox="-32 -32 64 64" class="ci-svg" aria-hidden="true">'
       + '<g class="ci-waves"><path class="w1" d="M19.5 -11.3 A22.5 22.5 0 0 1 19.5 11.3"/><path class="w2" d="M24.2 -14 A28 28 0 0 1 24.2 14"/><path class="w3" d="M28.6 -16.5 A33 33 0 0 1 28.6 16.5"/></g>'
-      + '<circle class="ci-disc" r="16"/>' + EAR_PATHS + '<path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
+      + '<circle class="ci-disc" r="16"/>' + EAR_PATHS + '<path class="ci-gap" d="M-10 -10 L10 10"/><path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
     this.earDock = h('button', { type: 'button', class: 'icon-btn ear-btn', hidden: '', tabindex: '-1', 'aria-label': 'Chirp indicator (docked)' });
-    this.earDock.innerHTML = '<svg viewBox="-14 -14 28 28" aria-hidden="true">' + EAR_PATHS + '<path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
+    this.earDock.innerHTML = '<svg viewBox="-14 -14 28 28" aria-hidden="true">' + EAR_PATHS + '<path class="ci-gap" d="M-10 -10 L10 10"/><path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
     this.earTaps(this.indicator); this.earTaps(this.earDock);
     this.ripples = h('div', { class: 'beacon-ripples', 'aria-hidden': 'true' });
     this.strip = h('canvas', { class: 'beacon-strip', hidden: '', 'aria-hidden': 'true', width: '300', height: '44' });
@@ -137,7 +137,7 @@ export class UI {
   // One focusable row.
   item(it) {
     const kind = it.kind || 'button';
-    const b = h('button', { class: `menu-btn kind-${kind} ${it.class || ''}` });
+    const b = h('button', { class: `menu-btn kind-${kind} ${it.offLabel ? 'named-vals' : ''} ${it.class || ''}` });
     if (it.id) b.dataset.id = it.id;
     if (it.disabled) b.disabled = true;
     const label = h('span', { class: 'mb-label' });
@@ -459,7 +459,7 @@ export { ICON };
 // counts. Pointer events with capture, so a tap on the moving ear still counts if it slides between down
 // and up; nothing reaches the game (the stage's dialog tap, the touch stick under it) and the button
 // never takes focus.
-const EAR_DOUBLE_MS = 300, EAR_HOLD_MS = 700;
+const EAR_DOUBLE_MS = 450, EAR_HOLD_MS = 700; // 450: a relaxed double-click (290-500 ms apart) is still one
 UI.prototype.earTaps = function (el) {
   el.addEventListener('pointerdown', (e) => {
     e.stopPropagation();
