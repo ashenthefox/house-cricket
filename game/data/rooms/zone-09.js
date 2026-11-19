@@ -229,7 +229,7 @@ export default {
         {"type": "cellarspider", "x": 24, "y": 21},
         {"type": "cellarspider", "x": 74, "y": 21},
         {"type": "centipede", "x": 20, "y": 17, "path": [[20, 17], [40, 17], [40, 17], [20, 17]], "speed": 240},
-        {"type": "sign", "x": 24, "y": 33, "w": 6, "text": "{use} near a hook to grab it. {jump} to fling."},
+        {"type": "sign", "x": 24, "y": 33, "w": 6, "nx": 25, "text": "{use} near a hook to grab it. {jump} to fling."},
       ],
     },
     {
@@ -428,7 +428,7 @@ export default {
         {"type": "lift", "kind": "steam", "x": 31, "y": 12, "w": 3, "h": 18, "vy": 9, "on": 2.5, "off": 1},
         {"type": "sign", "x": 17, "y": 30, "w": 6, "text": "Warm air rises off the furnace. Ride it up."},
         {"type": "sign", "x": 19, "y": 51, "w": 8, "text": "Jump at a wall to stick to it. {jump} again to kick off."},
-        {"type": "sign", "x": 7, "y": 30, "w": 3, "text": "A thermostat lock. It wants 60\u00b0F. Someone who can tell the temperature by ear might help."},
+        {"type": "sign", "x": 7, "y": 30, "w": 3, "text": "A thermostat lock. It wants 60\u00b0F. Someone who hears temperature could help."},
       ],
     },
     {

@@ -207,7 +207,7 @@ export default {
         { type: 'piano', id: 'liv-keys', x: 13, y: 24, kw: 2, keys: 5, melody: [0, 4, 2] },
         { type: 'gate', id: 'liv-lid', x: 24, y: 21, w: 1, h: 3, opens: { switch: 'liv-keys' }, msg: 'The music stand reads: first key, last key, middle key.' },
         { type: 'secret', id: 'liv-crumbs-keys', x: 26, y: 23 },
-        { type: 'sign', x: 10, y: 15, w: 4, text: 'The music stand: first key, last key, middle key. Pound them.' },
+        { type: 'sign', x: 6, y: 15, w: 4, text: 'The music stand: first key, last key, middle key. Pound them.' }, // [issue 9] on the ledge's end (was over the drop)
         { type: 'loud', x: 24, y: 5, w: 11, h: 3 },
         { type: 'secret', id: 'liv-seedheart-piano', x: 26, y: 7 },
         { type: 'secret', id: 'liv-jam', x: 55, y: 28 },

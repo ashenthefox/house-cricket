@@ -277,7 +277,7 @@ export const attic = {
         {"type":"lair","boss":"nana","x":2,"y":15,"w":2,"h":3,"to":"att-lair","at":[88,33]},
         {"type":"secret","id":"att-mote","x":35,"y":24},
         {"type":"duet","id":"att-duet","x":22,"y":15,"hear":6,"window":2,"then":[["secret",{"id":"att-duet"}]]},
-        {"type":"sign","x":19,"y":15,"w":3,"text":"An old music box with two keyholes. Two house crickets, singing together, might open it."},
+        {"type":"sign","x":19,"y":15,"w":3,"text":"A music box with two keyholes. Two house crickets singing as one might open it."},
         {"type":"sign","x":108,"y":33,"w":6,"text":"Hold {use} to stretch the Rubber Band, then let go to fly."},
         {"type":"crumbs","x":3,"y":33,"n":10},
       ],

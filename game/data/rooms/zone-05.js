@@ -115,7 +115,7 @@ export default {
         { type: 'earwig', x: 28, y: 6, range: [24, 34] },
         { type: 'earwig', x: 44, y: 6, range: [38, 44], dir: 1 },
         { type: 'sign', x: 49, y: 6, w: 4, text: 'Too far to jump. If only you could float across.' },
-        { type: 'sign', x: 5, y: 15, w: 3, text: 'Down to the sink. Wall-jump back up the shaft.' },
+        { type: 'sign', x: 5, y: 15, w: 3, nx: 7, text: 'Down to the sink. Wall-jump back up the shaft.' }, // [issue 9] the note at the shaft's lip
         { type: 'sign', x: 21, y: 6, w: 3, text: 'Up the rungs to the Kitchen.' }, // [playtest] the ladder
       ],
     },
@@ -143,7 +143,7 @@ export default {
         { type: 'light', x: 4, y: 3 },
         { type: 'clothesmoth', x: 27, y: 6 },
         { type: 'clothesmoth', x: 57, y: 6 },
-        { type: 'sign', x: 30, y: 15, w: 4, text: 'A thermostat lock. It wants 72°F. Someone who can tell the temperature by ear might help.' },
+        { type: 'sign', x: 30, y: 15, w: 4, text: 'A thermostat lock. It wants 72°F. Someone who hears temperature could help.' },
       ],
     },
     {
@@ -202,7 +202,7 @@ export default {
         { type: 'earwig', x: 8, y: 15, range: [3, 12] },
         { type: 'earwig', x: 38, y: 15, range: [34, 43] },
         { type: 'crumbs', x: 39, y: 8, n: 5 },
-        { type: 'sign', x: 45, y: 15, w: 4, text: 'Plaster rubble over the old basement stairs. A good hard pound from above might break it.' },
+        { type: 'sign', x: 45, y: 15, w: 4, text: 'Plaster rubble over the basement stairs. A hard pound from above might break it.' },
       ],
     },
     {

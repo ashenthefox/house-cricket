@@ -161,7 +161,7 @@ export default {
       entities: [
         { type: 'carrier', x: 18, y: 14 },
         { type: 'sign', x: 10, y: 14, w: 5, text: S.chirp },
-        { type: 'sign', x: 24, y: 14, w: 6, text: S.listen },
+        { type: 'sign', x: 24, y: 14, w: 6, nx: 25, text: S.listen }, // [issue 9] the note on the raised floorboards
         { type: 'sign', x: 3, y: 14, w: 5, text: S.save },
         { type: 'secret', id: 'bed-mote', x: 22, y: 16 },
       ],

@@ -12,6 +12,7 @@ import * as Mech from './mechanics.js'; // [mech] gates, switches, lifts, spring
 import { BOSSES } from './bosses/index.js';
 import { LAIRS } from '../data/house.js'; // [final-2] bossBeaten
 import { targetInRoom as beaconTargetInRoom } from './beacon.js'; // [audio] beacon target
+import { makeSign, floorProps } from './notes.js'; // [issue 9] tutorial notes on the path
 
 export class Game {
   constructor(zoneModules, opts = {}) {
@@ -120,7 +121,7 @@ export class Game {
     this.checkpoints = []; this.saves = []; this.beacons = []; this.doors = []; this.boss = null;
     this.metaEnts = []; // [meta] see buildEntities
 
-    const enemyDefs = [], mechDefs = [];
+    const enemyDefs = [], mechDefs = [], signDefs = [];
     room.entities.forEach((e, i) => {
       const key = `${e.type}@${e.x},${e.y}`;
       switch (e.type) {
@@ -131,7 +132,7 @@ export class Game {
         case 'checkpoint': this.checkpoints.push({ x: e.x * T, y: e.y * T - T, w: T, h: 2 * T, tx: e.x, ty: e.y, on: false }); break;
         case 'save': this.saves.push({ x: e.x * T, y: e.y * T, w: T, h: T, tx: e.x, ty: e.y }); break;
         case 'beacon': this.beacons.push({ x: (e.x + 0.5) * T, y: (e.y + 0.5) * T }); break;
-        case 'sign': this.signs.push({ x: e.x * T, y: e.y * T, w: (e.w || 4) * T, text: e.text }); break;
+        case 'sign': signDefs.push(e); break; // [issue 9] anchored once the grid has its gates (below)
         case 'door': this.doors.push({ x: e.x * T, y: e.y * T - T, w: (e.w || 1) * T, h: 2 * T, to: e.to, at: e.at, auto: !!e.auto, needs: e.needs || null, msg: e.msg || null, label: e.label || null }); break;
         case 'item':
           if (!this.player.has(e.item)) this.pickups.push({ key, kind: 'item', item: e.item, x: e.x * T + 8, y: e.y * T + 8, w: T - 16, h: T - 16 });
@@ -153,6 +154,12 @@ export class Game {
     this.enemies = enemyDefs.map((d, n) => spawnEnemy(d, n, room.id));
     this.projectiles = [];
     Mech.buildMech(this, mechDefs); // [mech] after the grid exists: shut gates, springs and crumbling floors set tiles
+    // [issue 9] each tip's paper note stands on the live grid (gates shut); ground broken earlier counts as
+    // its old self, so a note whose ground is gone stays retired (notes.js noteLive)
+    if (signDefs.length) {
+      const pristine = this.rs(room.id).broken.size ? this.world.makeGrid(room) : null, props = floorProps(room.entities);
+      for (const e of signDefs) this.signs.push(makeSign(e, `${room.id}:${e.x},${e.y}`, this.grid, pristine, props));
+    }
     this.ctx.hooks = this.hooks; this.ctx.hideSpots = this.hideSpots; this.ctx.currents = this.currents;
   }
 
@@ -286,6 +293,16 @@ export class Game {
     return !!(c && this.rescued.has(c));
   }
   // [final-S] a gecko fight is on (the tank's scripted beats are not fights: no lose())
+  // [issue 9] a tip a script puts up mid-scene (the tank's cup rim, the log): a note that flutters down.
+  // key: its text id (the read set's key); e: a sign entity (tiles) in this room
+  scriptNote(key, e) {
+    if (this.signs.some((s) => s.key === key)) return null;
+    const s = makeSign({ type: 'sign', ...e }, key, this.grid, null, floorProps(this.room.entities));
+    s.born = this.frame;
+    this.signs.push(s);
+    if (s.kind === 'note') this.emit('sfx', { name: 'crinkle', gain: 0.35, rate: 1.5 }); // a paper sound (the tank's beats load it)
+    return s;
+  }
   inFight() { return !!(this.boss && !this.boss.done && typeof this.boss.lose === 'function'); }
   // [final-S] Pause > "Back to room entrance": free; in a gecko fight it is the phase restart.
   backToEntrance() {

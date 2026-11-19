@@ -82,7 +82,7 @@ export default {
       fx: [{ kind: 'motes', x: 4, y: 1, w: 24, h: 8 }],
       entities: [
         { type: 'boss', boss: 'tank', beat: 'cup', x: 14, y: 9, floor: 10, cup: [11, 17] },
-        { type: 'sign', x: 10, y: 9, w: 8, text: TK.tongs },
+        { type: 'sign', x: 10, y: 9, w: 8, at: 'low', text: TK.tongs }, // [issue 9] the card takes the lower slot: the tongs come from above
       ],
     },
     {
@@ -100,7 +100,7 @@ export default {
         // [issue 7] Duchess hunts: berms = the berms' middle columns, exit = where the way on is held shut
         // until she has lost him; the "Hide in the log!" sign is put up by the script (src/bosses/tank.js)
         { type: 'boss', boss: 'tank', beat: 'sand', x: 6, y: 15, berms: [31, 49], exit: 60 },
-        { type: 'sign', x: 18, y: 15, w: 14, text: S.tell },
+        { type: 'sign', x: 14, y: 15, w: 5, text: S.tell }, // [issue 9] a note where the lesson starts, before the wake ripple (was a 14-tile zone)
       ],
     },
     {
@@ -118,7 +118,7 @@ export default {
       entities: [
         { type: 'boss', boss: 'tank', beat: 'decor', x: 24, y: 17, land: [22, 20, 2, 2] }, // [final-G] a 2x2 step: 2 below the ledge (was 3: pixel-exact)
         { type: 'sign', x: 15, y: 21, w: 9, text: TK.kick },
-        { type: 'sign', x: 2, y: 33, w: 8, text: S.jumpHold },
+        { type: 'sign', x: 2, y: 33, w: 8, nx: 2, text: S.jumpHold }, // [issue 9] the note on the floor (the span's middle is the ledge)
       ],
     },
     {

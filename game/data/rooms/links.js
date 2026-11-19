@@ -93,7 +93,7 @@ export const hall = {
       entities: [
         {"type":"loud","x":6,"y":32,"w":6,"h":2},
         {"type":"secret","id":"hall-songseed-closet","x":2,"y":33},
-        {"type":"sign","x":7,"y":29,"w":4,"text":"Jump at a wall to stick to it. {jump} again to kick off. Shiny things (glass, porcelain) are too slippery."},
+        {"type":"sign","x":7,"y":29,"w":4,"text":"Jump at a wall to stick, {jump} again to kick off. Glass and porcelain are too slick."},
         {"type":"sign","x":18,"y":33,"w":6,"text":"Loud places make your legs ring. The Earplugs keep you steady."},
       ],
     },
@@ -157,7 +157,7 @@ export const stairwell = {
         '############################...................................G',
       ],
       entities: [
-        {"type":"sign","x":2,"y":33,"w":5,"text":"{use} near a hook to grab it. {left} {right} to swing. {jump} to let go with a fling."},
+        {"type":"sign","x":2,"y":33,"w":5,"text":"Press {use} near a hook to grab it. {left} {right} to swing. {jump} to let go with a fling."},
         {"type":"crumbs","x":41,"y":23,"n":5},
       ],
     },
@@ -260,7 +260,7 @@ export const stairwell = {
         {"type":"hide","x":58,"y":33,"w":1,"art":"sock"},
         {"type":"silverfish","x":40,"y":33,"range":[33,56]},
         {"type":"silverfish","x":18,"y":33,"range":[12,26]},
-        {"type":"sign","x":26,"y":33,"w":6,"text":"{up} at a crack in the baseboard to save. Every crack leads home to the Carrier."},
+        {"type":"sign","x":26,"y":33,"w":6,"text":"Press {up} at a baseboard crack to save. Every crack leads home to the Carrier."},
       ],
     },
   ],
@@ -362,7 +362,7 @@ export const chimney = {
       entities: [
         {"type":"secret","id":"chim-songseed-lookout","x":8,"y":33},
         {"type":"gate","id":"damper-under","x":12,"y":0,"w":8,"h":1,"opens":{"rescues":9},"card":"damper"},
-        {"type":"sign","x":13,"y":69,"w":6,"text":"Press {jump} again in the air to flutter."},
+        {"type":"sign","x":13,"y":69,"w":6,"nx":17,"text":"Press {jump} again in the air to flutter."},
       ],
     },
     {

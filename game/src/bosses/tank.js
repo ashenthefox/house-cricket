@@ -41,6 +41,9 @@ function cup(g, e) {
 }
 const Cup = {
   setPhase() {},
+  notesOver: true, // [issue 9] the cup is drawn over the floor: the notes in it go on top (render.js)
+  // [issue 9] the tongs while they come down: the tip card keeps clear of them (ui.js tipHazards)
+  hazards() { const s = this; return !s.done && (s.mode === 'aim' || s.mode === 'dip' || s.mode === 'lift') ? [{ x0: s.x - T, x1: s.x + T, y0: s.tipY - 6 * T, y1: s.tipY + 0.5 * T }] : []; },
   inCup() { const { g, e } = this, p = g.player; return p.cx > (e.cup?.[0] ?? 11) * T && p.cx < (e.cup?.[1] ?? 17) * T && p.y + p.h > cupFloor(e) - 2.5 * T; },
   update() {
     const s = this, g = s.g, xs = CUP_XS, floorY = cupFloor(s.e), inCup = () => s.inCup();
@@ -72,7 +75,9 @@ const Cup = {
     const s = this, g = s.g, e = s.e, floorY = cupFloor(e);
     if (s.done) return;
     s.done = true; s.mode = 'gone';
-    g.signs.push({ x: (e.cup?.[0] ?? 10) * T - 2 * T, y: floorY - T, w: 12 * T, text: TK.rim });
+    // [issue 9] the rim tip flutters down on the cup floor by the right wall, where the leap goes out
+    const c0 = e.cup?.[0] ?? 11, c1 = e.cup?.[1] ?? 17;
+    g.scriptNote('opening.tank.rim', { x: c0 + 1, y: Math.round(floorY / T) - 1, w: c1 - c0 - 1, nx: c1 - 2, text: TK.rim });
   },
   draw(c) {
     const s = this, e = s.e, floorY = cupFloor(e);
@@ -196,7 +201,9 @@ const Sand = {
     const awake = s.mode !== 'asleep' && s.mode !== 'eye' && !lost;
     // the "Hide in the log!" sign: once she has lunged, or once he's near the log
     if (!s.signed && !lost && s.mode !== 'asleep' && (s.lunges > 0 || Math.abs(p.cx - (s.log().x + s.log().w / 2)) < 6 * T)) {
-      s.signed = true; g.signs.push({ x: 33 * T, y: (s.e.y ?? 15) * T, w: 29 * T, text: TK.hideLog });
+      // [issue 9] a note at the log's mouth (the side he comes from), fluttering down
+      const lx = Math.floor(s.log().x / T);
+      s.signed = true; g.scriptNote('opening.tank.hideLog', { x: lx - 4, y: s.e.y ?? 15, w: 4, nx: lx - 2, text: TK.hideLog });
     }
     const live = () => !p.hidden && s.roarCool === 0 && ov(s.snout(), { x: p.x + 3, y: p.y + 3, w: p.w - 6, h: p.h - 6 });
     switch (s.mode) {
@@ -272,7 +279,7 @@ const Sand = {
         if (!hidden || revealed) { s.seen(); break; }
         if (s.t > SAND.sniff) { // she shrugs and turns away: the way on opens right then
           rs.taken.add(SLEPT);
-          g.signs = g.signs.filter((sg) => sg.text !== TK.hideLog); // the sign's job is done
+          g.signs = g.signs.filter((sg) => sg.key !== 'opening.tank.hideLog'); // the note's job is done
           s.mode = 'shrug'; s.t = 0; s.pose = 'idle'; s.pulse = false;
           g.toast(TK.shrug, 150); g.toast(TK.lost, 180);
         }

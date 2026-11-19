@@ -51,7 +51,7 @@ function zoneJS(name, z) {
   const head = Object.entries(rest).map(([k, v]) => `  ${k}: ${J(v)},`).join('\n');
   return `export const ${name} = {\n${head}\n  rooms: [\n${rooms.map((r) => roomJS(r)).join('\n')}\n  ],\n};\n`;
 }
-const sign = (x, y, w, text) => ({ type: 'sign', x, y, w, text });
+const sign = (x, y, w, text, nx) => ({ type: 'sign', x, y, w, ...(nx != null ? { nx } : {}), text }); // [issue 9] nx: the note's column
 const deco = (prop, x, y, h, o = {}) => ({ prop, x, y, h, ...o });
 
 // =================================================================================================
@@ -255,7 +255,7 @@ function chimFlue() {
     entities: [
       { type: 'secret', id: 'chim-songseed-lookout', x: 8, y: 33 },
       { type: 'gate', id: 'damper-under', x: 12, y: 0, w: 8, h: 1, opens: { rescues: 9 }, card: 'damper' }, // the damper's underside (the card from below)
-      sign(13, 69, 6, TEXT.signs.feather),
+      sign(13, 69, 6, TEXT.signs.feather, 17), // [issue 9] the note on the glass ledge
     ],
   };
 }
@@ -484,7 +484,7 @@ function attBoxes() {
       { type: 'lair', boss: 'nana', x: 2, y: 15, w: 2, h: 3, to: 'att-lair', at: [88, 33] },
       { type: 'secret', id: 'att-mote', x: 35, y: 24 },
       { type: 'duet', id: 'att-duet', x: 22, y: 15, hear: 6, window: 2, then: [['secret', { id: 'att-duet' }]] }, // [fixer] Chip's Duet (post-game)
-      sign(19, 15, 3, 'An old music box with two keyholes. Two house crickets, singing together, might open it.'),
+      sign(19, 15, 3, 'A music box with two keyholes. Two house crickets singing as one might open it.'),
       sign(108, 33, 6, TEXT.signs.band),
       { type: 'crumbs', x: 3, y: 33, n: 10 },
     ],

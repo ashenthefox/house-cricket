@@ -41,10 +41,10 @@ const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.
 const stoneBox = (s) => ({ x: s.x * T - 4, y: s.y * T - 8, w: T + 8, h: T + 8 });
 
 function setHint(g, text) {
-  // a moving sign that follows the cricket (the HUD hint line renders {chirp} etc. as key caps)
-  const p = g.player;
+  // [issue 9] a card-only tip (no paper note, glint or read tracking): the phase hint shows while it's up
+  // (the HUD card renders {chirp} etc. as key caps)
   g.signs = (g.signs || []).filter((s) => !s.nana);
-  if (text) g.signs.push({ nana: true, x: 0, y: p.cy - 20, w: 96 * T, text });
+  if (text) g.signs.push({ nana: true, kind: 'card', key: 'nana', x: 0, y: 0, w: 96 * T, text });
 }
 
 function chorusMembers(g) {

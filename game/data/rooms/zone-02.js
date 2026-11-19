@@ -194,7 +194,7 @@ export default {
         { gecko: 'chikchak', pose: 'sleep', x: 56, y: 14, len: 240, after: 'katy', layer: 'mid' },
       ],
       entities: [
-        { type: 'sign', x: 14, y: 13, w: 6, text: S.floss },
+        { type: 'sign', x: 14, y: 14, w: 6, text: S.floss }, // [issue 9] a row lower: the note stands on the counter
         { type: 'secret', id: 'bath-songseed-cabinet', x: 11, y: 5 },
         { type: 'mosquito', x: 34, y: 6 },
       ],

@@ -284,7 +284,7 @@ export default {
       decor: [{ prop: 'bottle-cap', x: 50, y: 33, h: 1.1 }],
       entities: [
         { type: 'sign', x: 54, y: 33, w: 5, text: S.raft },
-        { type: 'sign', x: 14, y: 33, w: 4, text: 'Down to the Laundry: {down} + {jump} through the rungs.' }, // [playtest] the ladder
+        { type: 'sign', x: 42, y: 33, w: 4, nx: 43, text: 'The gap in the spill goes down to the Laundry: {down} + {jump} through the rungs.' }, // [playtest] the ladder; [issue 9] its note on the dry floor before the spill (was in the water)
         { type: 'crumbs', x: 56, y: 20, n: 10 },
         { type: 'cockroach', x: 54, y: 20, range: [49, 58] },
       ],
