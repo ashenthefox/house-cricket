@@ -128,7 +128,8 @@ const Sand = {
     if (s.y < 15.5 * T) return [];
     return (s.e.berms || [31, 49]).map((b) => (f > 0 ? (b - 1) * T : (b + 2) * T)).filter((face) => (face - n) * f > -2).sort((a, b) => (a - b) * f);
   },
-  snout() { const n = this.nose(); return { x: n - (this.facing > 0 ? 1.4 * T : 0), y: this.y - 1.7 * T, w: 1.4 * T, h: 1.7 * T }; },
+  // the snout box sits on the floor under the nose (not under her middle: on a ripple that lifted it a tile)
+  snout() { const n = this.nose(), fy = this.floorAt(n - this.facing * 2); return { x: n - (this.facing > 0 ? 1.4 * T : 0), y: fy - 1.7 * T, w: 1.4 * T, h: 1.7 * T }; },
   tellFrames() { return Math.round((this.g.gentle ? TELL.gentle : TELL.normal) * FPS); }, // Gentle Mode's longer tell
   startTell(mode) {
     const s = this, n = s.tellFrames();
@@ -162,7 +163,8 @@ const Sand = {
     s.roarCool = SAND.cool; s.mode = 'shake'; s.t = 0; s.pose = 'idle'; s.skit = 40;
     g.emit('sfx', { name: 'gecko-growl', gain: 0.7, rate: 0.7, x: s.x });
     p.shove(s.facing, g.ctx, { vx: 380, vy: -420, lock: 30 });
-    const pick = walkedIn ? [TK.caughtWalk, TK.caughtLog] : s.catches === 0 ? [TK.caughtFirst, TK.caughtLog] : [TK.caughtLog, TK.caughtFirst];
+    const l = s.log(), toLog = p.cx + s.facing * 4 * T > l.x + l.w ? TK.caughtLogBack : TK.caughtLog; // the arrow points to the log from where he lands
+    const pick = walkedIn ? [TK.caughtWalk, toLog] : s.catches === 0 ? [TK.caughtFirst, toLog] : [toLog, TK.caughtFirst];
     const text = pick[0] === s.lastToast ? pick[1] : pick[0];   // never the same one twice in a row
     s.lastToast = text; g.toast(text, 150);
     s.catches++; if (s.catches >= 2) s.pulse = true;
@@ -217,7 +219,7 @@ const Sand = {
         // a berm between them with him close behind it: she stops at its face (and lunges into it);
         // further on, she walks over it
         const face = s.facesAhead()[0];
-        if (face != null && (want + s.facing * NOSE - face) * s.facing > 0 && (p.cx - face) * s.facing < SAND.reach + 0.5 * T) want = face - s.facing * (NOSE + 2);
+        if (face != null && (want + s.facing * NOSE - face) * s.facing > 0 && (p.cx - face) * s.facing + 2 < SAND.reach) want = face - s.facing * (NOSE + 2); // the same reach she tells inside
         const there = s.toward(want, ahead > 9 * T ? SAND.scurry : SAND.plod);
         s.pose = there ? 'idle' : 'walk';
         if (live()) { s.catchPip(true); break; }
@@ -271,7 +273,7 @@ const Sand = {
         if (s.t > SAND.sniff) { // she shrugs and turns away: the way on opens right then
           rs.taken.add(SLEPT);
           g.signs = g.signs.filter((sg) => sg.text !== TK.hideLog); // the sign's job is done
-          s.mode = 'shrug'; s.t = 0; s.pose = 'idle'; s.facing = -1; s.pulse = false;
+          s.mode = 'shrug'; s.t = 0; s.pose = 'idle'; s.pulse = false;
           g.toast(TK.shrug, 150); g.toast(TK.lost, 180);
         }
         break;
@@ -280,9 +282,11 @@ const Sand = {
         if (s.t < 20) s.x = Math.max(SAND.minX, s.x - s.facing * 4.5 * T * DT);
         if (s.t > SAND.recoil) { s.mode = hidden ? 'seek' : 'stalk'; s.t = 0; s.cool = 30; }
         break;
-      case 'shrug':
-        s.pose = 'idle';
-        if (s.t > 40) { s.mode = 'home'; s.t = 0; }
+      case 'shrug':                 // a step back from the log (her tail clear of it), then she turns away
+        s.pose = s.t <= 30 ? 'walk' : 'idle';
+        if (s.t <= 30) s.x -= s.facing * 2.5 * T / 30;
+        if (s.t === 30) s.facing = -1;
+        if (s.t > 50) { s.mode = 'home'; s.t = 0; }
         break;
       case 'home':                  // her plod home and her nap play on behind him
         s.pose = 'walk'; s.facing = -1;
@@ -316,9 +320,11 @@ const Sand = {
       c.save(); c.globalAlpha = Math.sin(tt * Math.PI) * 0.8; c.fillStyle = '#5A4632'; c.font = `bold ${18 + 10 * tt}px "Patrick Hand", sans-serif`;
       c.fillText('z', s.x + 90 + 10 * tt, s.y - 110 - 30 * tt); c.restore();
     }
-    if (s.mode === 'sniff' && s.t > 0) { // a little "?" over her nose
-      c.save(); c.globalAlpha = Math.min(1, s.t / 20) * 0.85; c.fillStyle = '#5A4632'; c.font = 'bold 30px "Patrick Hand", sans-serif';
-      c.fillText('?', s.nose() - 10, s.y - 96 - 4 * Math.sin(s.t / 9)); c.restore();
+    if (s.mode === 'sniff' && s.t > 0) { // a "?" above her head
+      const qx = s.nose() - s.facing * 0.9 * T, qy = s.y - 170 - 5 * Math.sin(s.t / 9);
+      c.save(); c.globalAlpha = Math.min(1, s.t / 20); c.font = 'bold 48px "Patrick Hand", sans-serif'; c.textAlign = 'center';
+      c.lineJoin = 'round'; c.lineWidth = 6; c.strokeStyle = '#F4EBDD'; c.strokeText('?', qx, qy);
+      c.fillStyle = '#5A4632'; c.fillText('?', qx, qy); c.restore();
     }
   },
 };

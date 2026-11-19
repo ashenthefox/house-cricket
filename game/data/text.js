@@ -36,6 +36,7 @@ export const TEXT = {
       caughtFirst: 'Too close! Move when the tail wiggles.', // the first catch
       caughtWalk: "Hey! She's not a pillow.",  // walking into her snout
       caughtLog: 'Run to the log! →',          // from the second catch (the log's outline pulses)
+      caughtLogBack: '← Run back to the log!', // ... when the skitter lands him past the log
       bermBite: "Sand won't hide you. A cricket-sized gap will.", // once, when she bites a berm
       sniff: 'Mm? Where did dinner go?',
       shrug: 'Hmph. Nap time.',

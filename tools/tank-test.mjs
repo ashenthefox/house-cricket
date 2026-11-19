@@ -24,6 +24,8 @@ function sandGame(gentle) {
   const ev = [];
   const emit = g.emit.bind(g);
   g.emit = (t, d = {}) => { ev.push({ t, d, f: g.frame }); emit(t, d); };
+  const toasts = [], toast = g.toast.bind(g);
+  g.toast = (text, dur) => { toasts.push({ text, f: g.frame }); toast(text, dur); };
   let prev = {};
   const step = (held = {}, n = 1) => {
     for (let i = 0; i < n; i++) {
@@ -45,7 +47,7 @@ function sandGame(gentle) {
   const runTo = (x, max = 900) => { for (let i = 0; i < max && Math.abs(g.player.cx - x * T) > 6; i++) run(Math.sign(x * T - g.player.cx)); jt = 0; step({}, 3); };
   const until = (cond, max, fn = () => step({})) => { for (let i = 0; i < max; i++) { if (cond()) return true; fn(); } return cond(); };
   const hide = () => until(() => g.player.state === 'hide', 40, () => { step({ up: true }); step({}); });
-  return { g, p: g.player, b: () => g.boss, ev, step, run, runTo, until, hide, lost: () => g.rs('tank-sand').taken.has(SLEPT) };
+  return { g, p: g.player, b: () => g.boss, ev, toasts, step, run, runTo, until, hide, lost: () => g.rs('tank-sand').taken.has(SLEPT) };
 }
 const count = (ev, t, since = -1, pred = () => true) => ev.filter((e) => e.t === t && e.f > since && pred(e.d)).length;
 const roar = (d) => d.name === 'gecko-growl' && d.rate === 0.7;
@@ -195,6 +197,31 @@ for (const gentle of [false, true]) {
     ok(!g.toasts.some((t) => t.f > f0 && TK.duchessWakes.includes(t.text)), `${M}: no wake line`);
     s.runTo(59.5, 1200);
     ok(s.until(() => g.room.id === 'tank-decor', 200, () => s.step({ right: true })), `${M}: the exit stays open`);
+  });
+}
+
+for (const gentle of [false, true]) {
+  const M = gentle ? 'gentle' : 'normal';
+  // [review] no safe spots: standing still anywhere on the sand floor (a ripple under her middle, a few
+  // tiles past a berm face) she tells and catches him
+  for (const x of [22, 35, 44.5, 53]) section(`no safe spot at ${x} (${M})`, () => {
+    const s = sandGame(gentle), { g, p } = s;
+    s.runTo(x, 1200);
+    const f0 = g.frame;
+    s.until(() => count(s.ev, 'sfx', f0, roar) > 0, 1500);
+    ok(count(s.ev, 'tell', f0) > 0, `${M}: standing at ${x}, she tells (Pip at ${(p.cx / T).toFixed(1)})`);
+    ok(count(s.ev, 'sfx', f0, roar) > 0, `${M}: standing still at ${x}, he gets caught (her lunges ${s.b().lunges})`);
+  });
+
+  section(`caught past the log (${M})`, () => {
+    const s = sandGame(gentle), { g, p } = s;
+    s.runTo(59.3, 1200);
+    const f0 = g.frame;
+    s.until(() => s.b().catches >= 3, 2400);
+    ok(s.b().catches >= 3, `${M}: caught by the exit (${s.b().catches} catches)`);
+    const said = s.toasts.filter((t) => t.f > f0).map((t) => t.text);
+    ok(p.cx > 59 * T && !said.includes(TK.caughtLog), `${M}: never "${TK.caughtLog}" past the log (${said.join(' / ')})`);
+    ok(said.includes(TK.caughtLogBack), `${M}: "${TK.caughtLogBack}" points back to it`);
   });
 }
 
