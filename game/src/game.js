@@ -28,6 +28,7 @@ export class Game {
     this.levelComplete = false; this.gameWon = false; this.bossPhase = null;
     this.hold = 0;           // frames the sim is held (transition wipe, item freeze)
     this.trans = null;       // {f, dur, kind}
+    this.bossWait = false;   // [art] set by main.js while the boss's gecko art loads: the boss doesn't act yet (never set headless)
     this.onSave = opts.onSave || null;
     this.lastCall = -999;
     this.player = new Player('pip');
@@ -171,7 +172,7 @@ export class Game {
     if (kb) kickEnemies(this.enemies, kb, p.facing, this);
     updateEnemies(this.enemies, this);
     Mech.updateMech(this); // [mech]
-    if (this.boss) { this.boss.update(this); this.bossPhase = this.boss.phase; }
+    if (this.boss && !this.bossWait) { this.boss.update(this); this.bossPhase = this.boss.phase; }
     this.checkTriggers();
     this.checkHazards();
     this.checkExits();

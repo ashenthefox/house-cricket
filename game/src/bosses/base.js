@@ -155,5 +155,15 @@ export class BossBase {
 
 // A boss module from a spec (see the top of this file). Register it in bosses/index.js.
 export function makeBoss(name, spec = {}) {
-  return { create(game, e) { return new BossBase(game, e, { name, ...spec }); } };
+  return { create(game, e) { return new BossBase(game, e, { name, ...spec }); }, art: (e, game) => bossArt(name, spec, e, game) };
+}
+// [art] What a fight draws, for src/room-art.js to load before the lair shows:
+//   { gecko: the rig's name or null, props: ['props/ names or paths'], crickets: { id: [looks] } }
+// spec.art(e, { game, cricket }) lists the fight's own props and captives (next to its draw code;
+// cricket: the lair's captive, game: may be null); the rig defaults
+// to the one draw() uses (e.rig, spec.rig, else the boss's name when it is a gecko).
+export function bossArt(name, spec, e, game = null) {
+  const a = spec.art?.(e, { game, cricket: e.cricket || spec.cricket || LAIRS[name]?.cricket || null }) || {};
+  const rig = e.rig || spec.rig || name;
+  return { gecko: a.gecko !== undefined ? a.gecko : (Geckos.NAMES.includes(rig) ? rig : null), props: a.props || [], crickets: a.crickets || {} };
 }

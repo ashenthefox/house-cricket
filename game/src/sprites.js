@@ -16,6 +16,8 @@ const cache = new Map();
 const forceShapes = typeof location !== 'undefined' && new URLSearchParams(location.search).has('shapes');
 
 export function exists(path) { return !forceShapes && have.has(path); }
+// [art] every listed file under a folder prefix
+export function list(prefix) { return forceShapes ? [] : ASSET_FILES.filter((f) => f.startsWith(prefix)); }
 
 // [art] a cache entry: the image, ok/bad, and `done` (a promise settled either way). Marked ok
 // after decode(), so the first draw doesn't stall decoding a big painting.
@@ -34,13 +36,13 @@ function entry(path, priority) {
   if (priority) e.img.fetchPriority = priority; // [art] a room's own files 'high', its neighbours' 'low'
   e.img.src = 'assets/' + path;
   cache.set(path, e);
-  if (watching) watching.add(path);
   return e;
 }
 
 export function get(path) {
   if (!exists(path)) return null;
   const fresh = !cache.has(path);
+  if (fresh && watching) watching.add(path); // a draw asked first: the room-art list missed it
   const e = entry(path);
   if (!e.ok && !e.bad && artCheck && drawing) missed(path, fresh);
   return e.ok ? e.img : null;
@@ -56,11 +58,11 @@ export function ready(paths) { return paths.every((p) => !exists(p) || get(p)); 
 const artCheck = typeof location !== 'undefined' && new URLSearchParams(location.search).has('artcheck');
 const expected = new Set(), logged = new Set();
 let drawing = null, covered = false, watching = null;
-export function need(paths) {
+export function need(paths, priority = 'high') {
   for (const p of paths) {
     if (!exists(p)) continue;
     expected.add(p);
-    if (p.endsWith('.json')) getJSON(p); else entry(p, 'high');
+    if (p.endsWith('.json')) jsonEntry(p); else entry(p, priority);
   }
 }
 // the room being drawn (null between frames): ?artcheck logs misses against it. hidden: the
@@ -85,21 +87,24 @@ export function settled(path) {
 // start loading; resolves once settled (loaded or failed)
 export function load(path) {
   if (!exists(path)) return Promise.resolve();
-  if (path.endsWith('.json')) { getJSON(path); return json.get(path).done; }
+  if (path.endsWith('.json')) return jsonEntry(path).done;
   return entry(path, 'low').done;
 }
 
 const json = new Map();
-export function getJSON(path) {
-  if (!exists(path)) return null;
+function jsonEntry(path) {
   let e = json.get(path);
   if (!e) {
     e = { data: null, settled: false, done: null };
     json.set(path, e);
     e.done = fetch('assets/' + path).then((r) => (r.ok ? r.json() : null)).then((d) => { e.data = d; }).catch(() => {}).finally(() => { e.settled = true; });
-    if (watching) watching.add(path);
   }
-  return e.data;
+  return e;
+}
+export function getJSON(path) {
+  if (!exists(path)) return null;
+  if (watching && !json.has(path)) watching.add(path);
+  return jsonEntry(path).data;
 }
 
 // Animation frames: sprites/crickets/<id>/anim/<anim>/NN.png -> the list that exists.

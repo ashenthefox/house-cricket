@@ -25,6 +25,7 @@ const REMOTE = { x: 49.8 * T, y: 13 * T };
 const head = (b) => b.x + b.facing * LEN * 0.4;
 
 export default makeBoss('gargy', {
+  art: () => ({ props: ['throw-pillow', 'tv-remote'], crickets: { jam: ['idle', 'chirp'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {
     b.y = BACK; b.x = [0, 31, 31, 31][b.phase] * T; b.facing = -1;

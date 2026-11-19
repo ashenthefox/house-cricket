@@ -35,6 +35,7 @@ function hear(b, x, y, radius, loud = false) {
 }
 
 export default makeBoss('ember', {
+  art: () => ({ crickets: { mote: ['idle', 'peek'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: 300,
   start(b, g) {
     b.x = HOME[b.phase] * T; b.y = FLOOR; b.facing = -1;

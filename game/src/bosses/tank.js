@@ -227,4 +227,12 @@ function lid(g, e) {
 }
 
 const BEATS = { cup, sand, decor, lid };
-export default { create(game, e) { return (BEATS[e.beat] || cup)(game, e); } };
+// [art] what each beat draws (room-art.js loads it before the room shows); the sand's Duchess rig
+const ART = {
+  cup: { gecko: null, props: ['feeder-cup', 'tongs'] }, sand: { gecko: 'duchess', props: [] },
+  decor: { gecko: null, props: ['pebble'] }, lid: { gecko: null, props: ['mesh-lid', 'feeder-cup', 'feeder-cup-tipped'] },
+};
+export default {
+  create(game, e) { return (BEATS[e.beat] || cup)(game, e); },
+  art(e) { return { crickets: {}, ...(ART[e.beat] || ART.cup) }; },
+};

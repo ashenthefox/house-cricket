@@ -144,8 +144,8 @@ function seamless(buf, fadeS) {
   }
   return out;
 }
-async function fetchDecode(url) {
-  const r = await fetch(url);
+async function fetchDecode(url, priority) {
+  const r = await fetch(url, priority ? { priority } : undefined); // [art] sfx 'low': a room's art goes first on a slow line
   if (!r.ok) throw new Error(`${url}: ${r.status}`);
   const bytes = await r.arrayBuffer();
   return await new Promise((res, rej) => { const p = ac.decodeAudioData(bytes, res, rej); if (p && p.then) p.then(res, rej); });
@@ -153,7 +153,7 @@ async function fetchDecode(url) {
 function loadSfx() {
   if (sfx.loading) return; sfx.loading = true;
   for (const name of SFX_NAMES) {
-    fetchDecode(SFX_DIR + name + '.mp3').then((b) => {
+    fetchDecode(SFX_DIR + name + '.mp3', 'low').then((b) => {
       const isLoop = name in LOOP_DB;
       const buf = isLoop ? seamless(b, 0.3) : b;
       sfx.buf.set(name, buf);

@@ -77,6 +77,33 @@ export function bgFor(room) {
   else if (d && typeof d === 'object') Object.assign(o, d);
   return o;
 }
+// [art] The drawing rules room-art.js lists a room's files by (kept here, next to the drawing):
+// terrain swatches a room paints with (screenCanvas repaints as they arrive)
+export function terrainKinds(room) {
+  const d = roomLook(room), out = new Set(['cereal', 'soil']);
+  for (const v of Object.values(d.terrainKinds || {})) out.add(v);
+  for (const p of d.paint || []) if (p.kind) out.add(p.kind);
+  return [...out];
+}
+export const terrainPath = (kind) => `textures/terrain-${kind}.webp`;
+// near-layer silhouettes (drawNear). Room data: near: [{ prop, x: tiles, scale: 3..5, flip }] or
+// near: false; default: two props per screen from the zone's `near` list (or NEAR).
+export function nearList(room) {
+  const d = roomLook(room);
+  if (d.near === false || room.dark) return [];
+  if (d.near) return d.near;
+  const props = room.zone?.near || NEAR[bgFolder(room.zone)] || [];
+  if (!props.length) return [];
+  const rnd = seeded(room.id + ':near'), list = [];
+  for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
+  return list;
+}
+// a prop name ('spool') or any assets path ('carrier/lamp.png') -> its file
+export const propPath = (prop) => (prop.includes('/') ? prop : `props/${prop}.png`);
+// a hiding spot's art: entity art ('sock', a path, or 'none'); default the hide log, small spots none
+export const hideArtOf = (e, small = e?.type === 'hideSmall' || !!e?.small) => e?.art || (small ? null : 'hide-log');
+// an enemy's frames (drawEnemies): 0 and 1 walk, 2 flipped
+export const enemyFrames = (sprite) => [0, 1, 2].map((f) => `${sprite}/${f}.png`);
 
 // [polish] a room's render-only fields with data/look overlay merged in (memoised per room def).
 // Overlay paint regions come first (the first region that holds a tile wins); decor is appended.
@@ -176,14 +203,8 @@ export class Renderer {
   terrainReady(game) {
     // repaint once terrain swatches arrive
     let n = 0;
-    for (const k of ['cereal', 'soil', ...(this.extraKinds(game))]) if (S.get(`textures/terrain-${k}.webp`)) n++;
+    for (const k of terrainKinds(game.room)) if (S.get(terrainPath(k))) n++;
     return n;
-  }
-  extraKinds(game) {
-    const d = roomLook(game.room), out = new Set();
-    for (const v of Object.values(d.terrainKinds || {})) out.add(v);
-    for (const p of d.paint || []) if (p.kind) out.add(p.kind);
-    return [...out];
   }
 
   // which paint class a tile belongs to (null = not solid)
@@ -569,14 +590,8 @@ export class Renderer {
     const room = game.room, d = roomLook(room);
     if (d.near === false || room.dark) return;
     const col = zoneColors(game.zone);
-    let list = d.near;
-    if (!list) {
-      const props = game.zone?.near || NEAR[bgFolder(game.zone)] || [];
-      if (!props.length) return;
-      const rnd = seeded(room.id + ':near');
-      list = [];
-      for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
-    }
+    const list = nearList(room);
+    if (!list.length) return;
     const z = cam.zoom;
     for (const n of list) {
       const sil = this.nearSilhouette(n.prop, col);
@@ -845,8 +860,7 @@ export class Renderer {
     }
   }
   drawProp(c, prop, x, y, h, o = {}) {
-    const path = prop.includes('/') ? prop : `props/${prop}.png`;
-    const img = S.get(path);
+    const img = S.get(propPath(prop));
     if (!img) return false;
     const w = h * img.width / img.height;
     c.save(); c.translate(x, y);
@@ -861,7 +875,7 @@ export class Renderer {
   // hiding-spot art: entity { type: 'hide', x, y, w, art?: 'sock' | 'props/x.png' | 'none' }
   hideArt(game, s) {
     const e = game.room.entities.find((en) => (en.type === 'hide' || en.type === 'hideSmall') && en.x * TILE === s.x);
-    return e?.art || (s.small ? null : 'hide-log');
+    return hideArtOf(e, s.small);
   }
   drawHideSpot(c, game, s, front) {
     const art = this.hideArt(game, s);
@@ -967,10 +981,10 @@ export class Renderer {
       const flipped = e.state === 'flipped';
       const rate = e.state === 'scurry' ? 4 : e.stun > 0 ? 9999 : (e.T.frameRate || 9);
       const fr = Math.floor(e.t / rate) % 2;
-      const dir = e.T.sprite;
+      const art = enemyFrames(e.T.sprite);
       let img = null, upside = false;
-      if (flipped) { img = S.get(`${dir}/2.png`); if (!img) { img = S.get(`${dir}/0.png`); upside = !!img; } }
-      else img = S.get(`${dir}/${fr}.png`) || S.get(`${dir}/0.png`);
+      if (flipped) { img = S.get(art[2]); if (!img) { img = S.get(art[0]); upside = !!img; } }
+      else img = S.get(art[fr]) || S.get(art[0]);
       if (e.dir > 0) c.scale(-1, 1); // sprites face LEFT
       if (upside || (flipped && !img)) { c.translate(0, -e.h / 2); c.scale(1, -1); c.translate(0, e.h / 2); }
       if (img) {

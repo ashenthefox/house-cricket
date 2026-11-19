@@ -207,6 +207,8 @@ function newGame(n) {
   const tank = ZONES.find((z) => z.n === 0);
   const first = tank || ZONES.find((z) => z.n === 1) || ZONES.find((z) => z.n === 99) || ZONES[0];
   game.startAt(first.start.room, undefined, undefined, { party: ['pip'], items: [] });
+  const bed = ZONES.find((z) => z.n === 1); // [art] the tank doesn't link to the Bedroom: load its first room during the panels too
+  if (bed && bed !== first) gate.prefetch([game.world.rooms[bed.start.room]]);
   story.play(line('opening.panels'), { id: 'opening', onDone: (skipped) => startTank(skipped) });
 }
 // After panels 1-3: the playable tank escape (zone 0) if it's built; it ends with
@@ -376,6 +378,7 @@ function step() {
     if (f.pressed.map) { pause(null, 'map'); return; }
     if (f.pressed.mute) toggleMute();
     if (gate.check(game) && !frozen) return; // [art] the room's art is still loading: the sim waits (tests' __game.step don't)
+    game.bossWait = !frozen && gate.bossWaiting(game); // [art] a gecko never acts before it can be seen
     hub.update(game, f);
     game.update(f);
     Audio.tick(game); // [audio] effects from game.fx, music, beacon, game-clock cues (100 ms lookahead)
@@ -425,7 +428,7 @@ function drawMetaWorld() {
   c.save(); c.setTransform(renderer.scale, 0, 0, renderer.scale, 0, 0); c.scale(cam.zoom, cam.zoom); c.translate(-Math.round(cam.x), -Math.round(cam.y));
   for (const e of ents) {
     if (!e.done && (e.type === 'crumbs' || e.type === 'secret')) { // [builder B] crumb caches, seed-hearts and song-seeds were never drawn
-      const k = e.type === 'crumbs' ? 'crumbs' : Meta.secretKind(e.id || ''), file = k === 'heart' ? 'seed-heart' : k === 'song' ? 'song-seed' : 'crumb';
+      const file = Meta.pickupFile(e); // [art] shared with room-art.js
       const img = S.get(`items/${file}.png`), bob = Math.sin(renderer.t / 18 + e.px * 0.01) * 3, hh = file === 'crumb' ? 24 : 32;
       if (img) c.drawImage(img, e.px + 20 - hh * img.width / img.height / 2, e.py + 38 - hh + bob, hh * img.width / img.height, hh);
       else { c.fillStyle = '#F2C46D'; c.beginPath(); c.arc(e.px + 20, e.py + 26 + bob, 8, 0, 7); c.fill(); }

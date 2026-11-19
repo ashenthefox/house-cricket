@@ -31,6 +31,7 @@ function pathAt(phase, u) {
 }
 
 export default makeBoss('kite', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
+  art: () => ({ props: ['leaf-glider'], crickets: { digby: ['leap', 'cling'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows); glide.png is one of the rig's files
  
   phases: 3, len: 230,
   start(b, g) {

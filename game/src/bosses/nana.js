@@ -53,8 +53,18 @@ function chorusMembers(g) {
   for (const id of g.meta?.notCrickets || []) if (NC_VOICE[id]) out.push({ kind: 'npc', id, voice: NC_VOICE[id] });
   return out;
 }
+// [art] the stones, Chip, and the chorus that came along (drawn in phase 3)
+function nanaArt(g) {
+  const crickets = { chip: ['idle', 'leap'] }, props = STONES.map((s) => s.prop);
+  for (const m of g ? chorusMembers(g) : []) {
+    if (m.kind === 'npc') props.push(`sprites/npcs/${m.id}.png`);
+    else crickets[m.id] = ['idle', 'chirp'];
+  }
+  return { props, crickets };
+}
 
 export default makeBoss('nana', {
+  art: (e, o) => nanaArt(o.game), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: 980,
   focus() { return null; }, // [polish-V] she is painted on the far wall relative to the view (always in frame)
   start(b, g) {
