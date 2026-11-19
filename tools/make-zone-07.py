@@ -164,6 +164,8 @@ r.put(15, 46, 'H')
 r.fill(20, 47, 5, 5)                                   # P2 (stand 46)
 r.fill(25, 45, 3, 7)                                   # P2's step (stand 44)
 r.put(31, 41, 'H')
+for y in (50, 48, 46):                                 # [issue #4] rails out of the pit under the pin (it was 7 deep) up to P2's step
+    r.plat(28, y, 3)
 r.fill(36, 42, 6, 10)                                  # P3 (stand 41)
 r.fill(39, 40, 3, 2)                                   # P3's step (stand 39)
 r.plat(33, 38, 6); r.plat(29, 36, 6)                   # rails up to the corridor
