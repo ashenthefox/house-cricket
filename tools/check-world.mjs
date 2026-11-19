@@ -51,6 +51,9 @@
 // side; shut tiles are solid), levers, thermostats (with Frost home: --rescued frost), piano
 // melodies (with the Thimble), springs and aphids (bounce launches), lifts (to the lift's top, then
 // a hop or a glide), syrup (half rise), crumbling floors (standable), door entities (edges).
+// Water ([issue 20]): a pit without the Raft; with it, its top surface is a floor and its cells below are
+// 'water' nodes, never standing spots: walked into from the side or slid into down a wall, they lead
+// straight up to the surface (sideways only under a covered surface), as the game's bob does.
 //   --rescued a,b  crickets home at the start   --flags x,y  meta flags set
 // TODO: per-zone search over every route order, "no gate opens before its item".
 import { writeFileSync } from 'node:fs';
@@ -198,7 +201,10 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
     return { r, k };
   };
   const flags = new Set(extraFlags);
-  const passable = (t) => t && (t.k === K.EMPTY || t.k === K.ONEWAY || (t.k === K.CEREAL && has('thimble')));
+  // [issue 20] with the Raft, water is room to move through (you bob up to its surface: 'water' nodes below)
+  const passable = (t) => t && (t.k === K.EMPTY || t.k === K.ONEWAY || (t.k === K.CEREAL && has('thimble')) || (t.k === K.WATER && has('raft')));
+  // an arc's cells: the escape graph never counts a move through water below the surface but the bob itself
+  const arcOpen = (t) => passable(t) && !(st.strict && t.k === K.WATER);
   const allowed = (t, x, y) => t && (!t.r.needs || has(t.r.needs)) && (!inLoud(x, y) || has('earplugs'));
   const standOn = (t, x, y) => {
     if (!t) return false;
@@ -218,6 +224,8 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
         const wx = r.cx * SCREEN_W + x, wy = r.cy * SCREEN_H + y;
         const t = tileAt(wx, wy);
         if (!passable(t) || !allowed(t, wx, wy)) continue;
+        // [issue 20] in water with the Raft you never stand (no wading along the bottom): you bob up
+        if (t.k === K.WATER) { nodes.set(`${wx},${wy}`, { kind: 'water', x: wx, y: wy }); continue; }
         const below = tileAt(wx, wy + 1);
         if (standOn(below, wx, wy + 1) && !(below.k === K.CEREAL && has('thimble'))) nodes.set(`${wx},${wy}`, { kind: 'spot', x: wx, y: wy, bounce: !!(below.r.needs && !has(below.r.needs)) });
         else if (has('booties')) {
@@ -239,7 +247,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   }
   // Is a straight run of cells clear (passable and allowed)? Endpoints excluded.
   // [issue #4] A diagonal step between two cells must not squeeze between two solid corners.
-  const open2 = (x, y) => { const t = tileAt(x, y); return passable(t) && allowed(t, x, y); };
+  const open2 = (x, y) => { const t = tileAt(x, y); return arcOpen(t) && allowed(t, x, y); };
   function clearLine(x0, y0, x1, y1) {
     const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
     let px = x0, py = y0;
@@ -254,7 +262,7 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
   // A coarse stand-in for the arc: up-over-down, or over-then-down/up. One must be clear.
   function clearPath(n, m) {
     const ax = n.x, ay = n.y, bx = m.x, by = m.y, top = Math.min(ay, by);
-    const pts = (xs) => xs.every(([x, y]) => { const t = tileAt(x, y); return passable(t) && allowed(t, x, y); });
+    const pts = (xs) => xs.every(([x, y]) => { const t = tileAt(x, y); return arcOpen(t) && allowed(t, x, y); });
     if (pts([[ax, top], [bx, top]]) && clearLine(ax, ay, ax, top) && clearLine(ax, top, bx, top) && clearLine(bx, top, bx, by)) return true;
     if (pts([[bx, ay]]) && clearLine(ax, ay, bx, ay) && clearLine(bx, ay, bx, by)) return true;
     // [issue #4] a fall steered round a ledge: across (a few tiles past either end) at the top, down a
@@ -351,6 +359,18 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
       const E = new Set();
       out.set(n.key, E);
       if (n.kind === 'exit') continue;
+      // [issue 20] the Raft floats: from water below the surface, straight up (into more water or onto the
+      // surface spot); where the surface over it is covered (an overhang), sideways under it. Forward also
+      // up and one across (he steers at raft speed while he rises); the escape graph doesn't count that.
+      if (n.kind === 'water') {
+        const add = (x, y) => { const k = `${x},${y}`; if (nodes.has(k) && nodes.get(k).kind !== 'hook') E.add(k); };
+        const upT = tileAt(n.x, n.y - 1);
+        if (passable(upT) && allowed(upT, n.x, n.y - 1)) {
+          add(n.x, n.y - 1);
+          if (!st.strict) for (const d of [-1, 1]) if (clearLine(n.x, n.y, n.x + d, n.y - 1)) add(n.x + d, n.y - 1);
+        } else for (const d of [-1, 1]) add(n.x + d, n.y);
+        continue;
+      }
       for (const d of doors) {
         if (d.needs && !has(d.needs)) continue;
         if (Math.abs(n.x - d.wx) > 1 || n.y < d.wy - 1 || n.y > d.wy) continue;
@@ -381,6 +401,10 @@ function check(zone, pass, startItems, startRescued = [], opts = {}) {
         // (unless the drift is stopped: then one tile back, over the wall's top, or straight up a narrow shaft;
         // or with the Glider: kick, then glide back over the top, two tiles; the sim: Duo onto the study's books)
         // (strict: the escape graph only; reaching stays generous)
+        if (m.kind === 'water') { // [issue 20] into water below its surface: walked in at its side, or slid down a wall into it
+          if ((n.kind === 'spot' && up === 0 && Math.abs(dx) === 1) || (n.kind === 'cling' && dx === 0 && up === -1)) E.add(m.key);
+          continue;
+        }
         if (st.strict && n.kind === 'cling') {
           const back = n.back ? 1 : has('glider') ? 2 : -1;
           if (Math.sign(dx) === n.d && Math.abs(dx) > back) continue;
@@ -615,7 +639,7 @@ function trapReport(trapped, zone) {
     spots.sort((a, b) => a.y - b.y || a.x - b.x);
     const roomOf = (n) => world.roomAtCell(Math.floor(n.x / SCREEN_W), Math.floor(n.y / SCREEN_H));
     const r = roomOf(spots[0]);
-    const loc = (n) => { const q = roomOf(n); return `${q === r ? '' : q.id + ' '}(${n.x - q.cx * SCREEN_W},${n.y - q.cy * SCREEN_H})${n.kind === 'cling' ? 'cling' : n.kind === 'hook' ? 'hook' : ''}`; };
+    const loc = (n) => { const q = roomOf(n); return `${q === r ? '' : q.id + ' '}(${n.x - q.cx * SCREEN_W},${n.y - q.cy * SCREEN_H})${n.kind === 'cling' ? 'cling' : n.kind === 'hook' ? 'hook' : n.kind === 'water' ? 'water' : ''}`; };
     const why = best ? `nearest spot that gets out: ${loc(best.m)}, ${best.up} up and ${best.dx} across from ${loc(best.n)}` : 'nothing that gets out within 8 tiles';
     const cell = (n) => { const q = roomOf(n); return `${q.id}:${n.x - q.cx * SCREEN_W},${n.y - q.cy * SCREEN_H}`; };
     // the spot to try from in the sim: the one nearest a way out, else the lowest
