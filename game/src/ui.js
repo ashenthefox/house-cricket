@@ -358,7 +358,7 @@ export class UI {
     let prompt = null;
     for (const s of game.hideSpots || []) if ((!s.small || p.tiny) && Math.abs(s.x + s.w / 2 - p.cx) < s.w / 2 + 14 && Math.abs(s.y + s.h - (p.y + p.h)) < 12 && p.state === 'ground') prompt = ['up', 'Hide'];
     for (const s of game.saves || []) if (Math.abs(s.x + 20 - p.cx) < 40 && Math.abs(s.y + 40 - (p.y + p.h)) < 40 && p.grounded) prompt = ['up', 'Save'];
-    if (p.state === 'hide') prompt = ['left', 'Move to leave'];
+    if (p.state === 'hide') prompt = p.hideHold ? ['jump', 'Jump to leave'] : ['left', 'Move to leave']; // [issue 7] the tank's sniff: only Jump leaves
     if (p.has('floss') && p.state !== 'swing') for (const k of game.hooks || []) if (Math.hypot(k.x - p.cx, k.y - p.cy) < 70) prompt = ['use', 'Grab'];
     if (p.state === 'swing') prompt = ['jump', 'Fling'];
     if (this.extraPrompt && !prompt) prompt = this.extraPrompt;   // meta: Carrier facilities, talkers, lair doors

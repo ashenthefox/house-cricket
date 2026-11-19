@@ -55,7 +55,7 @@ export class Player {
     this.swing = null; this.hideSpot = null; this.listening = false; this.gliding = false;
     this.poundT = 0; this.recover = 0; this.wallRunLeft = 0;
     this.dashT = 0; this.dashCd = 0; this.lastTap = { dir: 0, t: 99 };
-    this.squash = 0; this.onRaft = false; this.dazed = 0;
+    this.squash = 0; this.onRaft = false; this.dazed = 0; this.hideHold = false;
     this.lastSafe = null; this.anim = 0; this.landedHard = false;
     if (this.cloakT > 0) { this.cloakT = 0; this.cloakCd = CLOAK.recharge; } // [builder C] knocked about: the cloak drops
   }
@@ -108,6 +108,13 @@ export class Player {
     if (this.dazed > 0) return;
     this.dazed = 40; this.vx = dir * 300; this.vy = -260; this.state = 'air'; this.prof = this.P.fall; this.lock = 20; this.cutDone = true;
     ctx.emit('dazed', { x: this.cx, y: this.y });
+  }
+
+  // [issue 7] a plain shove (Duchess's skitter in the tank): no damage, no event, no invulnerability
+  // flash; half a second without control. ctx is unused (the call matches daze and hurt).
+  shove(dir, ctx, { vx = 380, vy = -420, lock = 30 } = {}) {
+    this.vx = dir * vx; this.vy = vy; this.state = 'air'; this.prof = this.P.fall; this.lock = lock; this.cutDone = true;
+    this.hideSpot = null; this.hideHold = false; this.listening = false; this.coyote = 0; this.crouchFrames = 0;
   }
 
   launch(prof, ctx, kind = 'jump', dir = 0) {
@@ -615,10 +622,12 @@ export class Player {
     this.x = spot.x + spot.w / 2 - this.w / 2;
     ctx.emit('hide', { x: this.cx, y: this.y + this.h });
   }
+  // [issue 7] hideHold (set each step by a script, the tank's Duchess while she comes and sniffs): only
+  // Jump leaves, so a stick drifting sideways can't pop you out
   _hide(inp, dir, ctx) {
     this.listening = !!inp.held.listen;
-    if (dir !== 0 || this.jumpBuf > 0) {
-      this.state = 'ground'; this.hideSpot = null;
+    if ((dir !== 0 && !this.hideHold) || this.jumpBuf > 0) {
+      this.state = 'ground'; this.hideSpot = null; this.hideHold = false;
       ctx.emit('unhide', {});
       return this._ground(inp, dir, ctx);
     }
