@@ -89,3 +89,24 @@ Every item is in the design:
 - a range of enemies (16 types)
 - the Not-Crickets joke and puzzle (bat, tree frog, chimney swift, smoke alarm, a chirping gecko, squeaks)
 - gamepad support
+
+## Change: issue #10, the ear guide (one round, 2026-11-19)
+
+Player and Builder reviewed the change (no art or sound, so no art director).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Listen arrow points at the cricket while the ear points along the path | must-fix (Player) | Fixed: one direction everywhere; while Listening the ear is the arrow |
+| Beacon chirps Off leaves almost no guide | must-fix (Player), should-fix (Builder) | Fixed: with Off, When it helps counts as Always out |
+| "The doorway after" isn't in the path data; twin doorway nodes; door links | must-fix (Builder) | Fixed in design: switch on passing through the doorway, twins count as one, doors aimed at themselves; build records predecessors |
+| Reusing the boolean `indicator` key; migration | must-fix (Builder) | Fixed: a new `ear` setting; old saves move to When it helps |
+| Ear state must stay out of game state (replays, rewind, heardAt) | must-fix (Builder) | Fixed: pure display, own module, reset on rewind |
+| Clicking an auto-out ear did nothing; decide at press | should-fix (both) | Fixed: dismiss until the next reason; decided at press; ignored while Listening |
+| Lost and answer timing undefined | should-fix (both) | Fixed: in-control time, closer = beats best by a tile, out until 1280 px closer, 4 s from the answer |
+| Smoothing wrap-around, exact flip, stale angle | should-fix (Builder) | Fixed: short way round, keep sign on a half-turn, snap on out/room change/rewind |
+| No explanation when it appears | should-fix (Player) | Fixed: first-time toast, a "this way" pulse and cue when lost |
+| Doorway pointing needs to read as a route | should-fix (Player) | Fixed: a glint on the target doorway when on screen |
+| "Never" ambiguous; two "Ear" buttons on phones | should-fix (Player) | Fixed: renamed "Ear guide", "Only when I listen" |
+| "Followable zone" not defined | should-fix (Builder) | Fixed: Carrier, Tank, rescued, unreachable and fights excluded |
+| Keep the pulse and grow-with-closeness | nice | Kept |
+| Testability: pure module, headless test, debug hook | nice | Taken into the build plan |
