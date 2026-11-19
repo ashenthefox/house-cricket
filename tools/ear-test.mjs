@@ -149,10 +149,9 @@ console.log('(c) every portal node: the doorway aimed at');
           if (!A.rooms.includes(R)) why.push('not in the room');
           if (s >= 0 && twinNear(A, G.nodes[s])) why.push('successor is its twin');
           if (s >= 0 && A.door !== 'src' && G.nodes[s].rooms.includes(R)) why.push('the path stays in the room');
-          // (a door's arrival spot in this room is a place in the room: beacon.js links doors both ways, so the
-          // path may run through one back to its door, as at the Laundry's stair head; aimed at, it is still
-          // "go there", never the door's other room)
-          if (A.door === 'dst' && !A.rooms.includes(R)) why.push('a door\'s far end in another room');
+          // [issue 21] doors are one way: the path never runs from a door's arrival spot back through it, so
+          // the ear never aims at one (the Laundry's stair head used to)
+          if (A.door === 'dst') why.push('a door\'s arrival spot');
           if (nd.door === 'src' && a !== n) why.push('a door not aimed at itself');
           if (why.length && probs.length < 12) probs.push(`${spec.zone}/${spec.phase} node ${n} in ${R} -> ${a}: ${why.join(', ')}`);
           if (why.length) fail++, pass--;
@@ -186,6 +185,23 @@ console.log('(c) every portal node: the doorway aimed at');
     }
   }
   console.log(`  ok   hysteresis checked on ${hyst} kept doorways`);
+  // [issue 21] the ways a cricket can't go: a door backwards, a room's noWay (data: room def)
+  const at = (roomId, tx, ty, items = []) => {
+    g.startAt(roomId, tx, ty, { items, party: ['pip'], rescued: [] });
+    const spec = beaconSpec(g); return { spec, r: route(g, spec, null), m: measure(g, spec) };
+  };
+  let q = at('sun-door', 4, 33);
+  ok(q.r && q.r.aim.y < TILE && Math.abs(q.r.aim.x - 640) < TILE, `sun-door: up to the fern (aim ${q.r && [q.r.aim.x, q.r.aim.y]})`);
+  q = at('sun-fern', 16, 33);
+  ok(q.r && q.r.aim.x >= 1280 - 1, `sun-fern, just in from below: on to the canopy (aim ${q.r && [q.r.aim.x, q.r.aim.y]})`);
+  q = at('sun-bench', 20, 33);
+  ok(q.r && !q.r.target, 'sun-bench floor: not straight up to the bench top');
+  const top = at('sun-bench', 20, 22);
+  ok(top.r?.target && q.m.pathDist > top.m.pathDist + 2000, `sun-bench: the floor is the long way round (${q.m.pathDist} vs ${top.m.pathDist})`);
+  q = at('laun-sink', 40, 15, ['glider']);
+  ok(q.r && q.r.door, `laun-sink after the Glider: the pipe door, not up the drop (aim ${q.r && [q.r.aim.x, q.r.aim.y]})`);
+  q = at('laun-stairs', 30, 6, ['glider']);
+  ok(q.r && !q.r.door && q.r.aim.x >= 2560 - 1, `laun-stairs head: the lair exit, not the pipe door's arrival spot (aim ${q.r && [q.r.aim.x, q.r.aim.y]})`);
 }
 
 // ---- (d) the smoothed angle ----

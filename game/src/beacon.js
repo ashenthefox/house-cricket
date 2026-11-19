@@ -11,8 +11,9 @@
 //          default: the zone cricket's species (chirps.js CRICKET_VOICE).
 //   Zone 5 (Laundry): soundHole = the dryer vent by the Glider, beaconVoice = {hole: ['alarm','knock'], lair: ['alarm']},
 //          lair = the alarm in Peridot's arena.
-// Distance: shortest path over room exits (portal midpoints, from world.exits) and doors, plus the
-// straight distance inside the player's and the target's rooms. Gain: 0 dB at the target to
+// Distance: shortest path over room exits (portal midpoints, from world.exits) and doors (one way),
+// plus the straight distance inside the player's and the target's rooms; a room's `noWay` marks the
+// straight lines a cricket can't take (see noWay below). Gain: 0 dB at the target to
 // -24 dB at the zone's far side, never lower.
 import { TILE } from '../data/movement.js';
 import { ZONE_INFO } from '../data/zones.js';
@@ -111,12 +112,34 @@ function graph(world) {
   }
   // [issue 10] twins: the same opening seen from both rooms (one node per room's exits, ~0 apart)
   for (let i = 0; i < nodes.length; i++) for (let j = 0; j < nodes.length; j++) if (i !== j && isTwin(nodes[i], nodes[j])) nodes[i].twin = j;
-  // adjacency: every pair of nodes sharing a room (straight distance), plus door links (0)
+  // adjacency: every pair of nodes sharing a room (straight distance) unless the room's noWay says
+  // you can't walk it, plus door links (0). field() searches from the target outwards, so adj[u]
+  // lists the nodes that lead *into* u: [v, w] in adj[u] means a player at v can go on to u.
   const adj = nodes.map(() => []);
-  for (const ids of Object.values(byRoom)) for (const a of ids) for (const b of ids) if (a !== b) adj[a].push([b, Math.hypot(nodes[a].wx - nodes[b].wx, nodes[a].wy - nodes[b].wy)]);
-  for (const [a, b] of links) { adj[a].push([b, 0]); adj[b].push([a, 0]); }
+  for (const [rid, ids] of Object.entries(byRoom)) {
+    const room = world.rooms[rid];
+    for (const a of ids) for (const b of ids) if (a !== b && !noWay(room, nodes[a].wx, nodes[a].wy, nodes[b].wx, nodes[b].wy)) adj[b].push([a, Math.hypot(nodes[a].wx - nodes[b].wx, nodes[a].wy - nodes[b].wy)]);
+  }
+  // [issue 21] A door is one way (game.js useDoor: in at the door, out at its `at` spot; a way back is
+  // its own door entity): the door leads into its arrival spot, never the other way.
+  for (const [a, b] of links) adj[b].push([a, 0]);
   world._portalGraph = { nodes, byRoom, adj };
   return world._portalGraph;
+}
+
+// [issue 21] A room's straight lines are walkable unless its def says otherwise: room.def.noWay =
+// [{from: [x, y, w, h], to: [x, y, w, h]}] (tiles) says nothing in `from` gets to `to` inside the room
+// (the Sunroom's potting bench: its floor can't climb to the bench top, the canopy is the way up; the
+// Laundry sink's drop from the stair head only comes down).
+// World pixel points; one on the room's edge (an exit) counts as the tile just inside.
+function inRect(room, wx, wy, r) {
+  const tx = Math.max(0, Math.min(room.tw - 1, Math.floor((wx - room.wx) / TILE)));
+  const ty = Math.max(0, Math.min(room.th - 1, Math.floor((wy - room.wy) / TILE)));
+  return tx >= r[0] && tx < r[0] + r[2] && ty >= r[1] && ty < r[1] + r[3];
+}
+function noWay(room, ax, ay, bx, by) {
+  for (const w of room?.def?.noWay || []) if (inRect(room, ax, ay, w.from) && inRect(room, bx, by, w.to)) return true;
+  return false;
 }
 
 function isTwin(a, b) {
@@ -132,7 +155,8 @@ function field(world, spec) {
   if (world._beaconFields[key]) return world._beaconFields[key];
   const { nodes, byRoom, adj } = graph(world);
   const dist = new Float64Array(nodes.length).fill(Infinity), done = new Uint8Array(nodes.length), next = new Int32Array(nodes.length).fill(-1);
-  for (const i of byRoom[spec.target.room] || []) dist[i] = Math.hypot(nodes[i].wx - spec.target.wx, nodes[i].wy - spec.target.wy);
+  const troom = world.rooms[spec.target.room];
+  for (const i of byRoom[spec.target.room] || []) if (!noWay(troom, nodes[i].wx, nodes[i].wy, spec.target.wx, spec.target.wy)) dist[i] = Math.hypot(nodes[i].wx - spec.target.wx, nodes[i].wy - spec.target.wy);
   for (;;) {
     let u = -1, best = Infinity;
     for (let i = 0; i < nodes.length; i++) if (!done[i] && dist[i] < best) { best = dist[i]; u = i; }
@@ -155,10 +179,11 @@ function field(world, spec) {
 }
 function pathFrom(world, f, spec, room, x, y) {
   const wx = room.wx + x, wy = room.wy + y;
-  if (room.id === spec.target.room) return { d: Math.hypot(spec.target.wx - wx, spec.target.wy - wy), via: null };
+  if (room.id === spec.target.room && !noWay(room, wx, wy, spec.target.wx, spec.target.wy)) return { d: Math.hypot(spec.target.wx - wx, spec.target.wy - wy), via: null };
   const { nodes, byRoom } = graph(world);
   let d = Infinity, via = null;
   for (const i of byRoom[room.id] || []) {
+    if (noWay(room, wx, wy, nodes[i].wx, nodes[i].wy)) continue;
     const c = Math.hypot(nodes[i].wx - wx, nodes[i].wy - wy) + f.dist[i];
     if (c < d) { d = c; via = nodes[i]; }
   }
@@ -205,10 +230,10 @@ export function aimFrom(world, f, roomId, n) {
 export function route(game, spec = beaconSpec(game), keep = null) {
   if (!spec || !game.room) return null;
   const world = game.world, room = game.room, p = game.player;
-  if (room.id === spec.target.room) return { via: null, node: null, aim: { x: spec.target.wx - room.wx, y: spec.target.wy - room.wy }, door: false, target: true };
-  const f = field(world, spec), { nodes, byRoom } = graph(world);
-  const wx = room.wx + p.cx, wy = room.wy + p.cy, ids = byRoom[room.id] || [];
-  const cost = (i) => Math.hypot(nodes[i].wx - wx, nodes[i].wy - wy) + f.dist[i];
+  const wx = room.wx + p.cx, wy = room.wy + p.cy;
+  if (room.id === spec.target.room && !noWay(room, wx, wy, spec.target.wx, spec.target.wy)) return { via: null, node: null, aim: { x: spec.target.wx - room.wx, y: spec.target.wy - room.wy }, door: false, target: true };
+  const f = field(world, spec), { nodes, byRoom } = graph(world), ids = byRoom[room.id] || [];
+  const cost = (i) => (noWay(room, wx, wy, nodes[i].wx, nodes[i].wy) ? Infinity : Math.hypot(nodes[i].wx - wx, nodes[i].wy - wy) + f.dist[i]);
   let via = -1, bd = Infinity;
   for (const i of ids) { const c = cost(i); if (c < bd) { bd = c; via = i; } }
   if (via < 0 || !Number.isFinite(bd)) return null;

@@ -455,6 +455,9 @@ terrainKinds: { C: 'plaster', s: 'sand' },      // what C and s tiles look like 
 near: false | [{ prop, x, scale: 3..5, flip }], // near layer for this room (false = none)
 fx: [{ kind: 'steam', x, y, every: 8 },         // ambient emitters: steam puffs rising from (x, y)
      { kind: 'motes' | 'dust', x, y, w, h }],   // light motes / falling dust in a box
+noWay: [{ from: [x, y, w, h], to: [x, y, w, h] }], // tiles: nothing in `from` can get to `to` inside this room
+        // (a floor below an unclimbable side, a drop that only comes down). The beacon's path (src/beacon.js)
+        // otherwise takes every straight line between a room's openings as walkable. sun-bench, laun-sink.
 ```
 
 Hiding spots: `{ type: 'hide', x, y, w, art: 'sock' }` picks the art (`props/<art>.png` or a path;
@@ -778,7 +781,7 @@ Once on, a switch stays on (`sw:<id>`); emits `switch {id, x, y}`.
 
 `at` = the tile whose bottom the feet land on (default: the target room's `P`/`S` marker). No door
 back = one-way. A door keeps health (no heal) and downward speed. The beacon's path distance and
-check-world follow doors.
+check-world follow doors, one way (in at the door, out at `at`).
 
 ### Lifts (steam vents, dryer updrafts, misters)
 

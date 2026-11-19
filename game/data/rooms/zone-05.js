@@ -123,6 +123,9 @@ export default {
       id: 'laun-sink', name: 'The Utility Sink', x: 5, y: 10,
       grid: sk.rows(),
       temp: { left: 58, right: 86 },
+      // [issue 21] the drop from the stair head (cols 53-62) only comes down: the beacon's path
+      // (src/beacon.js) goes up by the pipe door or the shaft, never up through it
+      noWay: [{ from: [0, 0, 64, 18], to: [53, 0, 10, 1] }],
       bg: { v: 'a', x: 0.2, y: 0.6 },
       fx: [{ kind: 'steam', x: 48, y: 6, every: 6 }],
       decor: [

@@ -163,7 +163,10 @@ r.deco('water-dish', 3, 33, 0.8, layer='mid')
 r.deco('leaf-glider', 59, 19, 1.0, layer='mid', rot=0.25)
 
 # ------------------------------------------------------------------ sun-bench (28,7) 2x2
-r = z.room('sun-bench', 'The Potting Bench', 28, 7, 2, 2, temp={'left': 86, 'right': 66}, bg={'v': 'a', 'x': 0.7, 'y': 0.75})
+# noWay [issue 21]: the floor (rows 26 down) can't climb to the bench top or the drop from the canopy
+# (rows 0-24): the beacon's path (src/beacon.js) goes round by the canopy instead of up the slick side
+r = z.room('sun-bench', 'The Potting Bench', 28, 7, 2, 2, temp={'left': 86, 'right': 66}, bg={'v': 'a', 'x': 0.7, 'y': 0.75},
+           noWay=[{'from': [0, 26, 64, 10], 'to': [0, 0, 64, 25]}])
 r.floor(34)
 r.clear(3, 0, 27, 1)            # top: the drop from the canopy
 r.clear(0, 30, 1, 4)            # left: sun-pots
