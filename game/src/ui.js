@@ -17,6 +17,9 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 
+// [issue #8] arrow key caps: the font has no arrows (its fallback ↑ read as a "1"), so draw bold ones
+const ARROW = { '↑': ['up', 0], '→': ['right', 90], '↓': ['down', 180], '←': ['left', 270] };
+const arrowSvg = (ch) => `<svg class="cap-arrow" viewBox="0 0 20 20" role="img" aria-label="${ARROW[ch][0]} arrow"><path transform="rotate(${ARROW[ch][1]} 10 10)" d="M10 2.5 L17 10 H12.6 V17.5 H7.4 V10 H3 Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
 const ICON = {
   heart: '<svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 21C5 15 1 11.5 1 7a5.5 5.5 0 0 1 11-1 5.5 5.5 0 0 1 11 1c0 4.5-4 8-11 14z"/></svg>',
   pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5"/><rect x="14" y="4" width="4" height="16" rx="1.5"/></svg>',
@@ -341,7 +344,9 @@ export class UI {
     }
     const l = this.input.label(action);
     const e = h('span', { class: `cap cap-${l.kind}` });
-    if (l.kind === 'glyph') e.innerHTML = ICON[l.text]; else e.textContent = l.text;
+    if (l.kind === 'glyph') e.innerHTML = ICON[l.text];
+    else if (/[←→↑↓]/.test(l.text)) { for (const part of l.text.split(/([←→↑↓])/)) { if (!part) continue; if (ARROW[part]) e.insertAdjacentHTML('beforeend', arrowSvg(part)); else e.append(part); } } // [issue #8]
+    else e.textContent = l.text;
     return e;
   }
   capKey() { return (this.input.scheme ? this.input.scheme() : this.input.last) + this.input.layout + this.input.padFamily; } // [polish-T]
