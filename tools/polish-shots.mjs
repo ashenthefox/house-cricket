@@ -5,6 +5,10 @@
 // overview: the whole room stitched from every screen (camera set per screen, half scale, no HUD)
 //           -> DIR/<prefix>ov-<room>.png
 // play:     goToRoom, run ~1.3 s, a normal page screenshot (HUD included) -> DIR/<prefix><room>.png
+// --tips:   [issue 9] play-mode shots of sample tutorial notes and their cards (the tongs' lower slot, a plain
+//           note, one by the ceiling, a dark room's glint, a fight's band, a note on cereal before and after the
+//           pound); prints each card's slot. For touch, open the session with --device 'iPhone 15' and pass
+//           --size 844x390:   node tools/polish-shots.mjs --session S --tips --size 844x390 --prefix touch-
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,22 +18,28 @@ const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
 const url = opt('--url', 'http://127.0.0.1:8391/'), session = opt('--session', 'polish');
 const out = path.resolve(opt('--out', path.join(root, 'design/screenshots'))), prefix = opt('--prefix', '');
-const mode = opt('--mode', 'overview'), size = opt('--size', '1280x720'), zone = opt('--zone', null);
+const mode = opt('--mode', args.includes('--tips') ? 'play' : 'overview'), size = opt('--size', '1280x720'), zone = opt('--zone', null);
 const items = opt('--items', 'booties,floss,raft,band,glider,thimble,glow,earplugs,feather,cloak');
 const valued = new Set(['--url', '--session', '--out', '--prefix', '--mode', '--size', '--zone', '--items']);
-const rooms = args.filter((a, i) => !a.startsWith('--') && !valued.has(args[i - 1]));
+const TIPS = [ // [issue 9] room@x,y[:items][#phase][~ms]=name[!pound]
+  'tank-cup@13,9:~1500=tip-tank-cup', 'bed-carrier@11,14:~1600=tip-bed-carrier', 'sun-glass@9,2~1600=tip-sun-glass',
+  'bas-stairs@6,51:earplugs~1600=tip-bas-stairs-dark', 'bed-lair@11,15:#1~1600=tip-bed-lair-fight',
+  'laun-washer@47,15:thimble~1600=tip-laun-washer-before', 'laun-washer@47,15:thimble~1600=tip-laun-washer-after!pound',
+];
+const rooms = args.includes('--tips') ? TIPS : args.filter((a, i) => !a.startsWith('--') && !valued.has(args[i - 1]));
 const cli = (...a) => execFileSync('playwright-cli', [`-s=${session}`, ...a], { cwd: root, encoding: 'utf8', maxBuffer: 64 << 20, timeout: 900000 });
 
 const specs = rooms.map((r0) => {
   // room[@x,y][:items][#phase][~ms][=name]  (#phase: __game.setBossPhase; ~ms: run that long first; =name: file name)
-  let r = r0, name = null, phase = null, wait = null;
+  let r = r0, name = null, phase = null, wait = null, act = null;
+  if (r.includes('!')) [r, act] = r.split('!');
   if (r.includes('=')) [r, name] = r.split('=');
   if (r.includes('~')) { const [a, w] = r.split('~'); r = a; wait = +w; }
   if (r.includes('#')) { const [a, ph] = r.split('#'); r = a; phase = +ph; }
   const [head, it] = r.split(':');
   const [room, at] = head.split('@');
   const [x, y] = at ? at.split(',').map(Number) : [undefined, undefined];
-  return { room, x, y, items: (it || items).split(',').filter(Boolean), phase, wait, name };
+  return { room, x, y, items: (it ?? items).split(',').filter(Boolean), phase, wait, name, act };
 });
 const [W, H] = size.split('x').map(Number);
 const code = `async page => {
@@ -51,7 +61,13 @@ const code = `async page => {
     if (s.phase) { await page.waitForTimeout(200); await page.evaluate((n) => window.__game.setBossPhase(n), s.phase); }
     await page.waitForTimeout(s.wait ?? ${mode === 'play' ? 1300 : 900});
     const file = ${JSON.stringify(out)} + '/' + ${JSON.stringify(prefix)} + (${JSON.stringify(mode)} === 'overview' ? 'ov-' : '') + (s.name || (s.room + (s.x != null ? '-' + s.x + '-' + s.y : ''))) + '.png';
-    if (${JSON.stringify(mode)} === 'play') { await page.screenshot({ path: file }); done.push(file); continue; }
+    if (s.act === 'pound') { await page.evaluate(() => { const G = window.__G; G.breakUnder(G.player); }); await page.waitForTimeout(1200); } // the pound's own break (game.breakUnder)
+    if (${JSON.stringify(mode)} === 'play' || ${args.includes('--tips')}) {
+      await page.screenshot({ path: file });
+      const t = ${args.includes('--tips')} ? await page.evaluate(() => window.__game.tips()) : null;
+      done.push(file + (t ? '  card: ' + (t.shown ? t.shown.slot + ' ' + JSON.stringify(t.shown.text) + (t.shown.under ? ' (under)' : '') : 'none') + '; notes: ' + t.notes.map((n) => (n.kind === 'card' ? 'card' : n.live ? (n.read ? 'read' : 'unread') : 'retired')).join(',') : ''));
+      continue;
+    }
     const dims = await page.evaluate(() => {
       window.__game.freeze();
       const G = window.__G, R = window.__renderer, cv = R.canvas, room = G.room;
@@ -80,6 +96,6 @@ const code = `async page => {
     done.push(file);
   }
   await page.setViewportSize({ width: ${W}, height: ${H} });
-  return done.length + ' shots';
+  return done.length + ' shots: ' + done.join(' | ');
 }`;
 console.log(cli('run-code', code).split('### Result')[1]?.split('###')[0]?.trim());

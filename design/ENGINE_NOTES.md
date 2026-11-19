@@ -134,12 +134,20 @@ A room:
 { type: 'hide', x: 4, y: 33, w: 1, small: false }        // same as the h / m markers, with a width
 { type: 'hook', x: 18, y: 10 }                            // same as H
 { type: 'checkpoint', x: 3, y: 33 }  { type: 'save', x: 6, y: 15 }  { type: 'beacon', x: 27, y: 10 }
-{ type: 'sign', x: 1, y: 15, w: 9, text: '{jump} jumps (hold it for higher).' }
+{ type: 'sign', x: 1, y: 15, w: 9, text: '{jump} jumps (hold it for higher).' } // a tip's paper note (see below); nx, kind, at optional
 { type: 'loud', x: 20, y: 28, w: 5, h: 6 }                // loud zone: shoves you back out without Earplugs
 { type: 'current', x: 7, y: 13, w: 14, h: 3, vx: 1.2 }    // pushes the raft, tiles per second
 { type: 'door', x: 5, y: 15, to: 'room-id', at: [3, 15] } // Up to use; for non-adjacent links (auto, needs: see Entities and mechanics)
 { type: 'boss', boss: 'duchess', x: 16, y: 15 }           // see Bosses
 ```
+
+**Signs are notes on the path** ([issue 9], `src/notes.js`): the note stands at column `nx` (else the span's centre
+column) on the first standable tile at the sign's row or one below (never water or a hazard; a one-way plank counts; a
+solid tile at the row holds it on top), stepping up to 2 columns to keep clear of a save, checkpoint, hide, door, lair
+door, item or cage; if its ground breaks or opens later it retires. `kind: 'card'` is a card with no note (Nana's phase
+hints); `at: 'low'` asks for the card's lower slot (the tongs). The HUD card shows when the cricket comes within 2 tiles
+of the note on its floor (ui.js `updateTips`). A script tip mid-scene: `game.scriptNote(textId, signEntity)` (it flutters
+down). `node tools/sign-check.mjs` checks every note (and `--wrap`: every tip fits 2 lines at 667x375).
 
 **Text with `{action}` tokens** (signs; also usable via `ui.richText`) renders each token as a
 key cap or pad glyph for whatever the player used last (`{jump}`, `{use}`, `{down}`, `{left}`…).
@@ -1163,8 +1171,8 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   lunged yet, sniffs 2 s and shrugs; the beat sets **`player.hideHold`** each step while she's awake and he's hidden (player.js
   `_hide`: only Jump leaves; ui.js prompts "Jump to leave"). A Chirp in the log (the `'reveal'` event, read from `game.fx`) or a Jump
   out while she's at it: a recoil, no skitter. The shrug adds `'duchess-asleep'` to `g.rs('tank-sand').taken`: the exit hold
-  (`e.exit`, col 60) and a quiet nap on coming back read that flag, never her mode. The "Hide in the log!" sign is pushed into
-  `g.signs` by the script. Checks: `tools/tank-test.mjs`; rewind cases in tools/rewind-test.mjs.
+  (`e.exit`, col 60) and a quiet nap on coming back read that flag, never her mode. The "Hide in the log!" note is put up at the log's mouth by
+  the script (`g.scriptNote`, [issue 9]). Checks: `tools/tank-test.mjs`; rewind cases in tools/rewind-test.mjs.
 - [final-G] `chikchak.js`: `b.away` (2.5 s facing away at every phase start: no sight), knock-back clamp at x 2 tiles.
   `peridot.js` phase 1: two tugs (`b.half`, `b.needFloor`, lamp flicker). `gargy.js` phase 1: two bonks, the second from the
   other side cushion (`b.once`, `b.side1`).
