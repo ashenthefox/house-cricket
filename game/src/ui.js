@@ -63,6 +63,12 @@ export class UI {
     // [issue 10] the ear guide: it rests as a HUD button (this.earDock) and comes out to the screen edge
     // (this.indicator) when it helps; a click pins / rests / dismisses it, a double click toggles auto-chirp
     this.indicator = h('button', { type: 'button', class: 'chirp-ind', id: 'chirp-indicator', hidden: '', tabindex: '-1', 'aria-label': 'Ear guide' });
+    // [issue #10 review] the nudge and the fade play once: clear them when they end, or showing the ear again
+    // (from display:none) restarts them, and every later Listen would wobble like a lost-out
+    this.indicator.addEventListener('animationend', (e) => {
+      if (e.animationName === 'ear-this-way') this.indicator.classList.remove('this-way');
+      else if (e.animationName === 'ear-fade') this.indicator.classList.remove('fade-in');
+    });
     this.indicator.innerHTML = '<span class="ci-ring"></span><svg viewBox="-32 -32 64 64" class="ci-svg" aria-hidden="true">'
       + '<g class="ci-waves"><path class="w1" d="M19.5 -11.3 A22.5 22.5 0 0 1 19.5 11.3"/><path class="w2" d="M24.2 -14 A28 28 0 0 1 24.2 14"/><path class="w3" d="M28.6 -16.5 A33 33 0 0 1 28.6 16.5"/></g>'
       + '<circle class="ci-disc" r="16"/>' + EAR_PATHS + '<path class="ci-gap" d="M-10 -10 L10 10"/><path class="ci-strike" d="M-10 -10 L10 10"/></svg>';
@@ -431,7 +437,7 @@ UI.prototype.updateMetaHUD = function (info) {
     if (ear.chirpAt != null && ear.chirpAt !== this._indChirp) { this._indChirp = ear.chirpAt; const r = this.indicator.firstChild; r.classList.remove('go'); void r.offsetWidth; r.classList.add('go'); }
     // lost: a short "this way" nudge (main.js plays the soft cue)
     if (ear.pulseN !== this._earPulseN) { this._earPulseN = ear.pulseN; const c = this.indicator.classList; c.remove('this-way'); void this.indicator.offsetWidth; c.add('this-way'); }
-  } else { this.indicator.hidden = true; if (ear) this._earPulseN = ear.pulseN; }
+  } else { if (!this.indicator.hidden) { this.indicator.hidden = true; this.indicator.classList.remove('this-way', 'fade-in'); } if (ear) this._earPulseN = ear.pulseN; }
   this._earSnap = ear?.snap; this._earRoom = ear?.room;
   // [final-S] the visual double (design: HUD, beacon): screen-edge ripples and the rhythm strip,
   // while listening, for 4 s after a call, or always with "Always show beacon ripples"
