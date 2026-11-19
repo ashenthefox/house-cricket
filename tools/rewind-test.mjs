@@ -20,7 +20,7 @@ import { Game } from '../game/src/game.js';
 import { Input } from '../game/src/input.js';
 import { ZONES } from '../game/data/rooms/index.js';
 import { MetaLite } from './sim.mjs';
-import { endState } from './author.mjs';
+import { endState, Author } from './author.mjs';
 import { Rewinder, digest, isShared, markStatics, BACK } from '../game/src/rewind.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -112,6 +112,28 @@ if (want(['tank', 'zone-00-path'])) {
   ok(landed != null && squeezed != null, 'tank: the pebble lands and the lid squeeze happens');
   if (landed != null) check(n, sol(n).frames, [landed + 10, landed + 11], 'tank pebble landed, rewound twice, to the end');
   if (squeezed != null) check(n, sol(n).frames, [squeezed + 30], 'tank lid squeezed, rewound, to the end');
+}
+// [issue 7] Duchess hunts (tank.js Sand): mid-tell, mid-lunge, mid-sniff while hidden, right after the flag
+// (zone-00-path); and mid-skitter, from a short run authored here that stands still to be caught
+if (want(['tank', 'zone-00-path', 'duchess-hunt'])) {
+  const n = 'zone-00-path', sand = (g) => g.room.id === 'tank-sand' && g.boss;
+  const tell = firstFrame(n, (g) => sand(g) && g.boss.mode === 'tell');
+  const lunge = firstFrame(n, (g) => sand(g) && g.boss.mode === 'lunge');
+  const sniff = firstFrame(n, (g) => sand(g) && g.boss.mode === 'sniff' && g.player.state === 'hide');
+  const flag = firstFrame(n, (g) => g.room.id === 'tank-sand' && g.rs('tank-sand').taken.has('duchess-asleep'));
+  ok(tell != null && lunge != null && sniff != null && flag != null, 'tank hunt: the tell, the lunge, the sniff and the flag happen');
+  if (tell != null) check(n, tell + 160, [tell + 20], 'tank hunt mid-tell');
+  if (lunge != null) check(n, lunge + 150, [lunge + 6], 'tank hunt mid-lunge');
+  if (sniff != null) check(n, sniff + 200, [sniff + 50], 'tank hunt mid-sniff, hidden');
+  if (flag != null) { check(n, flag + 150, [flag + 1], 'tank hunt right after the flag'); check(n, sol(n).frames, [flag + 1], 'tank hunt right after the flag, to the end'); }
+  // caught: stand still through a tell (the skitter)
+  const a = new Author({ room: 'tank-sand', x: 1, y: 15, items: [], party: ['pip'] });
+  a.down('ArrowRight').until((g) => g.player.cx > 16 * 40, 300).tap('KeyZ', 8).until((g) => g.player.cx > 25 * 40, 300).up('ArrowRight');
+  a.until((g) => g.boss.catches > 0, 900, 'caught');
+  const caught = a.f;
+  a.wait(240);
+  sols['tank-catch'] = { name: 'tank-catch', start: a.start, frames: a.f, events: a.events, endState: null };
+  check('tank-catch', caught + 150, [caught + 10], 'tank hunt mid-skitter');
 }
 // chikchak's steam vents (module constants compared by identity: a copied one made an extra steam event)
 if (want(['zone-02-boss', 'chikchak'])) for (const T of [805, 1005, 1115, 1185]) { check('zone-02-boss', T + 90, [T], `chikchak vents @${T}`); check('zone-02-boss', sol('zone-02-boss').frames, [T], `chikchak vents @${T}, to the end`); }

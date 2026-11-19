@@ -114,14 +114,21 @@ if (want('zone-00')) {
   walkTo(a, 15.2);
   a.down(R).tap(J, 22).until(ground, 120, 'out of the cup').log('out');
   a.until((g) => g.room.id === 'tank-sand', 300, 'to the sand').log('sand');
-  // past Duchess; hop the ripples and berms
+  // past Duchess (asleep); hop the ripples and berms
   a.until((g) => g.player.cx > 16 * T, 300, 'by her').tap(J, 8).wait(30)
    .until((g) => g.player.cx > 28.5 * T, 300, 'berm 1').tap(J, 14).wait(20)
    .until((g) => g.player.cx > 38.5 * T, 300, 'ripple').tap(J, 10).wait(20)
    .until((g) => g.player.cx > 46.5 * T, 300, 'berm 2').tap(J, 14)
-   // [final-G] the exit waits for Duchess's two lunges (the tell is always taught)
-   .until((g) => g.boss.lunges >= 2, 1500, 'two lunges').log(`lunges done at ${Math.round(a.g.player.cx / T)}`)
-   .until((g) => g.room.id === 'tank-decor', 400, 'to the decor').up(R).log('decor');
+   .until((g) => g.player.cx >= 52 * T, 300, 'past berm 2').up(R).log('at 52');
+  // [issue 7] Duchess hunts: she lunges at him behind berm 2 (the tell is taught), then he hides in the
+  // log until she sniffs, shrugs and turns away: the exit opens. (The hunt made the tank 239 frames
+  // longer: full-run.mjs's G0, the Bedroom's start frame, moved with it.)
+  a.until((g) => g.boss.lunges >= 1 && g.boss.mode !== 'lunge', 900, 'her first lunge').log(`her first lunge ended (${a.g.boss.catches} catches)`);
+  walkTo(a, 58.5, 'the log');
+  for (let i = 0; i < 20 && a.p.state !== 'hide'; i++) a.tap(U, 2).wait(2);
+  a.until((g) => g.player.state === 'hide', 1, 'hidden').log('hidden in the log');
+  a.until((g) => g.rs('tank-sand').taken.has('duchess-asleep'), 900, 'she loses him').log('she has lost him');
+  a.down(R).until((g) => g.room.id === 'tank-decor', 400, 'to the decor').up(R).log('decor');
   walkTo(a, 4);
   climb(a, [[7, 32], [12, 32]]);
   climb(a, [[17, 30, { from: 13.5 }], [26, 28, { from: 22.8, delay: 2 }], [26.5, 26], [26.5, 24], [22, 22, { from: 25.3, delay: 2 }]]).log('under the pebble');
