@@ -22,20 +22,21 @@ import * as Geckos from '../geckos.js';
 import * as Audio from '../audio.js';
 import { voiceOf } from '../meta.js';
 import { line } from '../lines.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const T = TILE;
 const X0 = 12 * T, X1 = 95 * T;                        // the arena floor between the chimney breast and the door
-const BANDS = { low: [27 * T, 34 * T], high: [19 * T, 27 * T] };
-const STONES = [
+const BANDS = constant({ low: [27 * T, 34 * T], high: [19 * T, 27 * T] });
+const STONES = constant([
   { id: 'fork', prop: 'music-stone-fork', voice: 'low', x: 16, y: 31, note: 0 },
   { id: 'glass', prop: 'music-stone-glass', voice: 'mid', x: 50, y: 25, note: 2 },
   { id: 'bell', prop: 'music-stone-bell', voice: 'high', x: 75, y: 21, note: 4 },
-];
-const VOICE_COLOR = { low: '#9DB2E0', mid: '#E8B85A', high: '#E8846F' };
-const VOICE_NAME = { low: 'low', mid: 'middle', high: 'high' };
+]);
+const VOICE_COLOR = constant({ low: '#9DB2E0', mid: '#E8B85A', high: '#E8846F' });
+const VOICE_NAME = constant({ low: 'low', mid: 'middle', high: 'high' });
 const BEAT = 50, BEATS = 16, WINDOW = 9;               // 72 BPM; +/-150 ms
 const STONE_HEAR = 9;                                  // [fixer] tiles: a stone hears its voice this far (was 6)
-const NC_VOICE = { peeper: 'peeper', soot: 'swift-chitter', velvet: 'bat-squeaks', beep: 'alarm' };
+const NC_VOICE = constant({ peeper: 'peeper', soot: 'swift-chitter', velvet: 'bat-squeaks', beep: 'alarm' });
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const stoneBox = (s) => ({ x: s.x * T - 4, y: s.y * T - 8, w: T + 8, h: T + 8 });
 

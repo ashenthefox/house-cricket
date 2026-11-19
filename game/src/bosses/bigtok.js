@@ -15,21 +15,22 @@ import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
 import * as Geckos from '../geckos.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const LEN = 560;                                   // drawn height (tall rig), px
-const HOME = { x: 31 * T, y: 18.5 * T };            // body centre on the backsplash
+const HOME = constant({ x: 31 * T, y: 18.5 * T });            // body centre on the backsplash
 const COUNTER = 30 * T, BASIN = [24 * T, 38 * T];
-const SHELF = [0, 26 * T, 18 * T, 10 * T];         // phase goals: ledge 1, ledge 2, the top
+const SHELF = constant([0, 26 * T, 18 * T, 10 * T]);         // phase goals: ledge 1, ledge 2, the top
 const STUCK = 5 * FPS, WAVE = 9 * T;
-const EVERY = [0, 4.5, 4, 3.5].map((s) => Math.round(s * FPS));
-const DECOYS = [
+const EVERY = constant([0, 4.5, 4, 3.5].map((s) => Math.round(s * FPS)));
+const DECOYS = constant([
   null,
   { kind: 'cork', x: 39.5 * T, y: COUNTER, h: 0.9 * T },
   { kind: 'wooden-spoon', x: 9 * T, y: SHELF[1], h: 0.55 * T },
   { kind: 'sponge', x: 9 * T, y: SHELF[2], h: 0.9 * T },
-];
-const JAR = { x: 3.6 * T, y: SHELF[3] };
+]);
+const JAR = constant({ x: 3.6 * T, y: SHELF[3] });
 const reach = (p) => p.cx > 10 * T && p.cx < 52 * T;
 
 export default makeBoss('bigtok', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post

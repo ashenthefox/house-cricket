@@ -15,12 +15,13 @@ import { TILE, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
 import * as Geckos from '../geckos.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const T = TILE;
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const TAU = Math.PI * 2;
-const LOOP = [10, 8, 7];                      // seconds per lap, by phase
-const SOIL = { x0: 27, x1: 39, y: 34 };       // the soil bed Digby drops into (tiles; y = its surface row)
+const LOOP = constant([10, 8, 7]);                      // seconds per lap, by phase
+const SOIL = constant({ x0: 27, x1: 39, y: 34 });       // the soil bed Digby drops into (tiles; y = its surface row)
 
 // path position (px) at lap fraction u (0..1), by phase
 function pathAt(phase, u) {

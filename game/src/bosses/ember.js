@@ -13,14 +13,15 @@
 // Losing (no hearts) restarts the phase (base.js). Nobody is hurt: she is only ever dazzled.
 import { TILE, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const T = TILE;
 const FLOOR = 9 * T;                 // the den floor (upper level)
 const X0 = 7 * T, X1 = 93 * T;       // where she can go
-const CRACK = { x: 93.6 * T, y: 6 * T, w: 1.6 * T, h: 3 * T };
+const CRACK = constant({ x: 93.6 * T, y: 6 * T, w: 1.6 * T, h: 3 * T });
 const MIDDLE = 46 * T, CRACK_X = 86 * T;
-const SPEED = [0, 2.6, 3.0, 3.4];    // tiles/s while hunting, per phase
-const HOME = [0, 28, 62, 74];        // where she starts each phase (tile column)
+const SPEED = constant([0, 2.6, 3.0, 3.4]);    // tiles/s while hunting, per phase
+const HOME = constant([0, 28, 62, 74]);        // where she starts each phase (tile column)
 const DAZE = 4 * FPS, WARY = 90, LIT = 6 * FPS;
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 

@@ -15,13 +15,14 @@ import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { TEXT } from '../../data/text.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const LEN = 300, FLOOR = 16 * T, WALL_Y = 6 * T;
 const SIGHT = 10 * T, EVERY = 4 * FPS, LASTS = 3 * FPS;
-const FAUCETS = [{ x: 22.5 * T, y: FLOOR }, { x: 36.5 * T, y: FLOOR }, { x: 39.5 * T, y: 6 * T }];
-const VENTS = { a: { x: 22.5 * T, y0: 9 * T, y1: FLOOR, w: 6 * T }, b: { x: 34 * T, y0: 9 * T, y1: FLOOR, w: 6 * T }, riser: { x: 46 * T, y0: 1.5 * T, y1: FLOOR, w: 9 * T } };
-const DISH = { x: 57 * T, y: 7 * T, w: 5 * T, h: 2.2 * T };
+const FAUCETS = constant([{ x: 22.5 * T, y: FLOOR }, { x: 36.5 * T, y: FLOOR }, { x: 39.5 * T, y: 6 * T }]);
+const VENTS = constant({ a: { x: 22.5 * T, y0: 9 * T, y1: FLOOR, w: 6 * T }, b: { x: 34 * T, y0: 9 * T, y1: FLOOR, w: 6 * T }, riser: { x: 46 * T, y0: 1.5 * T, y1: FLOOR, w: 9 * T } });
+const DISH = constant({ x: 57 * T, y: 7 * T, w: 5 * T, h: 2.2 * T });
 const LURE = TEXT.geckos.chikchak.lure;
 
 function cloudsOn(b, g) {

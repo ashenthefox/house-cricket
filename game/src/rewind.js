@@ -1,5 +1,5 @@
 // [issue 11] Debug rewind: Backspace jumps the game back about five seconds (main.js turns it on
-// with ?rewind in the URL, or on localhost). No DOM, so node tools can test it
+// with ?rewind in the URL; nothing else does). No DOM, so node tools can test it
 // (tools/rewind-test.mjs).
 //
 // How: a ring buffer of whole-simulation snapshots. Every EVERY game frames the buffer deep-copies
@@ -9,8 +9,12 @@
 // rescue card). A rewind copies one back INTO the live Game object, so closures that hold the
 // game (game.ctx, the world's tile hook) keep working, and references back to the game stay it.
 //   - shared, never copied: the World (rooms, entities: read-only after load), the boss tables,
-//     functions, and anything that isn't a plain object, array, Set, Map or typed array (images,
-//     canvases, audio nodes: render and audio caches, not game state);
+//     frozen objects (module constants: world.js constant() deep-freezes them, so code that
+//     compares against them by identity still finds them after a rewind), functions, and anything
+//     that isn't a plain object, array, Set, Map or typed array (images, canvases, audio nodes:
+//     render and audio caches, not game state);
+//   - so sim state must never live in a closure: a function in the state is shared as it is, and
+//     would go on writing to the original (tools/rewind-test.mjs checks for any);
 //   - copied as generators: seeded() / rngFrom() functions (they expose rngState()).
 // Snapshots never touch a save slot: a rewind writes nothing and a save already written stays.
 import { rngFrom } from './world.js';
@@ -36,7 +40,8 @@ function markShared(root) {
     for (const k of kids) if (k && typeof k === 'object' && !shared.has(k)) stack.push(k);
   }
 }
-function markStatics(game) { markShared(game.world); markShared(LAIRS); markShared(BOSSES); }
+export const isShared = (v) => shared.has(v) || (typeof v === 'object' && v !== null && Object.isFrozen(v));
+export function markStatics(game) { markShared(game.world); markShared(LAIRS); markShared(BOSSES); }
 
 const PLAIN = new Set(['[object Object]', '[object Array]', '[object Set]', '[object Map]']);
 const copyable = (v) => PLAIN.has(Object.prototype.toString.call(v)) || (ArrayBuffer.isView(v) && !(v instanceof DataView));
@@ -50,7 +55,7 @@ export function copy(v, memo) {
   }
   if (v === null || typeof v !== 'object') return v;
   if (memo.has(v)) return memo.get(v);
-  if (shared.has(v) || !copyable(v)) return v;
+  if (isShared(v) || !copyable(v)) return v;
   let c;
   if (ArrayBuffer.isView(v)) { c = v.slice(); memo.set(v, c); return c; }
   if (v instanceof Set) { c = new Set(); memo.set(v, c); for (const x of v) c.add(copy(x, memo)); return c; }
@@ -103,27 +108,28 @@ export class Rewinder {
     return true;
   }
   // Back to the newest snapshot at least `back` frames old (else the oldest one there is).
-  // Returns { frames: how far it went, extra } or null when there is no history.
+  // Returns { frames: how far it went, extra } or null when there is no older history (nothing changes).
   rewind(game, back = BACK) {
     if (game !== this.game || !this.snaps.length) return null;
     let i = this.snaps.length - 1;
     while (i > 0 && this.snaps[i].frame > game.frame - back) i--;
     const snap = this.snaps[i], frames = game.frame - snap.frame;
+    if (frames <= 0) return null;
     this.snaps.length = i + 1; // the later ones are gone; this one stays (the game is at it now)
     return { frames, extra: restore(game, snap) };
   }
 }
 
 // A canonical text of the state (tools/rewind-test.mjs compares two runs with it). Shared objects
-// by id; generators by their state; gridVersion and the renderer's marks (_fx, _pl) left out.
+// by the order they are met (markStatics(game) first, in both runs); generators by their state; gridVersion and the renderer's marks (_fx, _pl) left out.
 const SKIP = new Set(['gridVersion', '_fx', '_pl']);
 export function digest(root) {
-  const seen = new Map(); let n = 0;
+  const seen = new Map(), sh = new Map(); let n = 0;
   const out = [];
   const walk = (v) => {
     if (typeof v === 'function') { out.push(v.rngState ? `rng(${v.rngState()})` : 'fn'); return; }
     if (v === null || typeof v !== 'object') { out.push(typeof v === 'number' ? (Object.is(v, -0) ? '-0' : String(v)) : JSON.stringify(v) ?? 'undefined'); return; }
-    if (shared.has(v)) { out.push(`S${shared.get(v)}`); return; }
+    if (isShared(v)) { if (!sh.has(v)) sh.set(v, sh.size); out.push(`S${sh.get(v)}`); return; } // numbered as met: two games compare
     if (seen.has(v)) { out.push(`@${seen.get(v)}`); return; }
     seen.set(v, n++);
     if (!copyable(v)) { out.push(`<${Object.prototype.toString.call(v)}>`); return; }

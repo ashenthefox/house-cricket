@@ -16,11 +16,12 @@ import { TILE, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as Geckos from '../geckos.js';
 import * as S from '../sprites.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const LEN = 190;                                  // nose-to-tail px on screen (he fits a shelf)
-const GLINT = { normal: 1.0, gentle: 1.5 };       // s
-const RELOCATE = [3, 2, 1.5];                     // s per phase
-const ALPHA = { hidden: 0.1, gentleHidden: 0.16, moving: 0.45 };
+const GLINT = constant({ normal: 1.0, gentle: 1.5 });       // s
+const RELOCATE = constant([3, 2, 1.5]);                     // s per phase
+const ALPHA = constant({ hidden: 0.1, gentleHidden: 0.16, moving: 0.45 });
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 
 function spotsOf(b) {

@@ -25,7 +25,7 @@ import * as HOUSE from '../data/house.js';
 import { ASSET_FILES as ASSET_LIST } from '../data/assets.js';
 import { drawMech } from './mech-draw.js'; // [mech] engine mechanics drawing
 import { ArtGate } from './room-art.js'; // [art] a room shows once its art is in (issue #5)
-import { Rewinder } from './rewind.js'; // [issue 11] debug: Backspace rewinds about 5 s
+import { Rewinder, BACK } from './rewind.js'; // [issue 11] debug: Backspace rewinds about 5 s
 
 const STEP_MS = 1000 / FPS;
 const PAUSE_TABS = new Set(['pause', 'map', 'crickets', 'sounds']); // [final-S] the pause menu's own tabs
@@ -49,9 +49,10 @@ let titleReady = !!window.__bootPressed; // "Press any key or button" until the 
 window.__bootDone?.();
 let padNote = '';
 const frameLog = [];
-// [issue 11] Debug rewind: Backspace in play jumps back about 5 s (src/rewind.js). On with ?rewind,
-// ?dev or on localhost; ?rewind=0 turns it off. Off, Backspace is only the menus' Back, as before.
-const REWIND = (() => { const q = new URLSearchParams(location.search); return q.has('rewind') ? q.get('rewind') !== '0' : q.has('dev') || ['localhost', '127.0.0.1'].includes(location.hostname); })();
+// [issue 11] Debug rewind: Backspace in play jumps back about 5 s (src/rewind.js). On only with
+// ?rewind in the URL (not ?dev, not localhost: replays and local playtests run the players' game).
+// Off, Backspace is only the menus' Back, as before.
+const REWIND = (() => { const q = new URLSearchParams(location.search); return q.has('rewind') && q.get('rewind') !== '0'; })();
 const rewinder = REWIND ? new Rewinder() : null;
 let rewindCue = null, rewindCueT = 0;
 let heldOver = null; // [issue 16] 'story' | 'title': that screen stays up while the room after it loads (foldIntoStory, continueGame)
@@ -452,10 +453,10 @@ function step() {
 // twice; the screen's own settings (camera size, Gentle Mode, upgrades) stay as they are now.
 // Never writes or reads a save slot.
 function rewind() {
-  const cam = game.camera, keep = { zoom: cam.zoom, hFrac: cam.hFrac, touchBias: cam.touchBias, avoid: cam.avoid };
+  const cam = game.camera, keep = { zoom: cam.zoom, hFrac: cam.hFrac, touchBias: cam.touchBias, avoid: cam.avoid }, gentle = game.gentle;
   const r = rewinder.rewind(game);
   if (r) {
-    Object.assign(game.camera, keep);
+    Object.assign(game.camera, keep); game.gentle = gentle;
     metaRun.pendingCard = r.extra?.pendingCard || null; metaRun.lastFx = game.frame;
     lastFxSound = game.frame;
     renderer.fx.p.length = 0; renderer.fx.spot = null;
@@ -463,7 +464,8 @@ function rewind() {
     applyUpgrades(); updateTouchButtons();
   }
   if (!rewindCue) { rewindCue = document.createElement('div'); rewindCue.className = 'rewind-cue'; rewindCue.setAttribute('aria-live', 'polite'); stage.appendChild(rewindCue); }
-  rewindCue.textContent = r ? `\u27F2 ${(r.frames / FPS).toFixed(1)} s` : '\u27F2 no history yet';
+  // a short history (the room just started, or just rewound) says so
+  rewindCue.textContent = !r ? '\u27F2 no older history' : `\u27F2 ${(r.frames / FPS).toFixed(1)} s${r.frames < BACK ? ' (no older history)' : ''}`;
   rewindCue.classList.add('on'); clearTimeout(rewindCueT); rewindCueT = setTimeout(() => rewindCue.classList.remove('on'), 900);
 }
 // [audio] menu move / select / back sounds around the one focus model

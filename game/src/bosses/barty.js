@@ -17,20 +17,21 @@ import { TEXT } from '../../data/text.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
 import { ensure } from '../meta.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
-const IMG = { eye: 'sprites/npcs/barty-eye.png', head: 'sprites/npcs/barty-head.png', black: 'sprites/npcs/barty-head-black.png', claw: 'sprites/npcs/barty-claw.png' };
+const IMG = constant({ eye: 'sprites/npcs/barty-eye.png', head: 'sprites/npcs/barty-head.png', black: 'sprites/npcs/barty-head-black.png', claw: 'sprites/npcs/barty-claw.png' });
 // Tile geometry of dragon-lair (tools/make-lair.py)
 const TIER2 = { feet: 28, x0: 38 };          // stand row 27: feet at the top of row 28
-const TOP = { feet: 20, x0: 70, x1: 79 };    // the summit: feet at the top of row 20
-const HEAD = { left: 77 * T, w: 1000 };      // head image placement (eye at 0.37 w, 0.2 h)
-const E = { x: HEAD.left + 0.37 * HEAD.w, y: 13.5 * T };
+const TOP = constant({ feet: 20, x0: 70, x1: 79 });    // the summit: feet at the top of row 20
+const HEAD = constant({ left: 77 * T, w: 1000 });      // head image placement (eye at 0.37 w, 0.2 h)
+const E = constant({ x: HEAD.left + 0.37 * HEAD.w, y: 13.5 * T });
 const HALF = 3 * T;                          // half-width of the patch of hoard his gaze lights (px)
 const SWEEP = 180;                           // frames for one pass of the gaze (eyeSweep 3 s)
 const CLAW_V = 20 * T;                       // px/s
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const lines = (k) => TEXT.npcs.barty[k];
 // the surface (feet y, px) of the hoard at a column, for drawing the gaze (tools/make-lair.py tops)
-const SURF = [[0, 34], [30, 32], [34, 30], [38, 28], [58, 26], [62, 24], [66, 22], [70, 20]];
+const SURF = constant([[0, 34], [30, 32], [34, 30], [38, 28], [58, 26], [62, 24], [66, 22], [70, 20]]);
 const surfaceAt = (x) => { let y = 34; for (const [c, r] of SURF) if (x >= c * T) y = r; return y * T; };
 
 function feet(p) { return p.y + p.h; }

@@ -14,16 +14,17 @@
 import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const LEN = 360;                       // nose to tail, px
 const BODY = LEN * 0.62;               // nose to the tail's root
 const FLOOR = 16 * T, ROCK = { x0: 28 * T, x1: 36 * T, top: 12 * T };
 const BERM_L = 22 * T, BERM_R = 42 * T; // the berms' inner faces (where a snout sticks)
-const TABS = [{ x: 30.5 * T }, { x: 33.5 * T }, { x: 32 * T }];
+const TABS = constant([{ x: 30.5 * T }, { x: 33.5 * T }, { x: 32 * T }]);
 const CUP_X = 32 * T;
 const STUCK = 3 * FPS, LUNGE = 12 * T;  // 3 s; 12 tiles/s
-const SPEED = [0, 3.0, 3.4, 3.8];       // stalk speed per phase, tiles/s
+const SPEED = constant([0, 3.0, 3.4, 3.8]);       // stalk speed per phase, tiles/s
 
 function nose(b) { return b.x + b.facing * BODY / 2; }
 function floorAt(x) { return x > ROCK.x0 - 20 && x < ROCK.x1 + 20 ? ROCK.top : FLOOR; }

@@ -29,7 +29,7 @@
 // Deterministic: b.rng is seeded per boss and phase. No DOM in update.
 import { TILE, FPS } from '../../data/movement.js';
 import { LAIRS } from '../../data/house.js';
-import { seeded } from '../world.js';
+import { seeded, constant } from '../world.js';
 import * as Geckos from '../geckos.js';
 
 export const TELL = { normal: 0.8, gentle: 1.2 };
@@ -156,7 +156,8 @@ export class BossBase {
 
 // A boss module from a spec (see the top of this file). Register it in bosses/index.js.
 export function makeBoss(name, spec = {}) {
-  return { create(game, e) { return new BossBase(game, e, { name, ...spec }); }, art: (e, game) => bossArt(name, spec, e, game) };
+  const full = constant({ name, ...spec }); // [issue 11] frozen: shared, never copied, by a rewind
+  return { create(game, e) { return new BossBase(game, e, full); }, art: (e, game) => bossArt(name, spec, e, game) };
 }
 // [art] What a fight draws, for src/room-art.js to load before the lair shows:
 //   { gecko: the rig's name or null, props: ['props/ names or paths'], crickets: { id: [looks] } }

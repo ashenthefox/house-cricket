@@ -9,6 +9,9 @@
 //   lid   (beats 5-6) hold Up under the lid gap to squeeze through; Pip's leap off the rim tips the
 //         feeder cup off the tank; then story 'tankEscaped' (panel 4, the Bedroom).
 // Deterministic, no DOM in update; draws with the renderer's props and the gecko rig.
+// [issue 11] Each beat's state is an object whose methods (update, draw, finish) live on a shared
+// prototype and read it through `this`, never a closure: a rewind (src/rewind.js) copies the state and
+// the copy runs. Room constants come from the entity (s.e); the game is s.g.
 import { TILE, DT } from '../../data/movement.js';
 import { TEXT } from '../../data/text.js';
 import * as S from '../sprites.js';
@@ -28,12 +31,16 @@ function img(c, path, x, y, w, h, alpha = 1, rot = 0) {
 }
 
 // ---------------------------------------------------------------- beat 1-2: the tongs
+const CUP_XS = Object.freeze([12.5, 15.5, 14]); // tile columns of the three dips (left, right, middle)
+const cupFloor = (e) => (e.floor ?? 10) * T;   // the cup floor (px)
 function cup(g, e) {
-  const xs = [12.5, 15.5, 14];             // tile columns of the three dips (left, right, middle)
-  const floorY = (e.floor ?? 10) * T;      // the cup floor (px)
-  const s = { phase: null, music: 'title', i: 0, t: -90, mode: 'wait', tipY: -6 * T, x: xs[0] * T, caught: 0, done: false };
-  const inCup = () => { const p = g.player; return p.cx > (e.cup?.[0] ?? 11) * T && p.cx < (e.cup?.[1] ?? 17) * T && p.y + p.h > floorY - 2.5 * T; };
-  s.update = () => {
+  return Object.assign(Object.create(Cup), { g, e, phase: null, music: 'title', i: 0, t: -90, mode: 'wait', tipY: -6 * T, x: CUP_XS[0] * T, caught: 0, done: false });
+}
+const Cup = {
+  setPhase() {},
+  inCup() { const { g, e } = this, p = g.player; return p.cx > (e.cup?.[0] ?? 11) * T && p.cx < (e.cup?.[1] ?? 17) * T && p.y + p.h > cupFloor(e) - 2.5 * T; },
+  update() {
+    const s = this, g = s.g, xs = CUP_XS, floorY = cupFloor(s.e), inCup = () => s.inCup();
     const p = g.player;
     if (s.done) return;
     s.t++;
@@ -57,14 +64,15 @@ function cup(g, e) {
       s.tipY += (-6 * T - s.tipY) * 0.08;
       if (s.t > 40) { if (s.i >= 3) s.finish(); else { s.mode = 'wait'; s.t = -20; } }
     }
-  };
-  s.finish = () => {
+  },
+  finish() {
+    const s = this, g = s.g, e = s.e, floorY = cupFloor(e);
     if (s.done) return;
     s.done = true; s.mode = 'gone';
     g.signs.push({ x: (e.cup?.[0] ?? 10) * T - 2 * T, y: floorY - T, w: 12 * T, text: TK.rim });
-  };
-  s.setPhase = () => {};
-  s.draw = (c) => {
+  },
+  draw(c) {
+    const s = this, e = s.e, floorY = cupFloor(e);
     // the feeder cup (its lower half: the lid is off), behind Pip
     const im = S.get('props/feeder-cup.png');
     if (im) { const cx = ((e.cup?.[0] ?? 11) + (e.cup?.[1] ?? 17)) / 2 * T, w = ((e.cup?.[1] ?? 17) - (e.cup?.[0] ?? 11) + 1.2) * T, h = w * 0.5;
@@ -79,16 +87,19 @@ function cup(g, e) {
     if (!img(c, 'props/tongs.png', s.x, s.tipY + 6, w * 1.1, h)) {
       c.save(); c.strokeStyle = '#8A7A5A'; c.lineWidth = 8; c.beginPath(); c.moveTo(s.x - 6, s.tipY - h); c.lineTo(s.x - 3, s.tipY); c.moveTo(s.x + 6, s.tipY - h); c.lineTo(s.x + 3, s.tipY); c.stroke(); c.restore();
     }
-  };
-  return s;
-}
+  },
+};
 
 // ---------------------------------------------------------------- beat 3: Duchess stirs (no-fail)
 function sand(g, e) {
-  const s = { phase: null, music: 'title', mode: 'asleep', t: 0, x: (e.x + 0.5) * T, y: (e.y + 1) * T, facing: 1, lunges: 0, pose: 'sleep', rig: null, wig: 0 };
-  const berms = (e.berms || [30, 48]).map((b) => (b + 0.5) * T);
-  const EXIT = (e.exit ?? 60) * T;
-  s.update = () => {
+  return Object.assign(Object.create(Sand), { g, e, phase: null, music: 'title', mode: 'asleep', t: 0, x: (e.x + 0.5) * T, y: (e.y + 1) * T, facing: 1, lunges: 0, pose: 'sleep', rig: null, wig: 0 });
+}
+const Sand = {
+  setPhase() {},
+  update() {
+    const s = this, g = s.g, e = s.e;
+    const berms = (e.berms || [30, 48]).map((b) => (b + 0.5) * T);
+    const EXIT = (e.exit ?? 60) * T;
     const p = g.player;
     s.t++;
     // [final-G] the way on waits until she has lunged twice (so everyone sees the tail tell)
@@ -129,9 +140,9 @@ function sand(g, e) {
     } else if (s.mode === 'sulk') {
       s.pose = 'idle';
     }
-  };
-  s.setPhase = () => {};
-  s.draw = (c, r) => {
+  },
+  draw(c, r) {
+    const s = this;
     if (!s.rig) { s.rig = Geckos.create('duchess'); Geckos.preload('duchess'); }
     if (!Geckos.ready('duchess')) return;
     if (s.wig) { s.rig.wiggle(s.wig); s.wig = 0; }
@@ -142,17 +153,20 @@ function sand(g, e) {
       c.save(); c.globalAlpha = Math.sin(tt * Math.PI) * 0.8; c.fillStyle = '#5A4632'; c.font = `bold ${18 + 10 * tt}px "Patrick Hand", sans-serif`;
       c.fillText('z', s.x + 90 + 10 * tt, s.y - 110 - 30 * tt); c.restore();
     }
-  };
-  return s;
-}
+  },
+};
 
 // ---------------------------------------------------------------- beat 4: kick the pebble
 function decor(g, e) {
-  const s = { phase: null, music: 'title', mode: 'sit', t: 0, px: (e.x + 0.2) * T, py: (e.y + 1) * T, vy: 0, rot: 0, land: e.land };
-  // [final-G] land: [x, y, w, h] tiles (default 1x1): a 2x2 rock makes a step 2 below the ledge (a 3 rise was pixel-exact)
-  const LW = s.land[2] || 1, LH = s.land[3] || 1;
-  function place() { for (let i = 0; i < LW; i++) for (let j = 0; j < LH; j++) g.grid.set(s.land[0] + i, s.land[1] + j, LH > 1 ? K.PROP : 1); g.gridVersion++; /* a big rock: solid, unpainted (the rock is drawn) */ s.px = (s.land[0] + LW / 2) * T; s.py = (s.land[1] + LH) * T; }
-  s.update = () => {
+  return Object.assign(Object.create(Decor), { g, e, phase: null, music: 'title', mode: 'sit', t: 0, px: (e.x + 0.2) * T, py: (e.y + 1) * T, vy: 0, rot: 0, land: e.land });
+}
+// [final-G] land: [x, y, w, h] tiles (default 1x1): a 2x2 rock makes a step 2 below the ledge (a 3 rise was pixel-exact)
+const landSize = (s) => [s.land[2] || 1, s.land[3] || 1];
+const Decor = {
+  setPhase() {},
+  place() { const s = this, g = s.g, [LW, LH] = landSize(s); for (let i = 0; i < LW; i++) for (let j = 0; j < LH; j++) g.grid.set(s.land[0] + i, s.land[1] + j, LH > 1 ? K.PROP : 1); g.gridVersion++; /* a big rock: solid, unpainted (the rock is drawn) */ s.px = (s.land[0] + LW / 2) * T; s.py = (s.land[1] + LH) * T; },
+  update() {
+    const s = this, g = s.g, [LW, LH] = landSize(s), place = () => s.place();
     const p = g.player;
     s.t++;
     if (s.mode === 'sit') {
@@ -173,23 +187,26 @@ function decor(g, e) {
         if (ov(tb, { x: p.x, y: p.y, w: p.w, h: p.h })) p.y = tb.y - p.h;
       }
     }
-  };
-  s.setPhase = () => {};
-  s.draw = (c) => {
+  },
+  draw(c) {
+    const s = this, g = s.g, [LW, LH] = landSize(s);
     const big = LH > 1, h = big ? (s.mode === 'step' ? LH * T + 6 : LH * T * 0.92) : (s.mode === 'step' ? 1.1 * T : 0.9 * T), w = big ? LW * T * 1.18 : h * 343 / 233;
     if (!img(c, 'props/pebble.png', s.px, s.py + (s.mode === 'step' ? 4 : 2), w * (s.mode === 'step' && !big ? 1.15 : 1), h, 1, s.rot)) {
       c.fillStyle = '#9A9486'; c.beginPath(); c.ellipse(s.px, s.py - h / 2, w / 2, h / 2, 0, 0, 7); c.fill();
     }
     if (s.mode === 'sit' && (g.frame % 90) < 45) { c.save(); c.globalAlpha = 0.6; c.fillStyle = '#F4EBDD'; c.font = 'bold 22px "Patrick Hand", sans-serif'; c.fillText('?', s.px - 5, s.py - h - 8); c.restore(); }
-  };
-  return s;
-}
+  },
+};
 
 // ---------------------------------------------------------------- beats 5-6: the lid gap
 function lid(g, e) {
-  const gx = e.gap[0], gy = e.gap[1];       // the gap tile (solid until squeezed)
-  const s = { phase: null, music: 'title', mode: 'wait', t: 0, held: 0, cupX: (e.cup[0] + 0.5) * T, cupY: (e.cup[1] + 1) * T, cupRot: 0, cupVy: 0, cupVx: 0 };
-  s.update = () => {
+  return Object.assign(Object.create(Lid), { g, e, phase: null, music: 'title', mode: 'wait', t: 0, held: 0, cupX: (e.cup[0] + 0.5) * T, cupY: (e.cup[1] + 1) * T, cupRot: 0, cupVy: 0, cupVx: 0 });
+}
+const Lid = {
+  setPhase() {},
+  update() {
+    const s = this, g = s.g, e = s.e;
+    const gx = e.gap[0], gy = e.gap[1];       // the gap tile (solid until squeezed)
     const p = g.player, inp = g.inp;
     s.t++;
     if (s.mode === 'wait') {
@@ -209,9 +226,9 @@ function lid(g, e) {
       if (s.t === 50) { g.emit('bellow', {}); g.emit('sfx', { name: 'splat', gain: 0.7 }); }
       if (s.t === 75) { s.mode = 'done'; if (g.meta?.flags?.inTank) g.emit('story', { name: 'tankEscaped' }); else g.toast('Free! (The story carries on from New Game.)', 180); } // only a real New Game hands over to panel 4
     }
-  };
-  s.setPhase = () => {};
-  s.draw = (c) => {
+  },
+  draw(c) {
+    const s = this, g = s.g, gx = s.e.gap[0], gy = s.e.gap[1];
     const mesh = S.get('props/mesh-lid.png');
     if (mesh) {
       const y0 = gy * T - 6, hh = T + 10;
@@ -222,9 +239,8 @@ function lid(g, e) {
     const h = tipped ? 2.2 * T : 2.8 * T;
     img(c, tipped ? 'props/feeder-cup-tipped.png' : 'props/feeder-cup.png', s.cupX, s.cupY, h * (tipped ? 415 / 255 : 274 / 312), h, 1, s.cupRot);
     if (s.mode === 'wait' && s.held > 0) { c.save(); c.globalAlpha = 0.7; c.strokeStyle = '#F2C46D'; c.lineWidth = 4; c.beginPath(); c.arc(g.player.cx, g.player.y - 14, 12, -Math.PI / 2, -Math.PI / 2 + (s.held / 30) * Math.PI * 2); c.stroke(); c.restore(); }
-  };
-  return s;
-}
+  },
+};
 
 const BEATS = { cup, sand, decor, lid };
 // [art] what each beat draws (room-art.js loads it before the room shows); the sand's Duchess rig
