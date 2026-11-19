@@ -30,7 +30,16 @@ export const TEXT = {
       duchessWakes: ['Mm? Is it Saturday already?', '...Oh, hello, dinner.'],
       kick: '{kick} kicks. Loose pebbles make good steps.',
       squeeze: 'Hold {up} to squeeze through the gap.',
-      waitTell: 'Not yet! Duchess is right behind you. Watch her tail.', // [final-G] the exit waits for her two lunges
+      // [issue 7] the hunt in the sand room (src/bosses/tank.js Sand): no damage, hide in the log to lose her
+      hideLog: 'Hide in the log!',            // the sign the script puts up (after her first lunge, or near the log)
+      exitShut: "She'd follow you out! Lose her first: hide in the log.",
+      caughtFirst: 'Too close! Move when the tail wiggles.', // the first catch
+      caughtWalk: "Hey! She's not a pillow.",  // walking into her snout
+      caughtLog: 'Run to the log! →',          // from the second catch (the log's outline pulses)
+      bermBite: "Sand won't hide you. A cricket-sized gap will.", // once, when she bites a berm
+      sniff: 'Mm? Where did dinner go?',
+      shrug: 'Hmph. Nap time.',
+      lost: "She's lost you. Go!",            // the exit opens
     },
   },
 

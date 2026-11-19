@@ -19,7 +19,8 @@ function cup() {
   return g.rows();
 }
 
-// ---------------------------------------------------------------- tank-sand (1,20): beat 3
+// ---------------------------------------------------------------- tank-sand (1,20): beat 3, Duchess hunts (issue #7)
+// Open on the left (back to the cup), the exit on the right held shut until she has lost him in the log.
 function sand() {
   const g = grid(2, 1);
   g.clear(0, 1, 64, 15);
@@ -96,9 +97,10 @@ export default {
         { prop: 'pebble-chip', x: 24, y: 15.2, h: 0.7 },
       ],
       entities: [
-        { type: 'boss', boss: 'tank', beat: 'sand', x: 6, y: 15, berms: [31, 49] },
+        // [issue 7] Duchess hunts: berms = the berms' middle columns, exit = where the way on is held shut
+        // until she has lost him; the "Hide in the log!" sign is put up by the script (src/bosses/tank.js)
+        { type: 'boss', boss: 'tank', beat: 'sand', x: 6, y: 15, berms: [31, 49], exit: 60 },
         { type: 'sign', x: 18, y: 15, w: 14, text: S.tell },
-        { type: 'sign', x: 52, y: 15, w: 10, text: S.hide },
       ],
     },
     {
