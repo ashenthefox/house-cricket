@@ -11,14 +11,21 @@ What is matched (reference -> frames):
   crickets  sprites/crickets/<id>/base.png  -> anim/*/NN.png and poses/*.png
   npcs      sprites/npcs/<id>.png           -> <id>-talk.png (the talk flap alternates the two ~7.5/s)
   enemies   sprites/enemies/<id>/0.png      -> 1.png (0 and 1 are the walk loop)
+The robot vacuum's frame 1 lights its ring up blue: that glow is the art, but the body round it
+came out ~14 levels lighter than frame 0's, so it flickered too. For it (GLOW) only the body is
+matched and measured: pixels whose blue is clearly above their red (the ring and its halo), and
+the white-hot core they enclose, are left out of the statistics and left as drawn, with a soft
+edge between (glow_weight()). --check measures the vacuum the same way (body only).
 Not matched: an enemy's 2.png (flipped / stunned: a different view, belly up, drawn once, not
-looped), the vacuum's 1.png (its glowing ring is the art), gecko rigs (body/tail/legs are pieces
-of one picture; strike/sleep are one-off poses), portraits.
+looped), gecko rigs (body/tail/legs are pieces of one picture; strike/sleep are one-off poses),
+portraits.
 
 Method: per-channel histogram matching on opaque pixels (alpha >= 250). For each of R, G, B the
 frame's quantiles (0.5 %..99.5 %) are mapped onto the reference's, giving a monotone tone curve
-that is smoothed (no kinks -> no banding) and has its slope held to 0.6..1.6 (no posterising,
-no crushed line art); a few passes are composed and the result rounded once. The curve is applied
+that is smoothed (no kinks -> no banding) and has its slope held to 0.6..1.6 in each pass (no
+posterising, no crushed line art). Up to four passes are composed and the result rounded once, so
+the combined curve is not held to that range: across the shipped frames its slope reaches 0..3.5
+in the deepest shadows (the few near-black line pixels). The curve is applied
 to every pixel with any alpha; alpha is untouched. The generated frames differ from their base by
 a tone and white-balance shift (a lighter, greyer, bluer frame: darks darker and lights lighter
 at once), not just an offset, so a full curve fits better than levels or mean/std (measured on
@@ -39,7 +46,7 @@ from the reference by at most MAX_SPREAD. Poses are separate looks, so only the 
 """
 import glob, os, sys
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPR = os.path.join(ROOT, 'game/assets/sprites')
@@ -54,7 +61,9 @@ OPAQUE = 250
 QS = np.concatenate([[0.5], np.arange(2.5, 98, 2.5), [99.5]])
 SLOPE = (0.6, 1.6)
 GAP = 0.08          # see split()
-SKIP_ENEMY_FRAMES = {('vacuum', '1.png')}
+GLOW = {'vacuum'}    # enemies whose frame 1 has a lit (blue) part left as drawn; see glow_weight()
+GLOW_CLOSE = 9
+GLOW_LO, GLOW_HI = 10, 30  # blue minus red: <= LO is body (matched, measured), >= HI is glow (untouched)
 
 
 def load(p):
@@ -64,12 +73,25 @@ def load(p):
 LUMA = np.array([0.299, 0.587, 0.114])  # Rec. 601 luma weights (the issue's numbers use these)
 
 
-def opaque(a):
-    return a[..., :3][a[..., 3] >= OPAQUE]
+def glow_weight(a):
+    """0 for body pixels, 1 for lit-ring pixels (blue clearly above red), a ramp between. The ring's
+    white-hot core is not blue, so the clearly-blue pixels are closed over (GLOW_CLOSE px) to take
+    in what they enclose."""
+    ramp = np.clip((a[..., 2] - a[..., 0] - GLOW_LO) / (GLOW_HI - GLOW_LO), 0, 1)
+    m = Image.fromarray(((ramp >= 1) * 255).astype(np.uint8))
+    m = m.filter(ImageFilter.MaxFilter(GLOW_CLOSE)).filter(ImageFilter.MinFilter(GLOW_CLOSE))
+    return np.maximum(ramp, np.asarray(m) / 255.0)
 
 
-def lum(a):
-    rgb = opaque(a)
+def opaque(a, glow=False):
+    m = a[..., 3] >= OPAQUE
+    if glow:
+        m &= glow_weight(a) == 0
+    return a[..., :3][m]
+
+
+def lum(a, glow=False):
+    rgb = opaque(a, glow)
     return float((rgb @ LUMA).mean()) if len(rgb) else float('nan')
 
 
@@ -113,9 +135,9 @@ def weights(rgb, ref_frac):
     return np.where(light, ref_frac / f, (1 - ref_frac) / (1 - f))
 
 
-def balanced_lum(a, ref_frac):
+def balanced_lum(a, ref_frac, glow=False):
     """Mean luminance with the frame's dark/light groups weighted to the reference's proportions."""
-    rgb = opaque(a)
+    rgb = opaque(a, glow)
     w = weights(rgb, ref_frac)
     return float(((rgb @ LUMA) * w).sum() / w.sum())
 
@@ -149,10 +171,8 @@ TOL = 0.75  # levels: mean change a matching curve would make to a channel, belo
 PASSES = 4  # the smoothed, slope-limited curve lands a little short; a few passes (composed, rounded once) close it
 
 
-def match(path, ref_rgb, ref_frac):
-    a = load(path)
-    rgb = opaque(a)
-    w = weights(rgb, ref_frac)
+def tone_luts(rgb, w, ref_rgb):
+    """-> per-channel composed curves (identity for a channel already within TOL)."""
     levels = np.arange(256, dtype=np.float64)
     luts = []
     for c in range(3):
@@ -164,13 +184,32 @@ def match(path, ref_rgb, ref_frac):
                 break  # this channel is already matched
             total, cur = np.interp(total, levels, lut), step
         luts.append(total)
+    return luts
+
+
+def match(path, ref_rgb, ref_frac, glow=False):
+    a = load(path)
+    levels = np.arange(256, dtype=np.float64)
+    vis = a[..., 3] > 0
+    g = glow_weight(a) if glow else np.zeros(a.shape[:2])
+    for _ in range(8):
+        # body = opaque pixels outside the glow; matching moves blue against red a little, so the
+        # glow mask is taken from the result and the match redone until it settles (else a second
+        # run would see a slightly different body and nudge it again)
+        rgb = a[..., :3][(a[..., 3] >= OPAQUE) & (g == 0)]
+        luts = tone_luts(rgb, weights(rgb, ref_frac), ref_rgb)
+        out = a.copy()
+        for c in range(3):
+            out[..., c] = np.where(vis, np.interp(a[..., c], levels, luts[c]), a[..., c])
+        out[..., :3] = out[..., :3] * (1 - g[..., None]) + a[..., :3] * g[..., None]  # the glow stays as drawn
+        if not glow:
+            break
+        g2 = glow_weight(np.round(out))
+        if np.array_equal(g2 == 0, g == 0) and np.abs(g2 - g).max() < 0.05:
+            break
+        g = g2
     if all(np.array_equal(t, levels) for t in luts):
         return False  # idempotent: a matched frame is left byte-for-byte alone
-    out = a.copy()
-    vis = a[..., 3] > 0
-    for c in range(3):
-        ch = a[..., c]
-        out[..., c] = np.where(vis, np.interp(ch, levels, luts[c]), ch)
     out[..., :3] = np.clip(np.round(out[..., :3]), 0, 255)
     out[..., 3] = a[..., 3]
     Image.fromarray(out.astype(np.uint8), 'RGBA').save(path, optimize=True)
@@ -178,7 +217,7 @@ def match(path, ref_rgb, ref_frac):
 
 
 def groups(only):
-    """-> [(name, ref, {set: [frames]})]"""
+    """-> [(name, ref, {set: [frames]}, glow)]"""
     out = []
     for d in sorted(glob.glob(os.path.join(SPR, 'crickets/*/'))):
         cid = os.path.basename(d.rstrip('/'))
@@ -186,19 +225,18 @@ def groups(only):
             continue
         sets = {os.path.basename(a): sorted(glob.glob(os.path.join(a, '*.png'))) for a in sorted(glob.glob(d + 'anim/*'))}
         sets['poses'] = sorted(glob.glob(d + 'poses/*.png'))
-        out.append((f'cricket {cid}', d + 'base.png', sets))
+        out.append((f'cricket {cid}', d + 'base.png', sets, False))
     for t in sorted(glob.glob(os.path.join(SPR, 'npcs/*-talk.png'))):
         nid = os.path.basename(t)[:-9]
         if only and nid not in only:
             continue
-        out.append((f'npc {nid}', t.replace('-talk.png', '.png'), {'talk': [t]}))
+        out.append((f'npc {nid}', t.replace('-talk.png', '.png'), {'talk': [t]}, False))
     for d in sorted(glob.glob(os.path.join(SPR, 'enemies/*/'))):
         eid = os.path.basename(d.rstrip('/'))
         if only and eid not in only:
             continue
-        fr = [d + '1.png'] if os.path.exists(d + '1.png') and (eid, '1.png') not in SKIP_ENEMY_FRAMES else []
-        if fr:
-            out.append((f'enemy {eid}', d + '0.png', {'walk': fr}))
+        if os.path.exists(d + '1.png'):
+            out.append((f'enemy {eid}', d + '0.png', {'walk': [d + '1.png']}, eid in GLOW))
     return out
 
 
@@ -207,24 +245,24 @@ def main():
     check, report = '--check' in args, '--report' in args
     only = {a for a in args if not a.startswith('--')}
     bad = changed = 0
-    for name, ref, sets in groups(only):
+    for name, ref, sets, glow in groups(only):
         a = load(ref)
-        ref_rgb = opaque(a)
+        ref_rgb = opaque(a, glow)
         ref_frac = two_tone(ref_rgb)
         if not (check or report):
             for fs in sets.values():
                 for f in fs:
-                    if match(f, ref_rgb, ref_frac):
+                    if match(f, ref_rgb, ref_frac, glow):
                         changed += 1
                         print('matched', os.path.relpath(f, ROOT))
             continue
-        base = lum(a)
+        base = lum(a, glow)
         for s, fs in sets.items():
             if not fs:
                 continue
             ims = [load(f) for f in fs]
-            ls = [lum(x) for x in ims]
-            bs = [balanced_lum(x, ref_frac) for x in ims]
+            ls = [lum(x, glow) for x in ims]
+            bs = [balanced_lum(x, ref_frac, glow) for x in ims]
             loop = bs if len(bs) > 1 else bs + [base]  # a lone talk/walk frame flaps with its reference
             within = max(loop) - min(loop) if s != 'poses' else 0.0  # poses are separate looks, not a loop
             vs_base = max(abs(x - base) for x in bs)

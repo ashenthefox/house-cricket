@@ -110,6 +110,7 @@ Other checks:
 - `node tools/check-cracks.mjs` checks every save point can be left on foot.
 - `node tools/entity-test.mjs` and `node tools/feel-test.mjs` test the mechanics and the jump feel.
 - `node tools/chirp-check.mjs` checks every cricket's song against the real species' pitch and rhythm.
+- `python3 tools/match-frames.py --check` checks every cricket's animation frames and poses, the NPC talk frames and the enemy walk frames stay within 2 levels of mean brightness of their base picture (so nothing flickers). Run `python3 tools/match-frames.py` (Pillow and numpy) to colour-match new frames to their base; it changes nothing on frames already matched.
 
 ## Playing locally
 
