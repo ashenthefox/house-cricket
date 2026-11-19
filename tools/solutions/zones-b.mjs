@@ -270,7 +270,10 @@ function livingFromSeat(a) {
   wallClimb(a, 1, (g) => g.room.id === 'liv-basket' && (g.player.y + g.player.h) / T < 14.6 && g.player.vx > 0, 'leg');
   endNow(a).down(R).until(ground, 90, 'the rim').up(R).log('basket rim');
   walkTo(a, 13.5, 'thimble').until((g) => g.player.has('thimble'), 60, 'thimble').log('thimble').wait(45);
-  walkTo(a, 19.4, 'rim end').until((g) => ground(g) && feet(a) > 19.5, 120, 'down to the table top').log('table top');
+  // [review #7] since 615ba56 a ball of yarn (cols 19-20, rows 18-19) sits below the rim end: down onto it, then off it to the table top
+  walkTo(a, 19.4, 'rim end').until(ground, 120, 'onto the yarn');
+  if (feet(a) < 19.5) walkTo(a, 21.6, 'off the yarn');
+  a.until((g) => ground(g) && feet(a) > 19.5, 120, 'down to the table top').log('table top');
   walkTo(a, 22.4, 'on the crackers');
   a.down(J).wait(8).up(J).wait(8).down(D).tap(J, 3).up(D).log('pound');
   a.until((g) => g.room.id === 'liv-rug' && ground(g), 200, 'back on the rug').log('back on the rug');
