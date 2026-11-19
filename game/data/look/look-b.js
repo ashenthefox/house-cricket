@@ -118,9 +118,11 @@ export default {
   'laun-shelf': {
     paint: [
       shelf(1, 3, 11, 1, '#A2805E'),                                                // the top shelf
-      { obj: 'wood', x: 1, y: 1, w: 1, h: 15, color: '#D8D0DC', grain: 'v' },       // painted shelf uprights
+      { obj: 'wood', x: 1, y: 1, w: 1, h: 11, color: '#D8D0DC', grain: 'v' },       // painted shelf uprights (the left one stops over the doorway: issue #19)
       { obj: 'wood', x: 30, y: 1, w: 1, h: 12, color: '#D8D0DC', grain: 'v' },
       { obj: 'appliance', x: 6, y: 12, w: 5, h: 4, color: '#7FA6C8', panel: false }, // detergent jugs (plastic)
+      { obj: 'appliance', x: 4, y: 14, w: 2, h: 2, color: '#E8C24A', panel: false }, // small bottles: steps up to the jugs (issue #19)
+      { obj: 'appliance', x: 11, y: 14, w: 2, h: 2, color: '#E8B4A8', panel: false },
       shelf(26, 13, 5, 1, '#A2805E'),                                               // the cubby's shelf
     ],
   },
