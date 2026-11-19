@@ -155,7 +155,7 @@ export default {
   'kit-stove': {
     paint: [
       { obj: 'appliance', x: 14, y: 6, w: 34, h: 16, color: '#E2D4AE', door: 'oven', dials: 4 }, // the oven
-      { obj: 'wood', x: 2, y: 14, w: 12, h: 16, color: '#A86E44', doors: 2 },    // the cabinet base
+      { obj: 'wood', x: 2, y: 6, w: 12, h: 24, color: '#A86E44', doors: 2 },     // the cabinet base (flush with the oven top)
       { obj: 'wood', x: 56, y: 16, w: 8, h: 1, color: '#C9A06A' },               // the counter from the fridge
     ],
   },
