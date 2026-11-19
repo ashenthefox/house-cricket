@@ -83,6 +83,14 @@ section('locked-room-pound', () => {
   locked.step({ right: true }, 10);
   ok(p.x > priorX, 'horizontal input works again after the blocked pound');
 
+  // A second pound at the same blocked boundary must recover again, without a reload.
+  p.x = 10 * TILE; p.y = g.room.ph - p.h - 8;
+  p.vx = 0; p.vy = 0; p.state = 'air';
+  locked.step({ down: true, jump: true }, 1);
+  ok(p.state === 'pound', 'a second Down+Jump starts another real pound');
+  locked.step({}, 25);
+  ok(g.room.id === upper.id && p.state !== 'pound', 'repeated blocked pound recovers without entering the locked room');
+
   // Same crossing with its actual required item must still enter the lower room.
   const allowed = game(z, upper.id, { x: 10, y: 14, items: ['thimble', 'glow'] });
   allowed.p.x = 10 * TILE; allowed.p.y = allowed.g.room.ph - allowed.p.h - 8;
