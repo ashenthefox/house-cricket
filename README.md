@@ -106,7 +106,7 @@ Every zone, every gecko fight and the whole game from New Game to the credits ha
 
 Other checks:
 
-- `node tools/check-world.mjs` checks every room can be reached, in every order the items can be found.
+- `node tools/check-world.mjs` checks every room can be reached, in every order the items can be found, and that no spot is a trap (somewhere you can get into and not get out of by playing). `node tools/escape-test.mjs` confirms a trap it names in the real sim.
 - `node tools/check-cracks.mjs` checks every save point can be left on foot.
 - `node tools/entity-test.mjs` and `node tools/feel-test.mjs` test the mechanics and the jump feel.
 - `node tools/chirp-check.mjs` checks every cricket's song against the real species' pitch and rhythm.

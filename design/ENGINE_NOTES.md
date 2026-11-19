@@ -278,8 +278,14 @@ it does not trace real arcs). Items are collected when reached, to a fixpoint, s
 order is covered. Passes: `pip`, `weakest` (Jump 2 / Speed 2, −0.5 tile) and `strongest`
 (+0.5 tile). Real zones default to weakest + strongest; it exits 1 if the main pass misses an item
 or rescue. Mechanics (gates, doors, lifts, springs, terrain, thermostats) are understood: see "Entities
-and mechanics". **Not done yet:** "no gate opens before its item" across zones, "every spot can
-get back to a save crack", moving enemies. ([cracks] `tools/check-cracks.mjs` proves every save crack can be
+and mechanics". **Traps** ([issue #4]): at every step of the fixpoint, every spot reached must reach
+a way out (an edge into another zone, a save crack, a door out, the Carrier, the tank's lid) or a
+way on (an item, a cage, a switch...) over the same edges with the abilities held then; it exits 1 on
+any pocket that can't, in any pass (and from every `minItems` entry set). Never resolved by the
+fall-respawn or damage: deliberate hazards and the test zones are listed in `data/trap-exempt.js`.
+`tools/escape-test.mjs` puts the cricket on a reported spot in the headless sim and searches the
+controls for a way out (`--traps-json` writes the candidates). **Not done yet:** "no gate opens
+before its item" across zones, moving enemies, Duo's shove blocks. ([cracks] `tools/check-cracks.mjs` proves every save crack can be
 left on foot: see Builder changes.) The recorded
 solutions are the real proof of a route.
 
