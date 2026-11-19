@@ -19,6 +19,7 @@
 14. #10: The ear swings wildly and points backwards; rest it and bring it out when it helps (https://github.com/zeveck/house-cricket/issues/10). `The mechanics of the ear are confusing. In the first room it swings wildly about, and it has no clear purpose and it often points backwards. Instead it should probably sit at rest and come out when it helps guide or find things maybe?`
 15. #7: Tank sand: Duchess gets stuck for good, ignores Pip, and hiding never matters (https://github.com/zeveck/house-cricket/issues/7). `It's weird that the first hiding place there's no reason to hide because Duchess is stick, and also, that if I just walk back over to Duchess nothing happens. It feels like she should roar and I should skitter away or something, but really, she shouldn't able to get stuck so easily and my hiding should matter?`
 16. #9: Tutorial signs look like floating signposts; put them on the path and centre their text (https://github.com/zeveck/house-cricket/issues/9). `I don't like that the tutorial signs look like signs just floating sometimes. Why have a stand? They should be on the path or something? Their popup should be more centered.`
+17. `--publish` (after: `Great. Then other than fixing 4 as you said, I approve the new cup and let's land it and publish.`)
 ## Settings
 
 - Platform: both (default)
@@ -82,3 +83,4 @@
     - added to the top of the gallery at zeveck/synapticnoise.
   - HTTPS: required (certificate issued).
   - REPUBLISHED 2026-11-19 (request 13), with the reviewed fixes for issues #1, #2, #3, #4, #5, #8 and #12. Each was fixed, independently reviewed, and checked with the quick replays; the full run replays on main before the push.
+  - REPUBLISHED 2026-11-19 (request 17), with the reviewed fixes for issues #6, #7, #9, #10, #11, #13, #14, #15, #16, #17, #18, #19, #20 and #21 (#7, #9 and #10 through --change, with design reviews logged in REVIEW_LOG.md). The full run was re-recorded twice (the tank hunt, the Raft) and replays on main before the push.
