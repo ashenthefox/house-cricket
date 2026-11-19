@@ -48,7 +48,7 @@ let titleReady = !!window.__bootPressed; // "Press any key or button" until the 
 window.__bootDone?.();
 let padNote = '';
 const frameLog = [];
-let storyHeld = false; // [issue 16] the last story panel stays up while the room after it loads (foldIntoStory)
+let heldOver = null; // [issue 16] 'story' | 'title': that screen stays up while the room after it loads (foldIntoStory, continueGame)
 
 function newGameObject() {
   const g = new Game([...ZONES, HUB_ZONE], { onSave: (gm) => { Save.writeSlot(slot, Save.fromGame(gm)); } }); // [meta] + the Carrier's rooms
@@ -227,9 +227,14 @@ function warmTitle() {
 }
 // [issue 16] A story just ended into play: if the room's art is still loading, its last panel stays
 // up (story.holdOpen) until it's in, instead of the ink cover (tick releases it); then the fade.
+function releaseHeld() {
+  if (heldOver === 'story') story.release();
+  else if (heldOver === 'title') { ui.titleArt.classList.remove('leaving'); if (screen === 'play') { ui.showTitleArt(false); ui.showHUD(true); touch.show(isTouch); } }
+  heldOver = null;
+}
 function foldIntoStory() {
   game.trans = { f: 0, dur: 24, kind: 'fade' }; // the panel -> game fade (visual only)
-  if (gate.check(game)) { story.holdOpen(); storyHeld = true; }
+  if (gate.check(game)) { story.holdOpen(true); heldOver = 'story'; } // calm: no "next / skip all" hints while it waits
 }
 function newGame(n) {
   slot = n;
@@ -301,7 +306,10 @@ function continueGame(latest) {
   try { Save.intoGame(game, latest.data); } catch (e) { console.warn('save could not be loaded', e); const z = ZONES.find((zz) => zz.n === 1) || ZONES[0]; game.startAt(z.start.room); }
   Meta.ensure(game); applyUpgrades();
   startPlay();
-  game.trans = { f: 0, dur: 24, kind: 'fade' }; // [issue 16] the Continue fade (a wait for the room's art holds its first frame)
+  game.trans = { f: 0, dur: 24, kind: 'fade' }; // [issue 16] the Continue fade
+  // [issue 16] the save's room still loading (its load started at boot, warmTitle): the title stays
+  // up, dimming, until it's in; then the fade
+  if (!latest.data.carrier && gate.check(game)) { ui.showTitleArt(true); ui.titleArt.classList.add('leaving'); ui.showHUD(false); touch.show(false); heldOver = 'title'; }
   if (latest.data.carrier) goCarrier(latest.data.returnCrack || latest.data.crack || game.saveCrack, true);
 }
 function startPlay() {
@@ -310,7 +318,7 @@ function startPlay() {
   updateTouchButtons();
 }
 function pause(msg, tab) {
-  if (screen !== 'play' || story.active) return;
+  if (screen !== 'play' || story.active || heldOver) return; // [issue 16] not under a held panel / title
   if (dialog.active) return;
   fbk.snapshot();
   paused = true; openModal();
@@ -510,14 +518,18 @@ function tick(now) {
     if (n === 8) acc = 0;
   }
   if (screen === 'play' && game) gate.check(game, !story.active); // [art] under a story panel the room's art starts loading
-  if (storyHeld && (!gate.holding || screen !== 'play')) { storyHeld = false; story.release(); } // [issue 16] the room's in: the panel goes, the fade runs
+  if (heldOver && (!gate.holding || screen !== 'play')) releaseHeld(); // [issue 16] the room's in: the panel / title goes, the fade runs
   if (screen === 'play' && game && !story.active) {
     if (game.inCarrier) hub.draw(renderer, game);
     else {
+      // [issue 16] a held transition shows the frame before the room change, dimming: keep it before drawing the held room
+      const heldTr = gate.heldKind(heldOver) === 'transition';
+      if (heldTr) { if (!renderer.snapOk) renderer.snapshot(); } else renderer.dropSnapshot();
       S.setDrawing(game.room?.id || null, gate.holding); // [art] ?artcheck logs misses against this room
-      renderer.draw(game, { shake: settings.shake }); drawMetaWorld();
+      renderer.draw(game, { shake: settings.shake, held: heldTr }); drawMetaWorld();
       S.setDrawing(null);
-      const cv = gate.cover(storyHeld ? 'story' : null); if (cv) renderer.drawCover(cv.alpha, cv.label, cv.ink); // [art] the wait, folded into the panel or the transition; else ink until the room's art is in
+      const cv = gate.cover(heldOver); // [art] the wait, folded into the panel, the title or the transition; else ink until the room's art is in
+      if (cv?.kind === 'transition') renderer.drawHeld(cv.alpha, cv.ink); else if (cv) renderer.drawCover(cv.alpha, cv.label, cv.ink);
     }
     ui.updateHUD(game); if (now - avoidAt > 500) measureAvoid(); updateMetaHUD(); // [polish-V]
   } else if (!story.active) renderer.draw({ room: null }, {});

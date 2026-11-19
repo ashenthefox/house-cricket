@@ -469,11 +469,14 @@ hidden cricket is drawn tucked (hide loop, then held; a peek every ~3 s) and sha
   but the art is asked for well before: during the title (`main.js warmTitle`: the Continue save's
   room, its zone's critical art and neighbours, then the new game's tank and first Bedroom room),
   on entering a zone (`zoneArt`: every room's gecko rigs, boss props, captives, decor, hiding spots,
-  mechanics, enemies and near layer, the lairs first; phones: the lairs only), aboard the Carrier
-  (the way back) and for the Post destination in focus. A wait that is left goes into what's on
-  screen: the last story panel stays up (`foldIntoStory`), a door / edge wipe or a travel /
-  Continue / title fade holds its first frame. The bare "Loading" ink cover is the fallback (a
-  debug `goToRoom`). Check: per frame, the room visible, the cover up, the rig and props loaded.
+  mechanics, enemies and near layer, the lairs first; a small-memory device, `S.lowMemory()`
+  (touch-first small screen, or `navigator.deviceMemory` <= 4, never the canvas size): the lairs
+  only), aboard the Carrier (the way back) and for the Post destination in focus. A wait that is
+  left goes into what's on screen, never with a "Loading" label: the last story panel stays up
+  without its hints (`foldIntoStory`; Pause waits), Continue keeps the title up, dimming; a door /
+  edge wipe or a travel fade shows the frame before the room change dimming under its ink
+  (`renderer.snapshot/drawHeld`). The bare "Loading" ink cover is the fallback (a debug
+  `goToRoom`). Check: per frame, the room visible, flat ink or a label drawn, rig and props loaded.
 
 ### Crickets
 

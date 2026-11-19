@@ -28,8 +28,9 @@
 //                           new game's first rooms, the Continue save's room), in the Carrier (the
 //                           way back) and for the Post destination in focus.
 //   gate.cover(over)     -> what to draw while a room is held: the wait is folded into what's on
-//                           screen (a story panel main.js keeps up, the room change's own wipe or
-//                           fade held on its first frame); the bare ink cover is the fallback.
+//                           screen (a story panel or the title main.js keeps up; the room change's
+//                           own wipe or fade, held as the previous frame dimming); the bare ink
+//                           cover is the fallback.
 //                           bossWaiting(game): the boss's rig isn't loaded (main.js keeps the
 //                           boss from acting until it can be seen; game.bossWait).
 //
@@ -57,6 +58,7 @@ const BOSS_WAIT_MS = 30000; // a gecko waits for its art at most this long in a 
 const LABEL_MS = 600;    // "Loading" appears on the cover after this
 const FADE = 12;         // frames the cover fades over after a hold (when no transition runs)
 const BG_SLOTS = 3;      // background loads at a time (of the browser's 6 a host), so the next room never queues behind them
+const EARLY_MAX = 24;    // [issue 16] ahead() lists kept at most
 const FIRST_LOOKS = ['base', 'idle', 'run', 'leap']; // the party's looks the gate waits for (a room is often entered in the air)
 
 const geckoDir = (n) => `sprites/geckos/${n}/`;
@@ -129,15 +131,15 @@ const allArt = (game, room) => { const a = roomArt(game, room); return [...a.gat
 // [issue 16] A zone's critical art: { lairs, rest }. lairs: each lair's whole first look (painting,
 // the boss's gecko rig, props and captive, its near layer); rest: every other room's things (decor,
 // hiding spots, cages, mechanics, enemies) and near layer. Not their paintings (the neighbour
-// prefetch brings those, a step ahead). On phones (small memory: props are never released) only
-// the lairs.
+// prefetch brings those, a step ahead). On a small-memory device (sprites.lowMemory: props are
+// never released) only the lairs.
 export function zoneArt(game, zone) {
   const lairs = new Set(), rest = new Set();
   for (const r of Object.values(game.world.rooms)) {
     if (r.zone !== zone) continue;
     const a = roomArt(game, r);
     if (r.entities.some((e) => e.type === 'boss')) for (const p of [...a.gate, ...a.soon]) lairs.add(p);
-    else if (!S.isPhone()) for (const p of [...a.things, ...a.soon]) rest.add(p);
+    else if (!S.lowMemory()) for (const p of [...a.things, ...a.soon]) rest.add(p);
   }
   return { lairs: [...lairs], rest: [...rest].filter((p) => !lairs.has(p)) };
 }
@@ -204,15 +206,17 @@ export class ArtGate {
   // front: before what's already queued here. The zones it touches are kept (sprites.zoneHold)
   // until the next room change's zone set says otherwise, as #5's memory budget does.
   ahead(game, room, { files = [], zone = true, nbs = true, front = false } = {}) {
-    const items = files.length ? [{ get: () => files, pri: 'auto' }] : [];
+    const items = files.length ? [{ key: 'f:' + files.join(), get: () => files, pri: 'auto' }] : [];
     if (game && room) {
       const near = nbs ? neighbours(game.world, room) : [];
       for (const p of zoneKeep(game.world, [room, ...near])) S.zoneHold(p);
-      items.push({ get: () => allArt(game, room), pri: 'auto' });
-      if (zone) items.push({ get: () => this.zoneList(game, room.zone).lairs, pri: 'auto' }, { get: () => this.zoneList(game, room.zone).rest, pri: 'auto' });
-      for (const r of near) items.push({ get: () => allArt(game, r), pri: 'low' });
+      items.push({ key: 'r:' + room.id, get: () => allArt(game, room), pri: 'auto' });
+      if (zone) items.push({ key: 'zl:' + room.zone.id, get: () => this.zoneList(game, room.zone).lairs, pri: 'auto' }, { key: 'zr:' + room.zone.id, get: () => this.zoneList(game, room.zone).rest, pri: 'auto' });
+      for (const r of near) items.push({ key: 'r:' + r.id, get: () => allArt(game, r), pri: 'low' });
     }
-    this.early = front ? [...items, ...this.early] : [...this.early, ...items];
+    // each list once (asking again moves it), and at most EARLY_MAX: the Post's focus can wander
+    const keys = new Set(items.map((i) => i.key)), old = this.early.filter((i) => !keys.has(i.key));
+    this.early = (front ? [...items, ...old] : [...old, ...items]).slice(0, EARLY_MAX);
     this.queue();
   }
   // zoneArt(game, zone), worked out once per game and zone
@@ -276,20 +280,28 @@ export class ArtGate {
     this.last = { room: this.room?.id, files: this.need.length, held: waited, heldMs: Math.round(held), timedOut: !!timedOut, as: this.heldAs };
     this.queue();
   }
-  // What to draw over this frame while the room's art is held, or null: { kind, alpha, label, ink }.
-  // [issue 16] The wait goes into what is already on screen: over = 'story' while main.js keeps
-  // the story panel up (draw nothing: the panel covers the game); a room change's own transition
-  // (the door / edge wipe, the travel / Continue / title fade) waits on its first frame (kind
-  // 'transition', ink: its kind); only with neither does the bare ink cover show (kind 'cover').
+  // [issue 16] How a hold shows: over ('story' | 'title': main.js keeps that screen up over the
+  // game), 'transition' (the room change's own wipe or fade waits on its first frame) or, with
+  // neither, 'cover' (the bare ink). null: not held on screen.
+  heldKind(over = null) {
+    if (!this.holding || !this.watched) return null;
+    if (over) return over;
+    const tr = this.game?.trans;
+    return tr && tr.f === 0 && (tr.kind === 'fade' || tr.kind === 'wipe') ? 'transition' : 'cover';
+  }
+  // What to draw over this frame, or null: { kind, alpha, label, ink }. A story / title hold draws
+  // nothing (that screen covers the game); a transition hold is the previous frame dimming under
+  // the transition's ink (render.js drawHeld: never flat, never a label); only the bare cover is
+  // flat ink, with "Loading" if it lasts.
   cover(over = null) {
     let c = null;
-    if (this.holding && this.watched) {
-      const t = this.t0 == null ? 0 : now() - this.t0, tr = this.game?.trans;
-      const label = t > LABEL_MS ? `Loading... ${this.settledN}/${this.total || this.need.length}` : '';
-      if (over === 'story') c = { kind: 'story', alpha: 0, label: '' };
-      else if (tr && tr.f === 0 && (tr.kind === 'fade' || tr.kind === 'wipe')) c = { kind: 'transition', alpha: 1, label, ink: tr.kind };
-      else c = { kind: 'cover', alpha: 1, label };
-      this.heldAs = c.kind;
+    const kind = this.heldKind(over);
+    if (kind) {
+      const t = this.t0 == null ? 0 : now() - this.t0;
+      if (kind === 'cover') c = { kind, alpha: 1, label: t > LABEL_MS ? `Loading... ${this.settledN}/${this.total || this.need.length}` : '' };
+      else if (kind === 'transition') c = { kind, alpha: Math.min(0.8, 0.25 + t / 900), label: '', ink: this.game.trans.kind };
+      else c = { kind, alpha: 0, label: '' };
+      this.heldAs = kind;
     } else if (this.fade > 0) c = { kind: 'cover', alpha: this.fade-- / FADE, label: '' };
     this.drawn = c ? c.kind : null;
     return c;

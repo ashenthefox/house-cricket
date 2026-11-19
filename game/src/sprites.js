@@ -137,6 +137,13 @@ export function zoneHold(prefix) { if (!zoneSet.includes(prefix)) zoneSet.push(p
 let phone = false;
 export function setPhone(v) { phone = !!v; }
 export function isPhone() { return phone; }
+// [issue 16] the memory and preload policy goes by the device, not the canvas (a small desktop
+// window is not a phone): a touch-first small screen, or a browser reporting <= 4 GB
+export function lowMemory() {
+  if (typeof navigator === 'undefined' || typeof matchMedia === 'undefined') return false;
+  const small = matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 600;
+  return small || (navigator.deviceMemory != null && navigator.deviceMemory <= 4);
+}
 export function bgPath(folder, variant = 'a') {
   const full = `bg/${folder}/far-${variant}.webp`, small = `bg/${folder}/far-${variant}-phone.webp`;
   if (phone && exists(small)) return small;

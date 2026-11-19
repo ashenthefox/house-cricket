@@ -166,6 +166,23 @@ export class Renderer {
     this.nearCache.clear();
   }
 
+  // [issue 16] a held transition: the frame before the room change (snapshot(), taken before the
+  // held room is drawn), dimming under the transition's ink (alpha < 1: it never reads as a flat
+  // cover). Without a snapshot: the ink.
+  snapshot() {
+    const cv = this.canvas;
+    if (!this.snap) this.snap = document.createElement('canvas');
+    if (this.snap.width !== cv.width || this.snap.height !== cv.height) { this.snap.width = cv.width; this.snap.height = cv.height; }
+    const g = this.snap.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(cv, 0, 0);
+    this.snapOk = true;
+  }
+  dropSnapshot() { this.snapOk = false; }
+  drawHeld(alpha, ink) {
+    if (!this.snapOk) { this.drawCover(1, '', ink); return; }
+    const c = this.ctx;
+    c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(this.snap, 0, 0);
+    this.drawCover(alpha, '', ink);
+  }
   // [art] the cover while a room's art loads (src/room-art.js): ink, then "Loading" if it lasts.
   // ink 'wipe': a door / edge wipe held on its first frame (drawTransition's ink, opaque)
   drawCover(alpha, label, ink) {
@@ -651,7 +668,7 @@ export class Renderer {
     if (room.dark) { if (game.boss?.drawDark) game.boss.drawDark(c, this, game); else this.drawDark(c, game); }
     if (game.boss?.drawOver) game.boss.drawOver(c, this, game);
     this.fx.drawScreen(c, game, VW, VH * (cam.hFrac || 1)); // [final-G] the view's real height (a wide phone)
-    this.drawTransition(c, game);
+    if (!view.held) this.drawTransition(c, game); // [issue 16] held: main.js draws the held transition over this frame
     this.perf.frame = performance.now() - t0;
   }
 
