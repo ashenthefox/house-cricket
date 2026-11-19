@@ -15,6 +15,7 @@
 10. `--publish`
 11. `--publish`
 12. #3: Ear indicator: click to dock/undock, double-click to toggle auto-chirp (https://github.com/zeveck/house-cricket/issues/3). `I should also be able to click the ear to "hide it" which should dock it near the other buttons and it can launch again when clicked again. Double clicking it should toggle whether I hear the autochirp?`
+13. `--publish`
 ## Settings
 
 - Platform: both (default)
@@ -76,6 +77,5 @@
     - making-of on: the README's How it was made and Replaying the tests sections, plus design/, solutions and tools in the repo (local paths swapped for placeholders);
     - title-screen links to synapticnoise.com and GitHub;
     - added to the top of the gallery at zeveck/synapticnoise.
-  - HTTPS: waiting for GitHub's certificate (publish.sh https running).
-  - The local game server was stopped by Claude Code under memory pressure.
-  - GitHub preview image: to upload (none set).
+  - HTTPS: required (certificate issued).
+  - REPUBLISHED 2026-11-19 (request 13), with the reviewed fixes for issues #1, #2, #3, #4, #5, #8 and #12. Each was fixed, independently reviewed, and checked with the quick replays; the full run replays on main before the push.
