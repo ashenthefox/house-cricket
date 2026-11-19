@@ -41,7 +41,7 @@ export const BUILDERS = {
 // ---------------------------------------------------------------------------------------------
 // Rooms. purpose tags: start save item soundHole lairDoor arena traversal tutorial secret sneak
 // recruit notCricket thermostat loud shortcut hub link carrier
-// features: enemies (engine type names = sprites/enemies/<name>), props (assets/props/<name>.png),
+// features: enemies (engine type names = sprites/enemies/<name>), props (assets/props/<name>.webp),
 // hides (hiding spots to place), secrets (ids in SECRETS), notes.
 // ---------------------------------------------------------------------------------------------
 const R = (id, zone, name, x, y, w, h, o = {}) => ({ id, zone, name, x, y, w, h, purpose: [], ...o });
@@ -580,7 +580,7 @@ export const NOT_CRICKETS = {
   dryerSqueak: { room: 'laun-dryer', oneLiner: true }, hinge: { room: 'stu-door', oneLiner: true },
   fridge: { room: 'kit-fridge', oneLiner: true },
 };
-// After their fight each gecko dozes somewhere (a non-hostile sleeping prop, sleep.png + curled tail).
+// After their fight each gecko dozes somewhere (a non-hostile sleeping prop, sleep.webp + curled tail).
 export const DOZING = {
   duchess: 'bed-dresser', chikchak: 'bath-cabinet', bigtok: 'kit-counter', lashes: 'pan-jars', peridot: 'laun-sink',
   gargy: 'liv-armchair', mossy: 'stu-desk', kite: 'sun-canopy', ember: 'bas-furnace', nana: 'att-lair',

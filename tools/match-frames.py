@@ -4,10 +4,17 @@
 Usage:
   python3 tools/match-frames.py              match every frame below to its reference (idempotent)
   python3 tools/match-frames.py --check      report and fail (exit 1) if any group's frames spread too far
+                                             (the PNG sources, then the WebP the game ships)
   python3 tools/match-frames.py --report     print the table, never fail
   python3 tools/match-frames.py pip soot     only these crickets / npcs / enemies
 
-What is matched (reference -> frames):
+It works on the PNG sources under art/ (issue #14); run tools/build-art.py afterwards to make the
+game's WebP from them. --check and --report measure both: the sources (the spread below), and the
+built WebP, whose frames must each stand against their base as their sources do, within DRIFT
+levels of mean luminance (lossy colour and downscaling must not undo the matching). A WebP is
+measured at its source's size with its source's alpha (see load_any()).
+
+What is matched (reference -> frames), paths under art/:
   crickets  sprites/crickets/<id>/base.png  -> anim/*/NN.png and poses/*.png
   npcs      sprites/npcs/<id>.png           -> <id>-talk.png (the talk flap alternates the two ~7.5/s)
   enemies   sprites/enemies/<id>/0.png      -> 1.png (0 and 1 are the walk loop)
@@ -49,7 +56,8 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SPR = os.path.join(ROOT, 'game/assets/sprites')
+SPR = os.path.join(ROOT, 'art/sprites')            # the PNG sources (matched here)
+BUILT = os.path.join(ROOT, 'game/assets/sprites')  # the WebP the game draws (tools/build-art.py), measured by --check
 
 # Luminance points (0..255). Before matching, spreads ran to 16.6 (Pip's idle: 132 -> 148.5 every
 # other frame) and 18-22 (centipede walk, Rin's poses); the smallest that read as a flicker when
@@ -57,6 +65,9 @@ SPR = os.path.join(ROOT, 'game/assets/sprites')
 # is 0.5. 2 is four times that (room for a new frame's honest content differences) and well under
 # the smallest visible step.
 MAX_SPREAD = 2.0
+# [issue 14] the built WebP: how far lossy colour (and downscaling) may move a frame's luminance
+# relative to its base, against the same two sources.
+DRIFT = 1.5  # the shipped frames drift 1.0 at most (the mosquito); visible flicker starts at ~4
 OPAQUE = 250
 QS = np.concatenate([[0.5], np.arange(2.5, 98, 2.5), [99.5]])
 SLOPE = (0.6, 1.6)
@@ -240,13 +251,43 @@ def groups(only):
     return out
 
 
+def built(p):
+    """the WebP tools/build-art.py makes from a source PNG"""
+    return os.path.join(BUILT, os.path.relpath(p, SPR))[:-4] + '.webp'
+
+
+def as_built(gs):
+    return [(f'{name} (webp)', built(ref), {s: [built(f) for f in fs] for s, fs in sets.items()}, glow) for name, ref, sets, glow in gs]
+
+
+def source(p):
+    """the PNG source of a built WebP"""
+    return os.path.join(SPR, os.path.relpath(p, BUILT))[:-5] + '.png'
+
+
+def load_any(p):
+    """A picture as measured: a built WebP is scaled back to its source's size and given the source's
+    alpha, so a downscaled one (the mites: 384 -> 120 px) is measured over the same pixels (its own
+    soft edges would otherwise move which pixels count as opaque) and only its colour is compared."""
+    if not p.endswith('.webp'):
+        return load(p)
+    s = Image.open(source(p)).convert('RGBA')
+    w = Image.open(p).convert('RGBA')
+    if w.size != s.size:
+        w = w.resize(s.size, Image.LANCZOS)
+    a = np.asarray(w).astype(np.float64).copy()
+    a[..., 3] = np.asarray(s)[..., 3]
+    return a
+
+
 def main():
     args = sys.argv[1:]
     check, report = '--check' in args, '--report' in args
     only = {a for a in args if not a.startswith('--')}
     bad = changed = 0
-    for name, ref, sets, glow in groups(only):
-        a = load(ref)
+    gs = groups(only)
+    for name, ref, sets, glow in gs + (as_built(gs) if check or report else []):
+        a = load_any(ref)
         ref_rgb = opaque(a, glow)
         ref_frac = two_tone(ref_rgb)
         if not (check or report):
@@ -260,7 +301,7 @@ def main():
         for s, fs in sets.items():
             if not fs:
                 continue
-            ims = [load(f) for f in fs]
+            ims = [load_any(f) for f in fs]
             ls = [lum(x, glow) for x in ims]
             bs = [balanced_lum(x, ref_frac, glow) for x in ims]
             loop = bs if len(bs) > 1 else bs + [base]  # a lone talk/walk frame flaps with its reference
@@ -268,11 +309,19 @@ def main():
             vs_base = max(abs(x - base) for x in bs)
             raw = (max(ls) - min(ls)) if len(ls) > 1 else abs(ls[0] - base)
             flag = within > MAX_SPREAD or vs_base > MAX_SPREAD
+            extra = ''
+            if ref.endswith('.webp'):
+                # [issue 14] the shipped WebP: each frame must sit against its base as its source does
+                # (the sources passed the spread check above), within DRIFT levels of plain mean luminance
+                sb = lum(load(source(ref)), glow)
+                drift = max(abs((x - base) - (lum(load(source(f)), glow) - sb)) for x, f in zip(ls, fs))
+                flag = drift > DRIFT
+                extra = f' | vs source: drift {drift:4.1f}'
             bad += flag
             if report or flag:
-                print(f"{'FAIL' if flag else 'ok  '} {name:18s} {s:6s} base {base:6.1f}  frames "
+                print(f"{'FAIL' if flag else 'ok  '} {name:25s} {s:6s} base {base:6.1f}  frames "
                       + ' '.join(f'{x:6.1f}' for x in ls)
-                      + f'  | raw spread {raw:4.1f} | balanced: within {within:4.1f}  vs base {vs_base:4.1f}')
+                      + f'  | raw spread {raw:4.1f} | balanced: within {within:4.1f}  vs base {vs_base:4.1f}' + extra)
     if check or report:
         print(f'{bad} group(s) over {MAX_SPREAD} luminance spread' if bad else f'all frame groups within {MAX_SPREAD}')
         sys.exit(1 if bad and check else 0)

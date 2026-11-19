@@ -20,7 +20,7 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 const portrait = (id, cls = 'pic') => {
-  const p = S.exists(`sprites/crickets/${id}/portrait.png`) ? `assets/sprites/crickets/${id}/portrait.png` : null;
+  const p = S.exists(`sprites/crickets/${id}/portrait.webp`) ? `assets/sprites/crickets/${id}/portrait.webp` : null;
   const d = h('span', { class: cls });
   if (p) d.append(h('img', { src: p, alt: '' })); else { d.style.background = CRICKETS[id]?.color || '#888'; }
   return d;
@@ -409,8 +409,8 @@ export function lairReady(A, door) {
   const g = A.game, boss = door.boss, m = ensure(g);
   const nana = boss === 'nana';
   const gecko = h('div', { class: 'gecko-pic' });
-  // [builder C] no gecko rig (Sir Bartholomew): his golden eye from sprites/npcs/<boss>-eye.png
-  const gp = S.exists(`sprites/geckos/${boss}/portrait.png`) ? `assets/sprites/geckos/${boss}/portrait.png` : S.exists(`sprites/geckos/${boss}/idle.png`) ? `assets/sprites/geckos/${boss}/idle.png` : S.exists(`sprites/npcs/${boss}-eye.png`) ? `assets/sprites/npcs/${boss}-eye.png` : null; // [polish-V] portrait.png: a face portrait for the tall climbers (Big Tok, Nana)
+  // [builder C] no gecko rig (Sir Bartholomew): his golden eye from sprites/npcs/<boss>-eye.webp
+  const gp = S.exists(`sprites/geckos/${boss}/portrait.webp`) ? `assets/sprites/geckos/${boss}/portrait.webp` : S.exists(`sprites/geckos/${boss}/idle.webp`) ? `assets/sprites/geckos/${boss}/idle.webp` : S.exists(`sprites/npcs/${boss}-eye.webp`) ? `assets/sprites/npcs/${boss}-eye.webp` : null; // [polish-V] portrait.webp: a face portrait for the tall climbers (Big Tok, Nana)
   if (gp) gecko.append(h('img', { src: gp, alt: '' }));
   const trio = h('div', { class: 'ready-trio' });
   for (const id of g.player.trio) { const w = h('div', { class: 'rt' }, portrait(id), h('span', { text: CRICKETS[id].name })); if (nana && voiceOf(id)) w.append(h('span', { class: `cc-voice v-${voiceOf(id)}`, text: voiceOf(id) === 'mid' ? 'middle' : voiceOf(id) })); trio.append(w); }

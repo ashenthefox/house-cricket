@@ -1,7 +1,7 @@
 // Sir Bartholomew, bearded dragon (the optional Dragon's Lair; design: "The Dragon's Lair",
 // house.js LAIRS.barty). Builder C. Not a fight you win: you hide, you climb, then you WAVE.
 //
-// He is far too big for the screen, so only parts of him are drawn (sprites/npcs/barty-*.png):
+// He is far too big for the screen, so only parts of him are drawn (sprites/npcs/barty-*.webp):
 //   phase 1  a golden eye in the gloom, its gaze sweeping a cone over the hoard (eyeSweep 3 s).
 //            Seen in the open = he hisses (1 heart, blown back). Chirping gives you away (he
 //            hears it: a tell, then the hiss finds you even under a cap). Ends: tier 2.
@@ -19,7 +19,7 @@ import * as S from '../sprites.js';
 import { ensure } from '../meta.js';
 import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
-const IMG = constant({ eye: 'sprites/npcs/barty-eye.png', head: 'sprites/npcs/barty-head.png', black: 'sprites/npcs/barty-head-black.png', claw: 'sprites/npcs/barty-claw.png' });
+const IMG = constant({ eye: 'sprites/npcs/barty-eye.webp', head: 'sprites/npcs/barty-head.webp', black: 'sprites/npcs/barty-head-black.webp', claw: 'sprites/npcs/barty-claw.webp' });
 // Tile geometry of dragon-lair (tools/make-lair.py)
 const TIER2 = { feet: 28, x0: 38 };          // stand row 27: feet at the top of row 28
 const TOP = constant({ feet: 20, x0: 70, x1: 79 });    // the summit: feet at the top of row 20

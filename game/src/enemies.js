@@ -1,5 +1,5 @@
 // Enemies, data-driven (design: "Enemies"). Two kinds:
-//  - bonkable critters: a kick flips them (2.png), a chirp stuns them (radius and stun from the
+//  - bonkable critters: a kick flips them (2.webp), a chirp stuns them (radius and stun from the
 //    Chirp stat; Rin's Lullaby x3); they scurry off and come back to their spawn 6 s later.
 //  - unbeatable hazards (darkling beetle, robot vacuum): kicks clonk, chirps do nothing; hide.
 // Add a type: an entry in TYPES naming a behaviour in BEHAVIOURS (or write a new one).
@@ -307,7 +307,7 @@ function grow(e, g, n) {
   Object.assign(e, b);
 }
 
-// Flip (kicked): lies on its back (2.png), falls to the floor, scurries off, comes back later.
+// Flip (kicked): lies on its back (2.webp), falls to the floor, scurries off, comes back later.
 function flip(e, g, dir) {
   e.state = 'flipped'; e.flipT = flipFrames; e.vy = -360; e.vx = dir * 120; e.dir = dir; e.stun = 0; e.mode = 'idle';
   g.emit('bonk', { x: ecx(e), y: e.y, type: e.type });

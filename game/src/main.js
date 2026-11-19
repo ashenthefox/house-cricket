@@ -221,7 +221,7 @@ function warmTitle() {
   const latest = Save.latestSlot(), key = latest ? `${latest.n}:${latest.data.savedAt}` : 'new';
   if (warmedFor === key) return;
   warmedFor = key;
-  const hud = (g) => g.player.trio.map((id) => `sprites/crickets/${id}/portrait.png`);
+  const hud = (g) => g.player.trio.map((id) => `sprites/crickets/${id}/portrait.webp`);
   try {
     if (latest) {
       const g = newGameObject();
@@ -233,7 +233,7 @@ function warmTitle() {
     g.startAt(first.start.room, undefined, undefined, { party: ['pip'], items: [] });
     gate.ahead(g, g.room, { files: hud(g) });
     if (bed && bed !== first) gate.ahead(g, g.world.rooms[bed.start.room], { zone: false, nbs: false });
-    gate.ahead(null, null, { files: ['ui/panel.png'] }); // the dialog box and the map (big: last)
+    gate.ahead(null, null, { files: ['ui/panel.webp'] }); // the dialog box and the map (big: last)
   } catch (e) { console.warn('[art] title preload', e); }
 }
 // [issue 16] A story just ended into play: if the room's art is still loading, its last panel stays
@@ -513,7 +513,7 @@ function drawMetaWorld() {
   for (const e of ents) {
     if (!e.done && (e.type === 'crumbs' || e.type === 'secret')) { // [builder B] crumb caches, seed-hearts and song-seeds were never drawn
       const file = Meta.pickupFile(e); // [art] shared with room-art.js
-      const img = S.get(`items/${file}.png`), bob = Math.sin(renderer.t / 18 + e.px * 0.01) * 3, hh = file === 'crumb' ? 24 : 32;
+      const img = S.get(`items/${file}.webp`), bob = Math.sin(renderer.t / 18 + e.px * 0.01) * 3, hh = file === 'crumb' ? 24 : 32;
       if (img) c.drawImage(img, e.px + 20 - hh * img.width / img.height / 2, e.py + 38 - hh + bob, hh * img.width / img.height, hh);
       else { c.fillStyle = '#F2C46D'; c.beginPath(); c.arc(e.px + 20, e.py + 26 + bob, 8, 0, 7); c.fill(); }
       continue;
@@ -521,7 +521,7 @@ function drawMetaWorld() {
     if (e.done || e.type !== 'npc') continue;
     const facing = game.player.cx < e.px + 20 ? -1 : 1, talking = dialog.active && dialog.who?.name === line(`npcs.${e.who}.name`);
     if (renderer.drawNPC) { renderer.drawNPC(c, e.who, e.px + 20, e.py + 40, { talking, h: e.size || 56, facing, t: renderer.t }); continue; }
-    const img = S.get(`sprites/npcs/${e.who}.png`); if (!img) continue;
+    const img = S.get(`sprites/npcs/${e.who}.webp`); if (!img) continue;
     const hh = e.size || 56, w = hh * img.width / img.height, bob = Math.abs(Math.sin(renderer.t / 10)) * 2;
     c.save(); c.translate(e.px + 20, e.py + 40 - bob); c.scale(facing, 1); c.drawImage(img, -w / 2, -hh + 2, w, hh); c.restore();
   }
@@ -652,7 +652,7 @@ window.__game = {
 // meta art (story panels, the Carrier, portraits) in idle time, so they work offline too.
 // (Published builds precache every file; this only matters for unstamped copies.)
 if (navigator.serviceWorker?.controller) {
-  const metaArt = ASSET_LIST.filter((f) => /^(story\/|bg\/carrier\/|carrier\/|ui\/|items\/|sprites\/npcs\/|sprites\/crickets\/[a-z]+\/portrait\.png|sprites\/geckos\/[a-z]+\/idle\.png|audio\/sfx\/|audio\/music\/(title|carrier)\.mp3)/.test(f));
+  const metaArt = ASSET_LIST.filter((f) => /^(story\/|bg\/carrier\/|carrier\/|ui\/|items\/|sprites\/npcs\/|sprites\/crickets\/[a-z]+\/portrait\.webp|sprites\/geckos\/[a-z]+\/idle\.webp|audio\/sfx\/|audio\/music\/(title|carrier)\.mp3)/.test(f));
   let i = 0;
   const next = () => { if (i >= metaArt.length) return; fetch('assets/' + metaArt[i++]).catch(() => {}).finally(() => setTimeout(next, 30)); };
   setTimeout(next, 3000);

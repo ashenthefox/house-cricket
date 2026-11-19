@@ -33,7 +33,7 @@ function pathAt(phase, u) {
 
 export default makeBoss('kite', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
   sfx: ['gecko-growl', 'glide-whoosh'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
-  art: () => ({ props: ['leaf-glider'], crickets: { digby: ['leap', 'cling'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows); glide.png is one of the rig's files
+  art: () => ({ props: ['leaf-glider'], crickets: { digby: ['leap', 'cling'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows); glide.webp is one of the rig's files
  
   phases: 3, len: 230,
   start(b, g) {
@@ -137,7 +137,7 @@ export default makeBoss('kite', { postLines: true, // [playtest] base.rescue() e
   },
   draw(b, c, r) {
     const t = b.game.frame;
-    const glide = S.get('sprites/geckos/kite/glide.png');
+    const glide = S.get('sprites/geckos/kite/glide.webp');
     const perched = b.mode === 'landed' || b.mode === 'nap';
     // Digby: clinging to the leaf under him, or falling into the soil
     if (b.digby) r.drawCricketAt(c, 'digby', b.digby.x, b.digby.y, 1, { look: 'leap', scale: 0.9 });

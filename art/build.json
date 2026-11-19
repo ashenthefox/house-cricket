@@ -1,0 +1,5894 @@
+{
+"carrier/bamboo-bell.webp": {
+"src": "bf281c3c16cf5785d32a912c20a4c2025a24b4a8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+113,
+476
+]
+},
+"carrier/bottle-cap-drum.webp": {
+"src": "7a433ae2c4f53e1bd3bed2d5fb4454cec5262b24",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+350,
+334
+]
+},
+"carrier/chalk-track.webp": {
+"src": "c6b723b2b13e8faac5168fe4937b52472ce00c96",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+500,
+239
+]
+},
+"carrier/clinic.webp": {
+"src": "9c69a552f9ac4f20a90cbd24f108439ba0b967a2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+436,
+316
+]
+},
+"carrier/crumb-shop.webp": {
+"src": "d3f4b96a78cec26567ee9db3f3e8cc0fcbc05dbe",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+417,
+381
+]
+},
+"carrier/dice-stack.webp": {
+"src": "a3ed4bd2d18d36e3b9565879c52913706a7a55e6",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+268,
+304
+]
+},
+"carrier/doorbell.webp": {
+"src": "f13d0dd170604fcf745b23cdee32dbc21869a576",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+297,
+379
+]
+},
+"carrier/echo-map.webp": {
+"src": "4b7ba14357265f5bd21b75b0656cf35da35314cc",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+375,
+374
+]
+},
+"carrier/feeder-cup-bed.webp": {
+"src": "c9338f274bbc560e429fca60b1cfb15864d5801d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+411,
+346
+]
+},
+"carrier/hammocks.webp": {
+"src": "fc4671635ec22930d3162bcd7ba200866d99d1fe",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+405,
+426
+]
+},
+"carrier/hoard-corner.webp": {
+"src": "7b6f31d14637e4423de9cccdca10e0b505ecf56f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+363,
+386
+]
+},
+"carrier/lamp.webp": {
+"src": "a9a9337aa19da90792eb08f8817239e2349ad240",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+337,
+484
+]
+},
+"carrier/leaf-hammock.webp": {
+"src": "8f035591595dde31e6ef27ae4076fc7b702a054a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+431,
+311
+]
+},
+"carrier/library.webp": {
+"src": "d42b99f7b85f8d07461bdd2d584ee5f174e6f9b6",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+299,
+419
+]
+},
+"carrier/lookout-tower.webp": {
+"src": "fcd549fcf38dda4307150555d5d32a4da5d2dacf",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+243,
+457
+]
+},
+"carrier/matchbox-bunk.webp": {
+"src": "5cff078c488d5dbdd1a38afe813e3cbd53a8d8f3",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+377,
+391
+]
+},
+"carrier/pond.webp": {
+"src": "f6ca8bb8940c0f75d245f4a6a725b3cd2b3b0d18",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+413,
+297
+]
+},
+"carrier/post.webp": {
+"src": "96dc9e96cee6ff04dcab47cd3406f0261131f7c7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+404,
+373
+]
+},
+"carrier/soil-tray.webp": {
+"src": "c37db6841e2d36e0d62d073a1189319236b9ab2a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+410,
+229
+]
+},
+"carrier/stage.webp": {
+"src": "b84bd903ba4e772581a0ce2c0bd71dff03b9ac65",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+409,
+374
+]
+},
+"carrier/thermometer-strip.webp": {
+"src": "5b97561311c9aed360b1aed724eb10e59def9925",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+142,
+414
+]
+},
+"carrier/trainer.webp": {
+"src": "9dd4434a0312edff13b564bafa73171d8800fb9a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+467,
+390
+]
+},
+"carrier/wall-run-lane.webp": {
+"src": "858f71d576c51049ac8170f5e241a52425602670",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+262,
+477
+]
+},
+"items/battery.webp": {
+"src": "abc644ae6db8fddf3b354ca2d15a1adc3fff489f",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+111,
+144
+]
+},
+"items/bottle-cap-raft.webp": {
+"src": "bd5492eec587890592882031d90062786b5e5fe0",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+122,
+144
+]
+},
+"items/cellophane-cloak.webp": {
+"src": "3e2869576243b0f063526082c3d1b84a95415a7d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+138
+]
+},
+"items/cotton-earplugs.webp": {
+"src": "f1506ec83bfcdea7e330f859d3f5325a9b100297",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+129
+]
+},
+"items/crumb.webp": {
+"src": "874377f1a8300d4ded58e2080606a50139240068",
+"set": {
+"q": 90,
+"m": 6,
+"max": 96
+},
+"size": [
+96,
+84
+]
+},
+"items/dryer-sheet.webp": {
+"src": "82fe9e6ab813c28062b73cfa9a79d8d26200de14",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+227
+]
+},
+"items/floss-line.webp": {
+"src": "f6d5d5455ef228988005a4f4309180de9459fb13",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+125
+]
+},
+"items/glow-bead.webp": {
+"src": "0cafe1e6075e1595f86be28b2592209f1f0ebe8c",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+143,
+144
+]
+},
+"items/rubber-band.webp": {
+"src": "320f4160bfaed8ef137d6219d04a9e93a53846b0",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+79
+]
+},
+"items/seed-heart.webp": {
+"src": "cb8350440c2ce518ac4129db44f0759f4e026bf5",
+"set": {
+"q": 90,
+"m": 6,
+"max": 112
+},
+"size": [
+86,
+112
+]
+},
+"items/song-seed.webp": {
+"src": "cb70d1d645c064782d0bd00738d116986e1dc870",
+"set": {
+"q": 90,
+"m": 6,
+"max": 112
+},
+"size": [
+106,
+112
+]
+},
+"items/swift-feather.webp": {
+"src": "1560d6800a51e06e443e37dc1b9ff802175d0da5",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+142
+]
+},
+"items/tape-booties.webp": {
+"src": "f38e468b400d17f081cc0ce2ae4df59208a6a844",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+98
+]
+},
+"items/thimble-helmet.webp": {
+"src": "26120e542c7a944553cbb9a65cbd213a81dbba58",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+133,
+144
+]
+},
+"props/bamboo-cage.webp": {
+"src": "cb5c778cdbd0c72fabeb54fdb808e76d37a8ddef",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+238,
+256
+]
+},
+"props/banana-slice.webp": {
+"src": "2c0924f06c9b8f6d53bcaf942cdf14b98dc9b26c",
+"set": {
+"q": 90,
+"m": 6,
+"max": 120
+},
+"size": [
+109,
+120
+]
+},
+"props/book-spine.webp": {
+"src": "4999773f9e1feee9c840f291c011b12d8092899e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+242,
+475
+]
+},
+"props/bottle-cap.webp": {
+"src": "7bfbd8949b277b00c7d815c70440bc7c58ac88d3",
+"set": {
+"q": 90,
+"m": 6,
+"max": 240
+},
+"size": [
+240,
+153
+]
+},
+"props/candy-wrapper.webp": {
+"src": "486cc9a636f1626d96dff0368167a17bc6cf70ce",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+120
+]
+},
+"props/carrier-keeper.webp": {
+"src": "a8af5bee2c2fc8d57a8a87bdf4bf76c6db98947f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+640,
+440
+]
+},
+"props/cork.webp": {
+"src": "18e563108c3821148c2821e122e350153eb8ecca",
+"set": {
+"q": 90,
+"m": 6,
+"max": 240
+},
+"size": [
+240,
+168
+]
+},
+"props/cup-tab-pulled.webp": {
+"src": "4363fba11e4b698aabbd562f4a9d05cf42b6fa7a",
+"set": {
+"q": 90,
+"m": 6,
+"max": 128
+},
+"size": [
+128,
+102
+]
+},
+"props/cup-tab.webp": {
+"src": "f98354b50fcb07b98a2a9eb05036627ba3f273c3",
+"set": {
+"q": 90,
+"m": 6,
+"max": 152
+},
+"size": [
+152,
+42
+]
+},
+"props/cushion.webp": {
+"src": "0469dd84ffaa94b09a62939cbc0ad3313a4e8c98",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+486,
+234
+]
+},
+"props/damper.webp": {
+"src": "e3cbc15bae25edfc6961edbd50d0689865800a62",
+"set": {
+"q": 90,
+"m": 6,
+"max": 216
+},
+"size": [
+216,
+197
+]
+},
+"props/dice.webp": {
+"src": "369c1386a39f0cbb7f895d6456f6776f334e6e3c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+333,
+362
+]
+},
+"props/drawer-pull.webp": {
+"src": "dc8ce89f7b0ae962c6a3f01830d480682ccbf72f",
+"set": {
+"q": 90,
+"m": 6,
+"max": 328
+},
+"size": [
+328,
+167
+]
+},
+"props/dryer-vent.webp": {
+"src": "448f01b2ac109bcaba6413de8ef52655a2515ce7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+445,
+292
+]
+},
+"props/fake-plant.webp": {
+"src": "78d8e15cc4ad372af2a1a560537452bca6f58ec0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+418,
+384
+]
+},
+"props/faucet-handle.webp": {
+"src": "8afdb0e00523ca574b9d5ffe95fa580b5993a415",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+225
+]
+},
+"props/feeder-cup-tipped.webp": {
+"src": "35e1b8a824b5f77b0cd1c93a6015293776d50694",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+415,
+255
+]
+},
+"props/feeder-cup.webp": {
+"src": "e75fe981bce677b17a24d9fff052c0004ed0156d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+274,
+312
+]
+},
+"props/furnace-grate.webp": {
+"src": "40c541ccee061dc63365812efaa629b26a1046ef",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+402,
+398
+]
+},
+"props/grape.webp": {
+"src": "1a917fea001f0cde51060b54f314f0987bdfb28b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 200
+},
+"size": [
+165,
+200
+]
+},
+"props/hide-log.webp": {
+"src": "5f277ceb8d8f23bb90704ba0b0bb36afd5fe66a0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+260
+]
+},
+"props/hoard-buttons.webp": {
+"src": "263211078dafb26938582a2885268aeba40af70f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+422,
+300
+]
+},
+"props/hoard-coins.webp": {
+"src": "7d84199b0379bcfdfd584a94f7194d0aa5376118",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+427,
+286
+]
+},
+"props/hoard-pile.webp": {
+"src": "7e80e35584de0ec93fd06f94c515d17d27c142f3",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+376,
+250
+]
+},
+"props/hook.webp": {
+"src": "07f1bfc283eeef57f48bc7b706829e26a5db37bd",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+346,
+237
+]
+},
+"props/jam-blob.webp": {
+"src": "b960f7c05422663b5eded754bec70f147d05e8c4",
+"set": {
+"q": 90,
+"m": 6,
+"max": 184
+},
+"size": [
+184,
+114
+]
+},
+"props/leaf-glider.webp": {
+"src": "b104aaf8c4285125fb913c1bca8fc504dd005dcb",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+195
+]
+},
+"props/marble.webp": {
+"src": "e4ce619ac777be2723dd41061700075add1e4544",
+"set": {
+"q": 90,
+"m": 6,
+"max": 128
+},
+"size": [
+127,
+128
+]
+},
+"props/mesh-lid.webp": {
+"src": "9bfca4ebda18814bd004dfd57d12fe3719a7b2c2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+492,
+79
+]
+},
+"props/mister-nozzle.webp": {
+"src": "74b937a216ff464b39ea5274a4cb38510859467c",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+169
+]
+},
+"props/music-stone-bell.webp": {
+"src": "c89cc6eb469e8eccdd8259ecff2f2f0398815dc6",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+131,
+224
+]
+},
+"props/music-stone-fork.webp": {
+"src": "152c77a24253c42625e3bb2d787dd7fef6da891b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+100,
+224
+]
+},
+"props/music-stone-glass.webp": {
+"src": "ad9752c1093e402a37fdafc7bda7f39a41c59e15",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+165,
+224
+]
+},
+"props/pebble-chip.webp": {
+"src": "3b91071bd802ad57f3da8c3acd290bdb35c48282",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+116
+]
+},
+"props/pebble.webp": {
+"src": "1d243e5a68c37c296b8ec2155b1144d3bd116072",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+343,
+233
+]
+},
+"props/piano-key.webp": {
+"src": "b336254814b45aa43a8bf61406cfed4d728ca021",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+448,
+141
+]
+},
+"props/pin.webp": {
+"src": "343487dcc7641998e51e00d60bfd34fc96cb1c53",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+288,
+154
+]
+},
+"props/pull-chain.webp": {
+"src": "e0620de8c91380714590106be4572dcc9705bc53",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+90,
+455
+]
+},
+"props/sand-berm.webp": {
+"src": "0b4d3bd1bd1423728b621a640eaf0c43b7cfe660",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+231
+]
+},
+"props/save-crack.webp": {
+"src": "022eb349ca3d771b938444ca662c56fc68912f5c",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+207,
+224
+]
+},
+"props/smoke-alarm-wall.webp": {
+"src": "1b1b3c4c5e445f294a78fc395ec028028fbfe97d",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+175,
+224
+]
+},
+"props/soap-dish.webp": {
+"src": "7da09f19793baf51631fc89b1aed16fba38f9708",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+459,
+220
+]
+},
+"props/sock.webp": {
+"src": "125eb8fa38105ba79438ccba07f922c6112f1333",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+224,
+199
+]
+},
+"props/sound-hole.webp": {
+"src": "9fd508d6adc63ec75be6ef96f5823854a4274d5b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 224
+},
+"size": [
+215,
+224
+]
+},
+"props/spice-rack.webp": {
+"src": "62cd8822966a89f4888d4f23cfcf6eb5a2fee3c1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+419,
+288
+]
+},
+"props/sponge.webp": {
+"src": "6b252c834d019e71c3149313d120f8b6c82959fc",
+"set": {
+"q": 90,
+"m": 6,
+"max": 240
+},
+"size": [
+240,
+141
+]
+},
+"props/spool.webp": {
+"src": "f424f8d2ca042e02fcf48a854ea0a0be2f0e7a75",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+335,
+394
+]
+},
+"props/steam-puff.webp": {
+"src": "cdcaeaccc3b7b22d12d96e6a7bad7e2bd1b852b5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+326,
+357
+]
+},
+"props/steam-vent.webp": {
+"src": "f2e820e93682c21fc49142e6ebf628c0d7393fff",
+"set": {
+"q": 90,
+"m": 6,
+"max": 336
+},
+"size": [
+213,
+336
+]
+},
+"props/thermostat-lock.webp": {
+"src": "9171a97390620dbe3e21f5a578717710fdf3d2af",
+"set": {
+"q": 90,
+"m": 6,
+"max": 200
+},
+"size": [
+155,
+200
+]
+},
+"props/throw-pillow.webp": {
+"src": "03294343196b37f6182ed9c9e351cea858fec130",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+421,
+380
+]
+},
+"props/tongs.webp": {
+"src": "1f27768fb9200efa08ac85f889b84b3bb27ae695",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+68,
+474
+]
+},
+"props/tv-remote.webp": {
+"src": "00f06ba4f4a8a9a5246ece075c8ac07d6002d658",
+"set": {
+"q": 90,
+"m": 6,
+"max": 232
+},
+"size": [
+232,
+156
+]
+},
+"props/water-dish.webp": {
+"src": "f8ebb05a124d61eee538cdb19aac762abc803a44",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+463,
+212
+]
+},
+"props/wooden-spoon.webp": {
+"src": "86f2613da736edcf03ea8e98b90429e4bea2e785",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+478,
+139
+]
+},
+"sprites/crickets/chip/anim/idle/00.webp": {
+"src": "e5ada7fa5b8ce82fb6d0f9dd29e272b2ed26f5a5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/idle/01.webp": {
+"src": "c05e1c51f2de2e2deaccfde7dfab51b0fca71864",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/idle/02.webp": {
+"src": "e5ada7fa5b8ce82fb6d0f9dd29e272b2ed26f5a5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/idle/03.webp": {
+"src": "1403905099e55bdf02790fd2a9f3409a24d06cb2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/run/00.webp": {
+"src": "0c8d731c018d709b8f91cd7096b87079843a32c1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/run/01.webp": {
+"src": "d4d3d0681e03ef98419ec47d705e57cb5856065a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/run/02.webp": {
+"src": "b7c64a0cf1ed69445d6214020209636d8ce1fd33",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/anim/run/03.webp": {
+"src": "55b853809c2623c415ce9c63ebad9242a30e14e4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/base.webp": {
+"src": "e5ada7fa5b8ce82fb6d0f9dd29e272b2ed26f5a5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/portrait.webp": {
+"src": "7f30adf0e441f79a4922b3742a2986cbffd4019f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+336
+]
+},
+"sprites/crickets/chip/poses/cling.webp": {
+"src": "25baeb368445e766a9276a5d17ab6d1b75ad35b4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/glide.webp": {
+"src": "7f1f21b0e423def48fe2781ce70599dd685a40c6",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/hang.webp": {
+"src": "41085b0bb707297213473ec74eef7a11705df4b5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/hide.webp": {
+"src": "d61581f03bedd50d6e20d4e2fe90695f6a4b8bee",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/leap.webp": {
+"src": "69c91e0fd55bcb3873f246bcfcdb11b453b7d603",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/listen.webp": {
+"src": "9d6b375873048ae438355b8450b5ad677a108295",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/peek.webp": {
+"src": "14150fdc539190febec2200f0f35074367eb1500",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/pound.webp": {
+"src": "3bcbf27264380d0cb9da2127d716274af8a805fb",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/run-a.webp": {
+"src": "a191b8326379751a843df130d88df721ed74e5ad",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/chip/poses/run-b.webp": {
+"src": "a97c48e60615690f1b0f6f2a2eeff03519f42e1b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/idle/00.webp": {
+"src": "cd6cf1c16d0049750b86d535ff4e8abc6fb3cf7f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/idle/01.webp": {
+"src": "3006d93bf8d61aa4cc9d11f2d0717b1f2b5682ed",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/idle/02.webp": {
+"src": "cd6cf1c16d0049750b86d535ff4e8abc6fb3cf7f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/idle/03.webp": {
+"src": "17ecd58324e1588216dc820d4d48e5b759d13194",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/run/00.webp": {
+"src": "f29e39fdc86fa4b9c90f99d89d8fe4922d35ce3c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/run/01.webp": {
+"src": "c62638562c456fd1da500f49c40bd357ef14cffc",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/run/02.webp": {
+"src": "6b9cfaf4e4ceb04448bef53fe1ac4d308551b176",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/anim/run/03.webp": {
+"src": "06113244e2e40f67b7c7f28c1675f0316921621e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/base.webp": {
+"src": "cd6cf1c16d0049750b86d535ff4e8abc6fb3cf7f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/portrait.webp": {
+"src": "b3298d6d8212fade50ae68e21bca47c54f8d5fa0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+228
+]
+},
+"sprites/crickets/digby/poses/cling.webp": {
+"src": "25306bab7b054e96d00082e40e5296b173c4a851",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/dig.webp": {
+"src": "3b92de9837dfe3d807ec098ba30def22a359b3e1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/glide.webp": {
+"src": "803c10f1ac0949e3beb554713be415689e924452",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/hang.webp": {
+"src": "d841a247b450e0ebfda5d17ec88068a04be4c5cd",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/hide.webp": {
+"src": "44b59a1691dfe5d84a708bb77d4593696623ef6d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/leap.webp": {
+"src": "c748f1880c56873d76ae6ea91efd66ef94d67666",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/listen.webp": {
+"src": "5b7feccdf90f3c34fd9a81a2e56ea94b77341cd4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/peek.webp": {
+"src": "0cffb26f4617c5b20ea0800af88c7fbbeaa3d621",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/pound.webp": {
+"src": "e8263d12c7a77ae667e53aaa8ea43150377633d2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/run-a.webp": {
+"src": "7ec50e7ce339079fa5cfa29a39d247721c9a0879",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/digby/poses/run-b.webp": {
+"src": "6b95bde659a2ee579b4598f42925e9d0ced8a900",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/idle/00.webp": {
+"src": "24fc81d4efec489f742dab255615cceaaa272d98",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/idle/01.webp": {
+"src": "c3f5c88a03cf1fc282a188b76ccde9372fb43dfd",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/idle/02.webp": {
+"src": "24fc81d4efec489f742dab255615cceaaa272d98",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/idle/03.webp": {
+"src": "598d0f2bc844e312e1adb0a284aa64d9e3a6cbe7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/run/00.webp": {
+"src": "bf3a5d68c7edd4d58564fe4af196809d7ff478d8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/run/01.webp": {
+"src": "4078891e3a1c9a6796e43db74c91c5f6ad85aa55",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/run/02.webp": {
+"src": "ad48aedfb62611d84fa62f1401fb6f51e782e08c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/anim/run/03.webp": {
+"src": "b42877259287d5119e369e0abe2eda035a7e6b8a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/base.webp": {
+"src": "24fc81d4efec489f742dab255615cceaaa272d98",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/portrait.webp": {
+"src": "c443e4491b9b5ce32a9372d483c91400ccdfab31",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+321
+]
+},
+"sprites/crickets/duo/poses/cling.webp": {
+"src": "3e8980c9b1cc43e39083d9eb5571e3b3347b89a5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/glide.webp": {
+"src": "0c5fd005892702d857b45f9b1b8aa6d5198ecd62",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/hang.webp": {
+"src": "f37ffcf4878c3f23da83da9c9bc427a1b3945635",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/hide.webp": {
+"src": "83a062bbb0f23f40cb3d2f4806dbafed263f4cce",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/leap.webp": {
+"src": "0d64e86929d91f8bb71ea935e17f90349e6d2f1a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/listen.webp": {
+"src": "d507c3679262c9be53ab92dc26eda38e0fed4a24",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/peek.webp": {
+"src": "2d704e9a1dbfd063a4c08a46313d0dfa2fc08f62",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/pound.webp": {
+"src": "7a2745c9b6a4644b87ad16dc5a78abe1ddee5e7f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/run-a.webp": {
+"src": "ad48aedfb62611d84fa62f1401fb6f51e782e08c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/duo/poses/run-b.webp": {
+"src": "bf3a5d68c7edd4d58564fe4af196809d7ff478d8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/idle/00.webp": {
+"src": "cb3597a9488d6b58b4be4930c98d5467c5834117",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/idle/01.webp": {
+"src": "74bb557b2a366ad767d2a3f5867c1cdc5487cc1c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/idle/02.webp": {
+"src": "cb3597a9488d6b58b4be4930c98d5467c5834117",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/idle/03.webp": {
+"src": "9cd12928941609d4c9afd1f39d07e0d7ac9dd923",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/run/00.webp": {
+"src": "8c94641909d3279573cee78bbe78202c36f2cce8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/run/01.webp": {
+"src": "51161a5275b64ccf0448b3e00af4f89109186ac5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/run/02.webp": {
+"src": "7edeb7926d7a09227afbb0222e914d259464e23f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/anim/run/03.webp": {
+"src": "10f5397cacdbaf7a68100657528195c997374bfa",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/base.webp": {
+"src": "cb3597a9488d6b58b4be4930c98d5467c5834117",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/portrait.webp": {
+"src": "7a605ed9c91985426a74c3ab959827449409fe2b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+337
+]
+},
+"sprites/crickets/frost/poses/cling.webp": {
+"src": "3dbc74a68dd59b7b6c773caf86e1f26af23485c1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/glide.webp": {
+"src": "2d4a2452bb2ad61f01efcba442f1f43364979719",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/hang.webp": {
+"src": "632a2fdf17947eb9826adea3c93f552624531f7c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/hide.webp": {
+"src": "58195afbcf8f6cc0469b7dacf51f00dbc83727df",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/leap.webp": {
+"src": "ad7c9a04733c6531b7d411606043abbc0063fb39",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/listen.webp": {
+"src": "23acb035bc0c722ae3f22eeb88990a6868f6ef89",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/peek.webp": {
+"src": "549ccdfee0a0a7e586a053f1a317d262d6c10072",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/pound.webp": {
+"src": "1cc425c082bcb52ced44827e455b39579e60183a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/run-a.webp": {
+"src": "7edeb7926d7a09227afbb0222e914d259464e23f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/frost/poses/run-b.webp": {
+"src": "8c94641909d3279573cee78bbe78202c36f2cce8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/idle/00.webp": {
+"src": "ebdeae943003ca98ffd1555af180cf89ca34368c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/idle/01.webp": {
+"src": "dbe8d78741eb5352b19329811b891a978f5a0e02",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/idle/02.webp": {
+"src": "ebdeae943003ca98ffd1555af180cf89ca34368c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/idle/03.webp": {
+"src": "f03be0ac6b4312c31067c0f144144b277bc91050",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/run/00.webp": {
+"src": "e67f48fd9a495a02266a9065a7e24bca991c74d5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/run/01.webp": {
+"src": "4256723965e65816047467585739b34a9958b08f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/run/02.webp": {
+"src": "6c1010f17f95343feba909a888f8a0013414ee9d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/anim/run/03.webp": {
+"src": "db13dd092b386cdbf9b163db65fe54bdc61e353b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/base.webp": {
+"src": "ebdeae943003ca98ffd1555af180cf89ca34368c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/portrait.webp": {
+"src": "5f784211aca64afddeb25490a85a496168817690",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+373
+]
+},
+"sprites/crickets/hump/poses/cling.webp": {
+"src": "044ac1c73506ba6603f084c63d532e1024818468",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/glide.webp": {
+"src": "9d716c012f59cb02e0b52ec07353edc95fefd666",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/hang.webp": {
+"src": "9c0ffc59db9c1684a47bdfa000e88aea99d778d5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/hide.webp": {
+"src": "429c82e6a2234f31593acc9342cae00b5de9329b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/leap.webp": {
+"src": "0a9c573bde20385a08615cd06c1dd88e0224dd8c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/listen.webp": {
+"src": "9a407ccba2fdfea2f20901b1d0c020537ee96258",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/peek.webp": {
+"src": "6c47f78c3987b149f5d8ae7cdf02dfbd4334d4d5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/pound.webp": {
+"src": "66309ee849a4b56fdc37309234f71f78e99eb972",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/run-a.webp": {
+"src": "6c1010f17f95343feba909a888f8a0013414ee9d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/hump/poses/run-b.webp": {
+"src": "e67f48fd9a495a02266a9065a7e24bca991c74d5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/idle/00.webp": {
+"src": "a0b5f2bae5743ab403b01e6e5b6d3301342e88a9",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/idle/01.webp": {
+"src": "43746b452ceae44e20863f6b002df1f4457fdc9e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/idle/02.webp": {
+"src": "a0b5f2bae5743ab403b01e6e5b6d3301342e88a9",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/idle/03.webp": {
+"src": "baeea0f1d3be6d972a31a13cd3ae4ad739ba3cc8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/run/00.webp": {
+"src": "14bc29cd018ce82830746e4fe0e6966760307d79",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/run/01.webp": {
+"src": "58014e58a5155b330b4b7563e491b18c28d15467",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/run/02.webp": {
+"src": "9a3cb8d274308765c635397bba3e32c7d6e102af",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/anim/run/03.webp": {
+"src": "75dbbce47b12119f6d4222e7a14b4d1304a3ba67",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/base.webp": {
+"src": "a0b5f2bae5743ab403b01e6e5b6d3301342e88a9",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/portrait.webp": {
+"src": "182b1cf946e69328fc3c309d958ab12df7aec497",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+329
+]
+},
+"sprites/crickets/jam/poses/cling.webp": {
+"src": "629407f6de0bee6824b98a8ce93aaef5938a1c44",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/glide.webp": {
+"src": "d6c2dcccd649514114cbae782766e0dea1beff7e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/hang.webp": {
+"src": "50b5f0547e1ef29822ecc9579fd550319c80e50f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/hide.webp": {
+"src": "14fd0ad59e25ec94d5f1b8694b926a61ea745e71",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/leap.webp": {
+"src": "512a79a2395fbe709a2f2d8bde91ba6f6b64b78d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/listen.webp": {
+"src": "08cd2d95602ce90c79a5c7ccf8dc3e6e62c7714a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/peek.webp": {
+"src": "17a512d27a9291d70b65c239897b1726e9722bac",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/pound.webp": {
+"src": "b9ac076353207de1b52208a0f8251982b7965449",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/run-a.webp": {
+"src": "2a3aa16b726cd2e81f764068d5a0b6467bae9334",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/jam/poses/run-b.webp": {
+"src": "0bea2a3c7d8e1e74ec4d61adedcdc4263d3e6c0b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/idle/00.webp": {
+"src": "4c8a90545ffe513fe9f381c1000cb4a8ded875ee",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/idle/01.webp": {
+"src": "3b077e8335feaf9058308e010b7cce170af8d369",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/idle/02.webp": {
+"src": "4c8a90545ffe513fe9f381c1000cb4a8ded875ee",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/idle/03.webp": {
+"src": "55bf665789b41fba0b0c6704000665f8ddbd358f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/run/00.webp": {
+"src": "a7a809bb2bff85cf36e559b191f6dcfbfd3051f7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/run/01.webp": {
+"src": "8ceb23b284b445095a8060c880c2b9a25114cb1f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/run/02.webp": {
+"src": "29b843f024ce57b1641535a5bc39473c17cddb0a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/anim/run/03.webp": {
+"src": "3b3964391ea55b78e5f72513ad9eca38dea87b4d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/base.webp": {
+"src": "4c8a90545ffe513fe9f381c1000cb4a8ded875ee",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/portrait.webp": {
+"src": "23ef30457a1a6654a15b55aabd91936fec8c241d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+309
+]
+},
+"sprites/crickets/katy/poses/cling.webp": {
+"src": "dc2868a74b8ac7b16993ba2e5e67cfe99396292f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/glide.webp": {
+"src": "77a40396b4099c74715979db9dfc233d77460a84",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/hang.webp": {
+"src": "16f5c7dfc272d18129be3505cb359ab9456c3c90",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/hide.webp": {
+"src": "7a23689d6932e3fb2354932ad39d8ffe4a8a41d4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/leap.webp": {
+"src": "cdafa56b46f721f13cc11d63b966e7bcc4a3408d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/listen.webp": {
+"src": "9d7cbde55af5f91b91c58238d47b28eecb82736a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/peek.webp": {
+"src": "bee6335e94bad71217a88b5f6d0bd516faff066e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/pound.webp": {
+"src": "893d914fc70840728826db1678fb547463a23056",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/run-a.webp": {
+"src": "29b843f024ce57b1641535a5bc39473c17cddb0a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/katy/poses/run-b.webp": {
+"src": "a7a809bb2bff85cf36e559b191f6dcfbfd3051f7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/idle/00.webp": {
+"src": "1770f4f99b5b225176f6907ea35c0a08686963f7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/idle/01.webp": {
+"src": "cb3a34e120d6e93c3009fbdfda291298a99d3db4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/idle/02.webp": {
+"src": "1770f4f99b5b225176f6907ea35c0a08686963f7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/idle/03.webp": {
+"src": "f54a9bd182734745e35d08d4919569bf37c9a5cc",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/run/00.webp": {
+"src": "f4215a6a3d17fc2dd20bbf82db502b76efd92b73",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/run/01.webp": {
+"src": "c63caf6f5f285485aca461de2984877d075a504e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/run/02.webp": {
+"src": "b5dbdefe9a63ea0e6715f05e567ee994e0693c99",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/anim/run/03.webp": {
+"src": "4a2fbb3028a855ba6b01915f1f486963c2879376",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/base.webp": {
+"src": "1770f4f99b5b225176f6907ea35c0a08686963f7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/portrait.webp": {
+"src": "5d235c8fd092a36a1f7c689303442b47fe105176",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+348
+]
+},
+"sprites/crickets/mote/poses/cling.webp": {
+"src": "a2f435d0b4836f1757b9d3a82891875a7949b8fd",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/glide.webp": {
+"src": "fc88a7bc93463e27418af1157f7b622d1b022f33",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/hang.webp": {
+"src": "757f9b0ff400d0da0a1a63afcf4c7ccdf651c266",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/hide.webp": {
+"src": "f0a3d82830b0610d7c618a39c9775015b8fae856",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/leap.webp": {
+"src": "4dcf84f4f314417129d82760fb8686ef34046ea5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/listen.webp": {
+"src": "1378d26bca0b98d99f03f33c445e3fee9e030828",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/peek.webp": {
+"src": "520601c950c7cc87263444836aacfd64a7af663e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/pound.webp": {
+"src": "0e752152191b8709ff9d0d36403078a0ef91eb5e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/run-a.webp": {
+"src": "bc9dc1bbfcbc79916df0b27a0d65f6c3c56fd057",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/mote/poses/run-b.webp": {
+"src": "f5bcb3375dabb4918faab7e87f59f0f9f97dc865",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/chirp/00.webp": {
+"src": "ff9ade4f8ce7fc6e5d89ff32b3494bb54d3c6649",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/chirp/01.webp": {
+"src": "6f0165bf89c3faa1c4acc9d011f8c458e8bcd769",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/chirp/02.webp": {
+"src": "bfeba64b711138b1000f1657938891c866fbd405",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/chirp/03.webp": {
+"src": "6f0165bf89c3faa1c4acc9d011f8c458e8bcd769",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/hide/00.webp": {
+"src": "38847bbfdcd03dcd3b388f9b755e6f308d8a3583",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/hide/01.webp": {
+"src": "09ecc7ee28d651c788cab237c0fc9e1b7a901ea1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/hide/02.webp": {
+"src": "e605e24c0ed14e41475a6bad145cfbc7427d38fa",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/hide/03.webp": {
+"src": "52b099fb708f5319de154fab14afd94ddcca6209",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/idle/00.webp": {
+"src": "38847bbfdcd03dcd3b388f9b755e6f308d8a3583",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/idle/01.webp": {
+"src": "932ef6404ac27b55a7fb424326202950e8631d0b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/idle/02.webp": {
+"src": "38847bbfdcd03dcd3b388f9b755e6f308d8a3583",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/idle/03.webp": {
+"src": "ec513eb1d8110c4241ac1bb6f31a82d6b6581e17",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/jump/00.webp": {
+"src": "f8561dcd6606ce850df2403d5c8b54f61e906693",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/jump/01.webp": {
+"src": "b2165b8c03b912424e64b49b5d93db44397b3d6c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/jump/02.webp": {
+"src": "636dd0ae904e0e3591ab5ca34040db3e820f8d7b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/jump/03.webp": {
+"src": "36127d81d85c566d6c5a1ecac3c827432f3cadb5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/kick/00.webp": {
+"src": "9f176ce95d5535adad50a3421e8af709d45db1d4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/kick/01.webp": {
+"src": "a7289cffe1ce6f960608971f29e1c479c7cc66ae",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/kick/02.webp": {
+"src": "d82a930cda70554e60dd6ec336a9726e93dbcc2e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/kick/03.webp": {
+"src": "38847bbfdcd03dcd3b388f9b755e6f308d8a3583",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/peek/00.webp": {
+"src": "52b099fb708f5319de154fab14afd94ddcca6209",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/peek/01.webp": {
+"src": "b4033b3421a1cd8c3e63b046c1dfa963861a2e6b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/peek/02.webp": {
+"src": "92343dcab21cfaa6c3192fbaa6e4c85a27fd73c2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/peek/03.webp": {
+"src": "b4033b3421a1cd8c3e63b046c1dfa963861a2e6b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/run/00.webp": {
+"src": "284cfcccb5b5a13aec290473f55e5c38a50a2670",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/run/01.webp": {
+"src": "49c4e5b7da0083b9c957971fbc83b0d504abbf66",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/run/02.webp": {
+"src": "c69c8c06ff674809f06e600237e77c2243f0f060",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/anim/run/03.webp": {
+"src": "e80f0e5b002fc2e2e09c27cfc7369216f7e2cf61",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/base.webp": {
+"src": "38847bbfdcd03dcd3b388f9b755e6f308d8a3583",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/portrait.webp": {
+"src": "64c42773799deb9a097e02c55facc4c98f4ab522",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+287
+]
+},
+"sprites/crickets/pip/poses/cling.webp": {
+"src": "50ca8f8ac6f579a75739087df8c5e4a346ca3a31",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/glide.webp": {
+"src": "c9adddeecd47d861378f32e5b589a3af15e82542",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/hang.webp": {
+"src": "68348aa594e3129fc86918e78a63d236fdb894c8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/hide.webp": {
+"src": "52b099fb708f5319de154fab14afd94ddcca6209",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/leap.webp": {
+"src": "b2165b8c03b912424e64b49b5d93db44397b3d6c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/listen.webp": {
+"src": "ab19a6c24c123fbd0c28ba6841cccbaf96599f4a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/peek.webp": {
+"src": "92343dcab21cfaa6c3192fbaa6e4c85a27fd73c2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/pound.webp": {
+"src": "1de53afda66f0785e48043400e7116bebc480950",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/run-a.webp": {
+"src": "c69c8c06ff674809f06e600237e77c2243f0f060",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/pip/poses/run-b.webp": {
+"src": "284cfcccb5b5a13aec290473f55e5c38a50a2670",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/idle/00.webp": {
+"src": "edd7a24362d989aa695d9b4aa9098aa41212d635",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/idle/01.webp": {
+"src": "f2fe9c3db91ae9846c8cc0f8a68f1cd801df93d7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/idle/02.webp": {
+"src": "edd7a24362d989aa695d9b4aa9098aa41212d635",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/idle/03.webp": {
+"src": "984b6e5c3a671dce1706cfb313b4b01605e810fa",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/run/00.webp": {
+"src": "7373ab98e658fbf97c09b4fe5fa33dc8c080fac5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/run/01.webp": {
+"src": "2f92e9c5ffa6cfac5267a5f1770b0a0fff015935",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/run/02.webp": {
+"src": "23fc4f95fd99b1e36f97c39a2e8600efa947ff4e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/anim/run/03.webp": {
+"src": "4f24daba104f97def2c36571177bb4f51db55e8d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/base.webp": {
+"src": "edd7a24362d989aa695d9b4aa9098aa41212d635",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/portrait.webp": {
+"src": "4f4606169eab3596df58c3fe6d532dd4a1991fc0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+377
+]
+},
+"sprites/crickets/rin/poses/cling.webp": {
+"src": "8c85983368ad282b39fa6d2c54b689b3099e35ea",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/glide.webp": {
+"src": "8451f877e32f3e962f29ba18bf2b40308de082f5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/hang.webp": {
+"src": "598e3a36d8646e00b978bbcae2414316dbcfef57",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/hide.webp": {
+"src": "8836cc38e229c45db4259cac08227b85a496e8dd",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/leap.webp": {
+"src": "73e8b7b9fac33975b837faf7925186c03141a79b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/listen.webp": {
+"src": "6cc1c6fa76edb80513edc6101b2fb955660df1fb",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/peek.webp": {
+"src": "546aff5d31dcdc658737e8495abff101044bb038",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/pound.webp": {
+"src": "64791ee8274805e92f826637af9ea584c1aaab60",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/run-a.webp": {
+"src": "5b0aa2bf0f75df3ec017ff93a68a1031e9be964d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/rin/poses/run-b.webp": {
+"src": "f5e6f9f26baa879b616c39b25d3d3484b53058c5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/idle/00.webp": {
+"src": "adbfd20a521705510033fd54b77968dbf11698fe",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/idle/01.webp": {
+"src": "02d33723b598227d7861bba2df28e0327d1e5b16",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/idle/02.webp": {
+"src": "adbfd20a521705510033fd54b77968dbf11698fe",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/idle/03.webp": {
+"src": "91b8c91ce7566af983f4ab6f2ff66f6a20d1418f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/run/00.webp": {
+"src": "c4baeb83ab29905d4e263ede7e30515af8e6cc79",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/run/01.webp": {
+"src": "eb435489a3845ef062dcd3c5f44b0f21bdafbddf",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/run/02.webp": {
+"src": "2a0f168ebac78cabdb3c0319eb94b2e8cc4f1cee",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/anim/run/03.webp": {
+"src": "f99a0058f6a393ec0218b81ac36bdca8add39daa",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/base.webp": {
+"src": "fc44e886b7e486ee5a11d97f87af103168f0df4a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/portrait.webp": {
+"src": "32098028e7ea67cc06dafb97d17e15c5d8ea78da",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+512,
+294
+]
+},
+"sprites/crickets/stripe/poses/cling.webp": {
+"src": "f72b5892b1b702d84265bd0715d785651d76c5f3",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/glide.webp": {
+"src": "38155f3d327ea63e28eca0f13858d7b6505aaf5e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/hang.webp": {
+"src": "23f6efea2086fee00d5871b5afd015006611c01c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/hide.webp": {
+"src": "44d3ebc21e25693d8df14d4753dff8c5869cf55c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/leap.webp": {
+"src": "79a26c35593d6440c7be04e337e90e6dbec6d952",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/listen.webp": {
+"src": "1186705dacb40859a2a2ae92a8b42f3ac603cf21",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/peek.webp": {
+"src": "36ee9af4b232428538fdc8f48cd71423595b8376",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/pound.webp": {
+"src": "dadc48474f023398808ed5e19e9758fa90689d3f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/run-a.webp": {
+"src": "2a0f168ebac78cabdb3c0319eb94b2e8cc4f1cee",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/crickets/stripe/poses/run-b.webp": {
+"src": "c4baeb83ab29905d4e263ede7e30515af8e6cc79",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+160
+]
+},
+"sprites/enemies/ant/0.webp": {
+"src": "7ca2eb72dfb74ccc4c18fbab9d9a7ff9557be88e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+84
+]
+},
+"sprites/enemies/ant/1.webp": {
+"src": "5353b5673740ccc750c51c4f2a6635c0f5bd3389",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+84
+]
+},
+"sprites/enemies/ant/2.webp": {
+"src": "ae666aa5a2b26b99ebcbc88b50f1fd5449f697fd",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+86
+]
+},
+"sprites/enemies/antsoldier/0.webp": {
+"src": "5c07f295ac53f022ccc6d388ab95cb6f48d47331",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+114
+]
+},
+"sprites/enemies/antsoldier/1.webp": {
+"src": "336399603b714e45507b0e083c8ec96849fe02c9",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+114
+]
+},
+"sprites/enemies/antsoldier/2.webp": {
+"src": "a468dc62323119ad9437318c4e9cbe3ffe96c34c",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+133
+]
+},
+"sprites/enemies/aphid/0.webp": {
+"src": "41fb808ae4e3092629f40217bcd10843306b49f5",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+103
+]
+},
+"sprites/enemies/aphid/1.webp": {
+"src": "9a14ce60afbc92d54b9fab3fd531526af77e4f75",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+103
+]
+},
+"sprites/enemies/aphid/2.webp": {
+"src": "3c1e016770c813df83f769bdcaa8b67e15ee434f",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+84
+]
+},
+"sprites/enemies/beetle/0.webp": {
+"src": "e2bf1b12ed6384e0e5a6aea7416866a964a909e2",
+"set": {
+"q": 90,
+"m": 6,
+"max": 240
+},
+"size": [
+240,
+109
+]
+},
+"sprites/enemies/beetle/1.webp": {
+"src": "ddf7bc61d22e5b9260f26fdee4d37488200bc4bb",
+"set": {
+"q": 90,
+"m": 6,
+"max": 240
+},
+"size": [
+240,
+109
+]
+},
+"sprites/enemies/booklouse/0.webp": {
+"src": "cf2ae7b823cb8c0831d0df5dd37a2f9ae2456826",
+"set": {
+"q": 90,
+"m": 6,
+"max": 96
+},
+"size": [
+96,
+80
+]
+},
+"sprites/enemies/booklouse/1.webp": {
+"src": "aa24eb7923862070984136a2ba7c25a377931643",
+"set": {
+"q": 90,
+"m": 6,
+"max": 96
+},
+"size": [
+96,
+80
+]
+},
+"sprites/enemies/booklouse/2.webp": {
+"src": "57d5bceac4b5872e7b016d1c5030c61951cfec0c",
+"set": {
+"q": 90,
+"m": 6,
+"max": 96
+},
+"size": [
+96,
+49
+]
+},
+"sprites/enemies/cellarspider/0.webp": {
+"src": "a256f39fadc97aa80f44f57e8bd96ca2d9cf0788",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+159,
+160
+]
+},
+"sprites/enemies/cellarspider/1.webp": {
+"src": "6fb655abfa4f7e329455ab7a47b18610658b1d5a",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+159,
+160
+]
+},
+"sprites/enemies/cellarspider/2.webp": {
+"src": "a184be41c03a063e1577f33800cb9c0036c82aee",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+138
+]
+},
+"sprites/enemies/centipede/0.webp": {
+"src": "271656dcd38bb857e500cf2fb263ccf005c3efe6",
+"set": {
+"q": 90,
+"m": 6,
+"max": 280
+},
+"size": [
+280,
+181
+]
+},
+"sprites/enemies/centipede/1.webp": {
+"src": "25c83d3858e6a10a9bc7e03d202b2c0f6b0a8bf1",
+"set": {
+"q": 90,
+"m": 6,
+"max": 280
+},
+"size": [
+280,
+181
+]
+},
+"sprites/enemies/centipede/2.webp": {
+"src": "36a5645143dfbf63b3108c7d000017f4ba31b183",
+"set": {
+"q": 90,
+"m": 6,
+"max": 280
+},
+"size": [
+280,
+157
+]
+},
+"sprites/enemies/clothesmoth/0.webp": {
+"src": "f091ca902a22a51cc3858e301be6690afb094266",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+108
+]
+},
+"sprites/enemies/clothesmoth/1.webp": {
+"src": "e60fc94ba9fdaafe67f3ceb7429fc21f5c017714",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+108
+]
+},
+"sprites/enemies/clothesmoth/2.webp": {
+"src": "fbbd549676edc5a49b604f50d05816f1313466c8",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+97
+]
+},
+"sprites/enemies/cockroach/0.webp": {
+"src": "9f4a82b8dbec8ee9b8dcb84589ed87547b84d8a8",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+124
+]
+},
+"sprites/enemies/cockroach/1.webp": {
+"src": "790117ce0b9a5713e7d11efe009d6b3e1ebaaf65",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+124
+]
+},
+"sprites/enemies/cockroach/2.webp": {
+"src": "404d434c551ecbf2b06cc926496445e803e582d3",
+"set": {
+"q": 90,
+"m": 6,
+"max": 192
+},
+"size": [
+192,
+99
+]
+},
+"sprites/enemies/dustbunny/0.webp": {
+"src": "ca307b9c9451c82723b4636f61dfda5e92fb5c5a",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+108
+]
+},
+"sprites/enemies/dustbunny/1.webp": {
+"src": "c3d4a115a31643e44c750522b0aa319d20eb3615",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+144,
+108
+]
+},
+"sprites/enemies/dustbunny/2.webp": {
+"src": "a567d4d3841b6bd2ba4cb0d3b48c9404f55ff604",
+"set": {
+"q": 90,
+"m": 6,
+"max": 144
+},
+"size": [
+129,
+144
+]
+},
+"sprites/enemies/earwig/0.webp": {
+"src": "6d9e5af8f654aa30cfaafb71728d489f2aa1973a",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+121
+]
+},
+"sprites/enemies/earwig/1.webp": {
+"src": "b3578492e119e3e6b7ecc0dfbd18339e0db15360",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+121
+]
+},
+"sprites/enemies/earwig/2.webp": {
+"src": "d0bcd6db3e8f3adfe02cdc2fee6da7be89dd78c6",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+98
+]
+},
+"sprites/enemies/fruitflies/0.webp": {
+"src": "8396283e8c255170461df13e594c76b3f8d02c2e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+384,
+361
+]
+},
+"sprites/enemies/fruitflies/1.webp": {
+"src": "e411668dd37572a083a6c10f1c47f4fcbe4ebf5a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+384,
+361
+]
+},
+"sprites/enemies/fruitflies/2.webp": {
+"src": "a247c94049b7e52f2c60d95d1a9b41549aff81df",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+384,
+357
+]
+},
+"sprites/enemies/mites/0.webp": {
+"src": "6b60b7022da01fa795459eaff89473392e10b74a",
+"set": {
+"q": 90,
+"m": 6,
+"max": 136
+},
+"size": [
+136,
+107
+]
+},
+"sprites/enemies/mites/1.webp": {
+"src": "89852f9f8cbadf7179c80c4b6f171ea6baf9344e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 136
+},
+"size": [
+136,
+107
+]
+},
+"sprites/enemies/mites/2.webp": {
+"src": "a0f3f51c4848a80125701bceb6789d7ccc9199a2",
+"set": {
+"q": 90,
+"m": 6,
+"max": 136
+},
+"size": [
+136,
+83
+]
+},
+"sprites/enemies/mosquito/0.webp": {
+"src": "03ee9f8b5ab3347f457693941724c45afacba06f",
+"set": {
+"q": 90,
+"m": 6,
+"max": 136
+},
+"size": [
+136,
+115
+]
+},
+"sprites/enemies/mosquito/1.webp": {
+"src": "89034bfe55dee460ad862472a612597cb275574e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 136
+},
+"size": [
+136,
+115
+]
+},
+"sprites/enemies/mosquito/2.webp": {
+"src": "64583398c47cebbfc2f21d2913ee2aeeeb13f14b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 136
+},
+"size": [
+136,
+93
+]
+},
+"sprites/enemies/silverfish/0.webp": {
+"src": "34b7ac917967e31b6ae93ba0b8622938ec064fab",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+92
+]
+},
+"sprites/enemies/silverfish/1.webp": {
+"src": "ef7414ff57b9125012920ecf0b76daa258bb19fe",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+92
+]
+},
+"sprites/enemies/silverfish/2.webp": {
+"src": "073493b65319b201af5856870142a24b40e73dcb",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+97
+]
+},
+"sprites/enemies/stinkbug/0.webp": {
+"src": "5f4598d62225abad1efa5ee6c810d49744efef3d",
+"set": {
+"q": 90,
+"m": 6,
+"max": 168
+},
+"size": [
+168,
+113
+]
+},
+"sprites/enemies/stinkbug/1.webp": {
+"src": "3a5dc5e117052a76a19a80c3edb9be3493daecd3",
+"set": {
+"q": 90,
+"m": 6,
+"max": 168
+},
+"size": [
+168,
+113
+]
+},
+"sprites/enemies/stinkbug/2.webp": {
+"src": "13ac1333c51c35ee4ec948722a03c01d65827fb9",
+"set": {
+"q": 90,
+"m": 6,
+"max": 168
+},
+"size": [
+168,
+101
+]
+},
+"sprites/enemies/vacuum/0.webp": {
+"src": "c4b5fbc121b9fa5ae4ac83c4ff642bdb70f6e334",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+384,
+197
+]
+},
+"sprites/enemies/vacuum/1.webp": {
+"src": "f06f961e3322b57cae91209ce9d5d096d4d4e162",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+384,
+197
+]
+},
+"sprites/enemies/wasp/0.webp": {
+"src": "7e616edc3a53a5873c97f3bad9e81b82bb35e687",
+"set": {
+"q": 90,
+"m": 6,
+"max": 168
+},
+"size": [
+168,
+158
+]
+},
+"sprites/enemies/wasp/1.webp": {
+"src": "701a05ff5864fcb6b7b0e38f71f1fdcc6800c4a1",
+"set": {
+"q": 90,
+"m": 6,
+"max": 168
+},
+"size": [
+168,
+158
+]
+},
+"sprites/enemies/wasp/2.webp": {
+"src": "72f8cfdd7b4b5cefff11b9ede6d9f06de49b14c7",
+"set": {
+"q": 90,
+"m": 6,
+"max": 168
+},
+"size": [
+168,
+109
+]
+},
+"sprites/enemies/weevil/0.webp": {
+"src": "f548391e1e0f5cc48f147a77a90b9b763950e946",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+73
+]
+},
+"sprites/enemies/weevil/1.webp": {
+"src": "84567fdcedd8549a551ebbaba7f7dc71febb12d4",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+73
+]
+},
+"sprites/enemies/weevil/2.webp": {
+"src": "7ee8e80811a4ba785bf3b9067f30e99820ea2963",
+"set": {
+"q": 90,
+"m": 6,
+"max": 160
+},
+"size": [
+160,
+97
+]
+},
+"sprites/enemies/wolfspider/0.webp": {
+"src": "68bf16235956b1050b67c9571138ddc5019740c7",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+124
+]
+},
+"sprites/enemies/wolfspider/1.webp": {
+"src": "f2890b5cc4a31a7ae28b68e3a3783ae4a5c3100b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+124
+]
+},
+"sprites/enemies/wolfspider/2.webp": {
+"src": "c409cc1a376aa4530edee2ef857d7e0d5683e4c0",
+"set": {
+"q": 90,
+"m": 6,
+"max": 208
+},
+"size": [
+208,
+144
+]
+},
+"sprites/geckos/bigtok/body.webp": {
+"src": "822c00c7e5941098161397a9c8a7275d31ee74c0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+678,
+1505
+]
+},
+"sprites/geckos/bigtok/idle.webp": {
+"src": "faf81dd793343d994769546f4171e1be19f173db",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+678,
+1505
+]
+},
+"sprites/geckos/bigtok/portrait.webp": {
+"src": "1ac78fef2479208e1e8da57f3458e8521718f07f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+422,
+394
+]
+},
+"sprites/geckos/bigtok/sleep.webp": {
+"src": "108559f2d22b19ecb1c62cedcbfe773e96e37d5b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+606,
+1114
+]
+},
+"sprites/geckos/bigtok/strike.webp": {
+"src": "662a7a47f5d7a927a36f52ebe64b36680febb684",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+666,
+1025
+]
+},
+"sprites/geckos/bigtok/tail.webp": {
+"src": "4a86075bb5a3cd8496bf9447445bd7e0b7f441f3",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+142,
+391
+]
+},
+"sprites/geckos/chikchak/body.webp": {
+"src": "922827b011cac64193e3ec55381d706f34e0ed42",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1506,
+605
+]
+},
+"sprites/geckos/chikchak/idle.webp": {
+"src": "2f4b5c748bd3c4670cde37640b9517c30603d0b5",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1506,
+605
+]
+},
+"sprites/geckos/chikchak/legs-back.webp": {
+"src": "ff00070535f1cc91de05d6533ff5205e819b667a",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+280,
+256
+]
+},
+"sprites/geckos/chikchak/legs-front.webp": {
+"src": "7813477e441d0339f39eebb1d6366450b4ccc77e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+201,
+241
+]
+},
+"sprites/geckos/chikchak/sleep.webp": {
+"src": "6da0d3dcfe9efe16bc8e5de90f6a230d8b91535c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+899,
+213
+]
+},
+"sprites/geckos/chikchak/strike.webp": {
+"src": "4f5cc3eb8847bbe6404b464e0e0f2e89fbe0a7a6",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1185,
+422
+]
+},
+"sprites/geckos/chikchak/tail.webp": {
+"src": "f7b97ab5e7579bdc0275f5afd871fc84c70375ab",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+607,
+127
+]
+},
+"sprites/geckos/duchess/body.webp": {
+"src": "01ef7ecf9ead58274f342e96ee3c7c21bbf870f2",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1520,
+557
+]
+},
+"sprites/geckos/duchess/idle.webp": {
+"src": "1bca257335efd46decc0550e7d4bb96d309b89fd",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1520,
+557
+]
+},
+"sprites/geckos/duchess/legs-back.webp": {
+"src": "2f92774cac199c29a3bcb4f23102015aa2d46172",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+226,
+148
+]
+},
+"sprites/geckos/duchess/legs-front.webp": {
+"src": "b1439c53a9f79a39a831a4943edef4e7a1370f9c",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+171,
+170
+]
+},
+"sprites/geckos/duchess/sleep.webp": {
+"src": "b59caf6a8e3f9f796e114bfce6ebc69a068d192f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+999,
+246
+]
+},
+"sprites/geckos/duchess/strike.webp": {
+"src": "2aaba9c2e50ef47de46f8e605939df3cd859d7b4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1182,
+451
+]
+},
+"sprites/geckos/duchess/tail.webp": {
+"src": "01495c1c74eee8d357c0030fa6736528709ac508",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+522,
+240
+]
+},
+"sprites/geckos/ember/body.webp": {
+"src": "46d43e9d1c71e145d31d6efede9c0b8bee0f3cdb",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1515,
+561
+]
+},
+"sprites/geckos/ember/idle.webp": {
+"src": "35039d9cf59ba6b7fcf583e386ad8ba1c38acc08",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1515,
+561
+]
+},
+"sprites/geckos/ember/legs-back.webp": {
+"src": "67d4416d6bdf61c464ebbb84c6ffb79f692a48d1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+264,
+243
+]
+},
+"sprites/geckos/ember/legs-front.webp": {
+"src": "0c39063e46904bd56a72880f3f71dd8afaa26bc4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+203,
+222
+]
+},
+"sprites/geckos/ember/sleep.webp": {
+"src": "5ca84e3961a6a617cc178b5dbfed5e671fcffeb1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+869,
+242
+]
+},
+"sprites/geckos/ember/strike.webp": {
+"src": "47411206322c142d99218f9b6156c6929fc57053",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1197,
+450
+]
+},
+"sprites/geckos/ember/tail.webp": {
+"src": "ce39eb364eb83a371fab93c48e611b06e92f4686",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+646,
+149
+]
+},
+"sprites/geckos/gargy/body.webp": {
+"src": "6739e19f9f88cc7bd58281f43a3386dadb7051d1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1499,
+597
+]
+},
+"sprites/geckos/gargy/idle.webp": {
+"src": "60bf2480feb60c5960b040236c5f9f50cf7e4ccb",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1499,
+597
+]
+},
+"sprites/geckos/gargy/legs-back.webp": {
+"src": "214891ecb39b8e3c9595dac24115a13b865e2b0d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+240,
+176
+]
+},
+"sprites/geckos/gargy/legs-front.webp": {
+"src": "77fa27963a87006a072e043997e373c95c410d47",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+217,
+173
+]
+},
+"sprites/geckos/gargy/sleep.webp": {
+"src": "bb2dfde81329b99c96272ca4534377f566cbe48f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+959,
+289
+]
+},
+"sprites/geckos/gargy/strike.webp": {
+"src": "a70b7c74368fa41406beec18493058688b68f7fc",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1224,
+487
+]
+},
+"sprites/geckos/gargy/tail.webp": {
+"src": "4a9b03eea3a0dc5e7b3bc39e3a5e72441cb3e9c7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+540,
+210
+]
+},
+"sprites/geckos/kite/body.webp": {
+"src": "8223537728338964dbefba87a6ecf22656faf4b4",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1520,
+504
+]
+},
+"sprites/geckos/kite/glide.webp": {
+"src": "8125da9f423cb51992742ffa97eb21a6f1dfe92b",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1515,
+949
+]
+},
+"sprites/geckos/kite/idle.webp": {
+"src": "69c74a6aa13372a3f0dc15cb2ba7b5c761c0af8e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1520,
+504
+]
+},
+"sprites/geckos/kite/legs-back.webp": {
+"src": "dc42f70d0bb62eb7cf4941c1dfdea0d4839f37c8",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+228
+]
+},
+"sprites/geckos/kite/legs-front.webp": {
+"src": "343d5e35986278701c958ec856ae6c3004ca664f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+266,
+220
+]
+},
+"sprites/geckos/kite/sleep.webp": {
+"src": "ae7a42db2ffb3769349711abd416b588ba31d3e9",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+954,
+219
+]
+},
+"sprites/geckos/kite/strike.webp": {
+"src": "ccb9cbd097ebb9759c01c6e8580c7f4e99825382",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+960,
+393
+]
+},
+"sprites/geckos/kite/tail.webp": {
+"src": "a0b2b0d89bd1585915a3eb329d861744b06c1e32",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+565,
+217
+]
+},
+"sprites/geckos/lashes/body.webp": {
+"src": "ee6ea8f3bb11c9381b362b8f4f32aeb0f9903936",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1499,
+806
+]
+},
+"sprites/geckos/lashes/idle.webp": {
+"src": "128105b604e99e532114bec490c0015fc944465d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1499,
+806
+]
+},
+"sprites/geckos/lashes/legs-back.webp": {
+"src": "d7b5522b43a59a10f5f9a877e2ce6543f08ec056",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+256,
+277
+]
+},
+"sprites/geckos/lashes/legs-front.webp": {
+"src": "cbbd54f4876fe74c1dca56e8aa46b573b66e4d60",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+232,
+267
+]
+},
+"sprites/geckos/lashes/lick.webp": {
+"src": "219b13d13347d4f393b77139c54a310c29911698",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1429,
+807
+]
+},
+"sprites/geckos/lashes/sleep.webp": {
+"src": "801a495f475424880111e51a23eea633b21e16cf",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+984,
+338
+]
+},
+"sprites/geckos/lashes/strike.webp": {
+"src": "8be326acc9e5cd688b8fc95e94ede5ae401422ff",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1168,
+564
+]
+},
+"sprites/geckos/lashes/tail.webp": {
+"src": "79b6df294b3b0d32523e438e01e64f6b94d22801",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+515,
+160
+]
+},
+"sprites/geckos/mossy/body.webp": {
+"src": "8cd13a090d7e4804498a5fa292ca50f8ade3d790",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1515,
+556
+]
+},
+"sprites/geckos/mossy/idle.webp": {
+"src": "1000e65fa0534c0dbea96e617322ecd79666f7fc",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1515,
+556
+]
+},
+"sprites/geckos/mossy/legs-back.webp": {
+"src": "12ab70c11c8a0b1c6dc0c42f6ddddec02cda26da",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+213,
+173
+]
+},
+"sprites/geckos/mossy/legs-front.webp": {
+"src": "29d678128f3ef20662927bab8a1cc6d9134b5803",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+179,
+166
+]
+},
+"sprites/geckos/mossy/sleep.webp": {
+"src": "4af13d2a43a11b61195f92c5a3467b6dc90741e7",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+969,
+297
+]
+},
+"sprites/geckos/mossy/strike.webp": {
+"src": "351cff484f61bb722c1fa456ac0b5736de3e1de0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1082,
+422
+]
+},
+"sprites/geckos/mossy/tail.webp": {
+"src": "8021733c1ce065bba3052c6b22eb0574e4a9625f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+551,
+305
+]
+},
+"sprites/geckos/nana/body.webp": {
+"src": "67b04aba472e3d4423abab55b02f748e41706fa3",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+781,
+1490
+]
+},
+"sprites/geckos/nana/idle.webp": {
+"src": "217a2fb025e062d4460aa9fcd1a431df8866051e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+781,
+1490
+]
+},
+"sprites/geckos/nana/portrait.webp": {
+"src": "1efdf38438ce832d03accec371080892a80a9c43",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+577,
+424
+]
+},
+"sprites/geckos/nana/sleep.webp": {
+"src": "8f0b95a3d6882f1f84eeb89e2a7c0ce842d56d3e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+604,
+1114
+]
+},
+"sprites/geckos/nana/strike.webp": {
+"src": "1566a667b53dc7e7239d7cca95a50cea0771e225",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+769,
+1143
+]
+},
+"sprites/geckos/nana/tail.webp": {
+"src": "3a8b59aea8828b2fec12c228b8185659434c6101",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+312,
+376
+]
+},
+"sprites/geckos/peridot/body.webp": {
+"src": "1670268c1cb7f81cdc6896d6a5e2ea53ea8d455d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1503,
+679
+]
+},
+"sprites/geckos/peridot/idle.webp": {
+"src": "d1dceaf64a4c8ecd478fb62d199fbc3cc5d09fff",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1503,
+679
+]
+},
+"sprites/geckos/peridot/legs-back.webp": {
+"src": "88b57e274e910848ec86acefa58f829118fb5f5f",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+413,
+245
+]
+},
+"sprites/geckos/peridot/legs-front.webp": {
+"src": "34cecb69fd338899d2dc67ebaf226d56fc0ee428",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+235,
+245
+]
+},
+"sprites/geckos/peridot/sleep.webp": {
+"src": "f05cde3a9bc3c48678a046bb8abaea72ab778310",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+899,
+247
+]
+},
+"sprites/geckos/peridot/strike.webp": {
+"src": "5632752eda107af485a9a9e9d44efcba174d3465",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1206,
+463
+]
+},
+"sprites/geckos/peridot/tail.webp": {
+"src": "ce303e910ee1e7893e31f0d8b0339197668946f0",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+604,
+198
+]
+},
+"sprites/npcs/barty-claw.webp": {
+"src": "6c7df9c3e228f66a92153e80acffcea0d5292b99",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1529,
+956
+]
+},
+"sprites/npcs/barty-eye.webp": {
+"src": "50d52a94ecfaae720bea9f8393ff6d64098cd28e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1011,
+974
+]
+},
+"sprites/npcs/barty-head-black.webp": {
+"src": "c8ba77b99d7f96311473613571bf91a66e9c943d",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1509,
+1017
+]
+},
+"sprites/npcs/barty-head.webp": {
+"src": "d3e48be9bc680505818aa89dbc9421ec1000b240",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1509,
+1017
+]
+},
+"sprites/npcs/barty.webp": {
+"src": "f4a9c8e053642f38988a21db1f4eac112ba8721e",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1483,
+826
+]
+},
+"sprites/npcs/beep-talk.webp": {
+"src": "2dda9435da81d5f9eea5e9e60e2b91fe4c5794f0",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+210
+]
+},
+"sprites/npcs/beep.webp": {
+"src": "24ee45f47e17631bb4c3af9f9e56d12f0868158a",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+210
+]
+},
+"sprites/npcs/crumb-talk.webp": {
+"src": "b175e6567e1a32f1ed77b3b44974270c96d6bf04",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+243,
+256
+]
+},
+"sprites/npcs/crumb.webp": {
+"src": "c009b1fedab83926d2579ae2687b4c1dc0730e74",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+243,
+256
+]
+},
+"sprites/npcs/dot-talk.webp": {
+"src": "65e6047213a814484977b6d9c009a5b4b5d2bedd",
+"set": {
+"q": 90,
+"m": 6,
+"max": 280
+},
+"size": [
+280,
+260
+]
+},
+"sprites/npcs/dot.webp": {
+"src": "7de32a78f90fecf8d5b46331aa933de8f4ac23ea",
+"set": {
+"q": 90,
+"m": 6,
+"max": 280
+},
+"size": [
+280,
+260
+]
+},
+"sprites/npcs/glim-talk.webp": {
+"src": "370589e77c22fa1bfbff0558d4d765d1ab93e57e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+226
+]
+},
+"sprites/npcs/glim.webp": {
+"src": "c7f3a215ab3ce61746f008e2842a0c047268ca7b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+226
+]
+},
+"sprites/npcs/lumen-talk.webp": {
+"src": "2bed47e6c8ffce61c5ce97213f359a1ef7fafe1e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+254,
+256
+]
+},
+"sprites/npcs/lumen.webp": {
+"src": "2dc16f83e6e5b2be1f0c15691595009b7630e72b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+254,
+256
+]
+},
+"sprites/npcs/page-talk.webp": {
+"src": "1fd353c14502a6be54b5eb8c388348d7219af2ec",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+238
+]
+},
+"sprites/npcs/page.webp": {
+"src": "e06297f7b3cf89b64a68b791bb81860962b9b74e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+238
+]
+},
+"sprites/npcs/peeper-talk.webp": {
+"src": "d91ccf0e27610d8c6167d181182f87bf7665b2df",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+229
+]
+},
+"sprites/npcs/peeper.webp": {
+"src": "5225b32bb1e589938535fe50137796796b174fc3",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+229
+]
+},
+"sprites/npcs/rolo-talk.webp": {
+"src": "e3959b7480c040efc1a8e57556a9ffadd9d780dc",
+"set": {
+"q": 90,
+"m": 6,
+"max": 360
+},
+"size": [
+360,
+197
+]
+},
+"sprites/npcs/rolo.webp": {
+"src": "8570f7128c2c44ac2727dd86a11f0ae65d69e2d1",
+"set": {
+"q": 90,
+"m": 6,
+"max": 360
+},
+"size": [
+360,
+197
+]
+},
+"sprites/npcs/shelly-talk.webp": {
+"src": "3841c9c3432e47a9253ff238c41f996f251253f6",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+249
+]
+},
+"sprites/npcs/shelly.webp": {
+"src": "d2ba5cb1e7be30e357ee16e14ee3abd5228a2204",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+249
+]
+},
+"sprites/npcs/soot-talk.webp": {
+"src": "12f72d9790ee4d79d00a8a8882e429fda286c619",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+248,
+256
+]
+},
+"sprites/npcs/soot.webp": {
+"src": "d3b2113d08dd00e8ac0f99813b32af67c6f4c805",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+248,
+256
+]
+},
+"sprites/npcs/velvet-talk.webp": {
+"src": "13a5c5db2c11fecf5d20f153c8db02b9e2e14835",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+137,
+256
+]
+},
+"sprites/npcs/velvet.webp": {
+"src": "c2b011a739015ae236f76eec29407b476799fc9f",
+"set": {
+"q": 90,
+"m": 6,
+"max": 256
+},
+"size": [
+137,
+256
+]
+},
+"sprites/npcs/weft-talk.webp": {
+"src": "478bcbca09d6723e4c0e71437c897735ba6872a7",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+239
+]
+},
+"sprites/npcs/weft.webp": {
+"src": "8ee217d326a2d97acde114a22cd2a0863f1b388d",
+"set": {
+"q": 90,
+"m": 6,
+"max": 304
+},
+"size": [
+304,
+239
+]
+},
+"ui/panel.webp": {
+"src": "9b70d57a3abfc3881b0410ad0e16dd653f07c3d1",
+"set": {
+"q": 90,
+"m": 6,
+"max": null
+},
+"size": [
+1491,
+978
+]
+}
+}

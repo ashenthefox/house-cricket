@@ -13,11 +13,12 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const out = path.join(root, 'design/zones');
 fs.mkdirSync(out, { recursive: true });
 const ls = (p) => { try { return fs.readdirSync(path.join(root, 'game/assets', p)).sort(); } catch { return []; } };
-const PROPS = ls('props').map((f) => f.replace(/\.png$/, ''));
+const lsArt = (p) => { try { return fs.readdirSync(path.join(root, 'art', p)).sort(); } catch { return []; } }; // [issue 14] terrain swatches are sources only
+const PROPS = ls('props').map((f) => f.replace(/\.webp$/, ''));
 const ENEMIES = ls('sprites/enemies');
-const NPCS = ls('sprites/npcs').map((f) => f.replace(/\.png$/, ''));
-const TERRAIN = ls('terrain').map((f) => f.replace(/\.png$/, ''));
-const ITEM_ART = ls('items').map((f) => f.replace(/\.png$/, ''));
+const NPCS = ls('sprites/npcs').map((f) => f.replace(/\.webp$/, ''));
+const TERRAIN = lsArt('terrain').map((f) => f.replace(/\.png$/, ''));
+const ITEM_ART = ls('items').map((f) => f.replace(/\.webp$/, ''));
 const SFX = ls('audio/sfx').map((f) => f.replace(/\.mp3$/, ''));
 const MUSIC = ls('audio/music').map((f) => f.replace(/\.mp3$/, ''));
 
@@ -101,7 +102,7 @@ const FLOW = {
     ],
     notes: [
       'Zones 4-7 combine two movement skills per room and add tougher enemies (ant soldiers).',
-      'Syrup is a new terrain (terrain/syrup.png): see links.md engine features. Until then, paint it but keep it a plain floor.',
+      'Syrup is a new terrain (art/terrain/syrup.png): see links.md engine features. Until then, paint it but keep it a plain floor.',
       'pan-jars is the band playground; pan-high (Sgt. Crumb) is the 8-tile G wall above the door.',
     ],
   },
@@ -316,11 +317,11 @@ function zoneDoc(zid) {
 
 function assetsSection() {
   return ['## Art and sound you can use (real file names)', '',
-    `- props (assets/props/<name>.png): ${PROPS.join(', ')}`,
+    `- props (assets/props/<name>.webp): ${PROPS.join(', ')}`,
     `- enemies (engine type = sprites/enemies/<name>): ${ENEMIES.join(', ')}`,
-    `- npcs (sprites/npcs/<name>.png): ${NPCS.join(', ')}`,
-    `- items (assets/items/<name>.png): ${ITEM_ART.join(', ')}`,
-    `- terrain swatches (assets/terrain/<kind>.png): ${TERRAIN.join(', ')}`,
+    `- npcs (sprites/npcs/<name>.webp): ${NPCS.join(', ')}`,
+    `- items (assets/items/<name>.webp): ${ITEM_ART.join(', ')}`,
+    `- terrain swatches (art/terrain/<kind>.png): ${TERRAIN.join(', ')}`,
     `- music: ${MUSIC.join(', ')}`,
     `- sfx (Audio.play): ${SFX.join(', ')}`,
     '- synth voices (Audio.play): house banded twospot field snowy katydid mole ground bell knock alarm peeper chikchak tell sweep whoosh swish brush steam clonk thunk ping fall ring chime sting',

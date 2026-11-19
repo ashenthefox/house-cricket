@@ -105,7 +105,7 @@ function hallFloor() {
       deco('drawer-pull', 4, 20, 1.2),                     // the bedroom door's knob
       deco('hook', 16, 12, 1.4, { layer: 'mid' }),        // the coat hook
       deco('sock', 17, 12, 1.0, { layer: 'mid', rot: 0.3 }),
-      deco('sprites/enemies/vacuum/0.png', 9, 33, 1.1, { layer: 'mid' }),
+      deco('sprites/enemies/vacuum/0.webp', 9, 33, 1.1, { layer: 'mid' }),
       deco('sock', 4, 33, 0.8, { layer: 'mid' }),
       deco('spool', 13, 33, 0.9, { layer: 'mid' }),
       deco('dice', 44, 31, 1.0, { layer: 'mid' }),
@@ -247,7 +247,7 @@ function chimFlue() {
     id: 'chim-flue', name: 'The Flue', x: 24, y: 3,
     bg: { v: 'a', x: 0.5 }, near: false,
     decor: [
-      deco('carrier/lookout-tower.png', 9, 33, 2.6, { alpha: 0.9 }),
+      deco('carrier/lookout-tower.webp', 9, 33, 2.6, { alpha: 0.9 }),
       deco('steam-puff', 16, 60, 2.0, { alpha: 0.25 }),
     ],
     fx: [{ kind: 'dust', x: 12, y: 0, w: 8, h: 72 }],
@@ -306,7 +306,7 @@ function chimAsh() {
 // =================================================================================================
 // ZONE 10: THE ATTIC (x 7-23, y 0-2). Everything combined; loud zones (Cotton Earplugs).
 // =================================================================================================
-const bat = (x, y, h = 0.9, flip = false) => deco('sprites/npcs/velvet.png', x, y, h, { layer: 'mid', rot: 3.14, flip, alpha: 0.85 });
+const bat = (x, y, h = 0.9, flip = false) => deco('sprites/npcs/velvet.webp', x, y, h, { layer: 'mid', rot: 3.14, flip, alpha: 0.85 });
 const hide = (x, y, art) => ({ type: 'hide', x, y, w: 1, art });
 
 function attEntry() {
@@ -327,7 +327,7 @@ function attEntry() {
     decor: [
       bat(22, 11), bat(26, 11, 1.1, true), bat(31, 11), bat(35, 11, 0.8, true), bat(39, 11, 1.0), bat(43, 11, 0.9, true),
       deco('spool', 54, 33, 1.0, { layer: 'mid' }), deco('book-spine', 58, 33, 1.4), deco('marble', 40, 33, 0.6, { layer: 'mid' }),
-      deco('carrier/dice-stack.png', 28, 33, 1.8),
+      deco('carrier/dice-stack.webp', 28, 33, 1.8),
     ],
     fx: [{ kind: 'motes', x: 46, y: 2, w: 16, h: 10 }, { kind: 'dust', x: 2, y: 18, w: 60, h: 14 }],
     grid: g,
@@ -475,7 +475,7 @@ function attBoxes() {
       deco('spool', 79, 22, 1.2, { layer: 'mid' }), deco('pin', 99, 22, 1.1), deco('pin', 93, 23, 1.1),
       deco('dice', 41, 21, 1.0, { layer: 'mid' }), deco('book-spine', 28, 17, 1.3, { layer: 'mid' }),
       deco('music-stone-bell', 22, 15, 1.2, { layer: 'mid', alpha: 0.8 }),
-      deco('carrier/dice-stack.png', 112, 33, 1.6),
+      deco('carrier/dice-stack.webp', 112, 33, 1.6),
     ],
     fx: [{ kind: 'motes', x: 30, y: 2, w: 40, h: 14 }],
     grid: g,
@@ -501,7 +501,7 @@ function attHatch() {
     id: 'att-hatch', name: 'The Hatch', x: 8, y: 2,
     bg: { v: 'b', x: 0.7, y: 0.8 }, terrainKinds: { C: 'plaster' },
     decor: [deco('pull-chain', 38, 15, 1.4, { layer: 'mid' }), deco('dice', 20, 15, 1.2, { layer: 'mid' }), deco('marble', 26, 15, 0.7, { layer: 'mid' }),
-      deco('spool', 12, 15, 1.3, { layer: 'mid' }), deco('carrier/dice-stack.png', 6, 15, 2.2), deco('tv-remote', 54, 15, 1.0, { layer: 'mid' })],
+      deco('spool', 12, 15, 1.3, { layer: 'mid' }), deco('carrier/dice-stack.webp', 6, 15, 2.2), deco('tv-remote', 54, 15, 1.0, { layer: 'mid' })],
     grid: g,
     entities: [sign(32, 15, 12, TEXT.signs.hatch), { type: 'crumbs', x: 16, y: 15, n: 5 }],
   };

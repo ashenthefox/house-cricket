@@ -50,7 +50,7 @@ export const hall = {
       y: 4,
       bg: {"v":"b","x":0.4,"y":0.6},
       loops: ["vacuum"],
-      decor: [{"prop":"drawer-pull","x":4,"y":20,"h":1.2},{"prop":"hook","x":16,"y":12,"h":1.4,"layer":"mid"},{"prop":"sock","x":17,"y":12,"h":1,"layer":"mid","rot":0.3},{"prop":"sprites/enemies/vacuum/0.png","x":9,"y":33,"h":1.1,"layer":"mid"},{"prop":"sock","x":4,"y":33,"h":0.8,"layer":"mid"},{"prop":"spool","x":13,"y":33,"h":0.9,"layer":"mid"},{"prop":"dice","x":44,"y":31,"h":1,"layer":"mid"},{"prop":"throw-pillow","x":56,"y":33,"h":1.2,"layer":"mid"}],
+      decor: [{"prop":"drawer-pull","x":4,"y":20,"h":1.2},{"prop":"hook","x":16,"y":12,"h":1.4,"layer":"mid"},{"prop":"sock","x":17,"y":12,"h":1,"layer":"mid","rot":0.3},{"prop":"sprites/enemies/vacuum/0.webp","x":9,"y":33,"h":1.1,"layer":"mid"},{"prop":"sock","x":4,"y":33,"h":0.8,"layer":"mid"},{"prop":"spool","x":13,"y":33,"h":0.9,"layer":"mid"},{"prop":"dice","x":44,"y":31,"h":1,"layer":"mid"},{"prop":"throw-pillow","x":56,"y":33,"h":1.2,"layer":"mid"}],
       paint: [{"kind":"plaster","x":7,"y":30,"w":9,"h":2}],
       grid: [
         '#######...##...................................................#',
@@ -283,7 +283,7 @@ export const chimney = {
       y: 3,
       bg: {"v":"a","x":0.5},
       near: false,
-      decor: [{"prop":"carrier/lookout-tower.png","x":9,"y":33,"h":2.6,"alpha":0.9},{"prop":"steam-puff","x":16,"y":60,"h":2,"alpha":0.25}],
+      decor: [{"prop":"carrier/lookout-tower.webp","x":9,"y":33,"h":2.6,"alpha":0.9},{"prop":"steam-puff","x":16,"y":60,"h":2,"alpha":0.25}],
       fx: [{"kind":"dust","x":12,"y":0,"w":8,"h":72}],
       grid: [
         'GGGGGGGGGGGG........GGGGGGGGGGGG',

@@ -154,7 +154,7 @@ export default makeBoss('mossy', {
       const cx = b.cage.x, cy = b.cage.y;
       c.save(); c.strokeStyle = 'rgba(90,70,50,0.8)'; c.lineWidth = 2; c.beginPath(); c.moveTo(cx, 40); c.lineTo(cx, cy - 64); c.stroke(); c.restore();
       if (!b.done) renderer.drawCricketAt(c, b.cricket || 'rin', cx, cy - 6, -1, { look: Math.floor(t / 90) % 2 ? 'listen' : 'idle', t, scale: 0.8 });
-      const img = S.get('props/bamboo-cage.png');
+      const img = S.get('props/bamboo-cage.webp');
       if (img) {
         const h = 72, w = h * img.width / img.height;
         c.save(); c.translate(cx, cy - 36); c.rotate(Math.sin(t / 50) * 0.04 + (b.done ? 0.5 : 0)); c.globalAlpha = b.done ? 0.85 : 1;

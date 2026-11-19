@@ -98,12 +98,12 @@ export function roomArt(game, room) {
   const taken = game.roomState?.[room.id]?.taken;
   for (const e of room.entities) {
     switch (e.type) {
-      case 'hook': add(1, 'props/hook.png'); break;
+      case 'hook': add(1, 'props/hook.webp'); break;
       case 'hide': case 'hideSmall': { const art = hideArtOf(e); if (art && art !== 'none') add(1, propPath(art)); break; }
-      case 'save': add(1, 'props/save-crack.png'); break;
-      case 'beacon': add(1, 'props/sound-hole.png'); break;
+      case 'save': add(1, 'props/save-crack.webp'); break;
+      case 'beacon': add(1, 'props/sound-hole.webp'); break;
       case 'item': if (!has(e.item)) add(1, itemArt(e.item)); break;
-      case 'cage': if (!rescued.has(e.cricket)) { add(1, 'props/bamboo-cage.png'); addAll(1, lookFiles(e.cricket, ['idle', 'listen'])); } break;
+      case 'cage': if (!rescued.has(e.cricket)) { add(1, 'props/bamboo-cage.webp'); addAll(1, lookFiles(e.cricket, ['idle', 'listen'])); } break;
       case 'boss': {
         const b = bossArt(e, game);
         if (b.gecko) addAll(1, geckoArt(b.gecko));
@@ -111,8 +111,8 @@ export function roomArt(game, room) {
         for (const [id, looks] of Object.entries(b.crickets)) addAll(1, lookFiles(id, looks));
         break;
       }
-      case 'npc': if (!taken?.has(`npc@${e.x},${e.y}`)) { add(1, npcFrame(e.who, false)); add(1, `sprites/npcs/${e.who}-talk.png`); } break;
-      case 'crumbs': case 'secret': add(1, `items/${pickupFile(e)}.png`); break;
+      case 'npc': if (!taken?.has(`npc@${e.x},${e.y}`)) { add(1, npcFrame(e.who, false)); add(1, `sprites/npcs/${e.who}-talk.webp`); } break;
+      case 'crumbs': case 'secret': add(1, `items/${pickupFile(e)}.webp`); break;
       default: {
         if (MECH_TYPES.includes(e.type)) { for (const m of mechArt(e)) add(1, propPath(m)); break; }
         const T = ENEMIES[ALIAS[e.type] || e.type];

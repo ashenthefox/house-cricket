@@ -107,11 +107,11 @@ export function getJSON(path) {
   return jsonEntry(path).data;
 }
 
-// Animation frames: sprites/crickets/<id>/anim/<anim>/NN.png -> the list that exists.
+// Animation frames: sprites/crickets/<id>/anim/<anim>/NN.webp -> the list that exists.
 const framesCache = new Map();
 export function frames(dir) {
   if (framesCache.has(dir)) return framesCache.get(dir);
-  const list = forceShapes ? [] : ASSET_FILES.filter((f) => f.startsWith(dir + '/') && /\/\d+\.png$/.test(f)).sort();
+  const list = forceShapes ? [] : ASSET_FILES.filter((f) => f.startsWith(dir + '/') && /\/\d+\.webp$/.test(f)).sort();
   framesCache.set(dir, list);
   return list;
 }

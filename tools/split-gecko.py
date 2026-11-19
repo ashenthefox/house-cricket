@@ -10,6 +10,8 @@ Usage:
                                                     save <frame>.png and record its offset in meta.json
 
 All coordinates in meta.json are pixels of idle.png (body.png has the same canvas).
+The pictures are the PNG sources in art/sprites/geckos/<name>/ (run tools/build-art.py afterwards);
+meta.json is written to game/assets/sprites/geckos/<name>/.
   frame     "wide" (side profile, tail runs right) or "tall" (clinging upright, tail runs down)
   size      [w, h] of idle.png / body.png
   tailBox   [x0, y0, x1, y1]: where tail.png sits (its top-left is x0,y0)
@@ -24,7 +26,8 @@ import json, os, sys
 from PIL import Image, ImageChops, ImageDraw, ImageStat
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GECKOS = os.path.join(ROOT, 'game/assets/sprites/geckos')
+GECKOS = os.path.join(ROOT, 'art/sprites/geckos')         # the PNG pieces (sources: tools/build-art.py makes the game's WebP)
+METAS = os.path.join(ROOT, 'game/assets/sprites/geckos')   # meta.json, read by the game (in the source PNGs' pixels)
 EDITS = os.path.join(ROOT, '.gamegen/candidates/geckos/edits')
 OV = 12  # seam overlap in px
 
@@ -85,7 +88,7 @@ def split(name):
     W, H = idle.size
     wide = c['frame'] == 'wide'
     meta = {'frame': c['frame'], 'size': [W, H], 'overlap': OV}
-    old = os.path.join(d, 'meta.json')
+    old = os.path.join(METAS, name, 'meta.json')
     if os.path.exists(old):
         meta['frames'] = json.load(open(old)).get('frames', {})
 
@@ -151,7 +154,7 @@ def frame(name, fname, src):
     """Trim a strike/sleep edit past the tail cut and align it to the idle body."""
     c = CFG[name]
     d = os.path.join(GECKOS, name)
-    meta = json.load(open(os.path.join(d, 'meta.json')))
+    meta = json.load(open(os.path.join(METAS, name, 'meta.json')))
     wide = c['frame'] == 'wide'
     off = json.load(open(os.path.join(EDITS, f'{name}-notail-canvas.json')))['offset']
     im = Image.open(src).convert('RGBA')
@@ -245,7 +248,7 @@ def frame(name, fname, src):
         run = _nearest_run([pa.getpixel((x, y)) > 128 for x in range(piece.width)], px - at[0])
         fp = [at[0] + (run[0] + run[1]) // 2, py] if run else [px, py]
     meta.setdefault('frames', {})[fname] = {'file': f'{fname}.png', 'at': at, 'pivot': fp, 'scale': round(sc, 3)}
-    json.dump(meta, open(os.path.join(d, 'meta.json'), 'w'), indent=1)
+    json.dump(meta, open(os.path.join(METAS, name, 'meta.json'), 'w'), indent=1)
     print(name, fname, 'at', at, 'size', piece.size)
 
 

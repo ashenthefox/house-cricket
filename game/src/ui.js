@@ -277,7 +277,7 @@ export class UI {
       p.trio.forEach((id, i) => {
         const c = CRICKETS[id];
         const b = h('button', { class: 'portrait' + (i === p.active ? ' active' : '') + (i === p.queuedSwap ? ' queued' : ''), 'aria-label': `swap to ${c.name}`, title: c.name });
-        const img = S.exists(`sprites/crickets/${id}/portrait.png`) ? h('img', { src: `assets/sprites/crickets/${id}/portrait.png`, alt: '' }) : null;
+        const img = S.exists(`sprites/crickets/${id}/portrait.webp`) ? h('img', { src: `assets/sprites/crickets/${id}/portrait.webp`, alt: '' }) : null;
         if (img) b.append(img); else { b.style.background = c.color; b.append(h('span', { text: c.name })); }
         const glow = game.portraitGlow?.[id]; // [builder D] a boss can make portraits glow: game.portraitGlow = {id: colour}
         if (glow) { b.style.borderColor = glow; b.style.boxShadow = `0 0 0 3px ${glow}, 0 0 18px 6px ${glow}`; }

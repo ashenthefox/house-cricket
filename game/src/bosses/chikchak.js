@@ -137,7 +137,7 @@ export default makeBoss('chikchak', { postLines: true, // [playtest] base.rescue
   after(b) { b.pose = 'idle'; },
   draw(b, c, r) {
     // steam clouds
-    const puff = S.get('props/steam-puff.png');
+    const puff = S.get('props/steam-puff.webp');
     for (const v of b.clouds || []) {
       const t = (r?.t || 0) * 0.02;
       for (let i = 0; i < 6; i++) {
@@ -147,7 +147,7 @@ export default makeBoss('chikchak', { postLines: true, // [playtest] base.rescue
       }
     }
     // faucets (and running water)
-    const fh = S.get('props/faucet-handle.png');
+    const fh = S.get('props/faucet-handle.webp');
     FAUCETS.forEach((f, i) => {
       const w = 1.4 * T, h = fh ? w * fh.height / fh.width : w;
       if (fh) c.drawImage(fh, f.x - w / 2, f.y - h, w, h);

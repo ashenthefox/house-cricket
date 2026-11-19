@@ -166,9 +166,9 @@ export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue(
     // Stripe's feeding cup on the rock, with its three pull tabs
     const tipped = b.done;
     const cupH = 3.3 * T;
-    if (tipped) { const im = S.get('props/feeder-cup-tipped.png'); if (im) c.drawImage(im, 25.2 * T, ROCK.top + 2.2 * T - cupH * 0.8, cupH * 0.8 * im.width / im.height, cupH * 0.8); }
+    if (tipped) { const im = S.get('props/feeder-cup-tipped.webp'); if (im) c.drawImage(im, 25.2 * T, ROCK.top + 2.2 * T - cupH * 0.8, cupH * 0.8 * im.width / im.height, cupH * 0.8); }
     else {
-      const im = S.get('props/feeder-cup.png');
+      const im = S.get('props/feeder-cup.webp');
       if (im) c.drawImage(im, CUP_X - cupH * 0.44, ROCK.top - cupH + 4, cupH * 0.88, cupH);
       // [issue 13] Stripe, full size on the cup's floor and facing Pip, with a hop up to the lid now
       // and then: at 0.8 scale, floating mid-cup behind the front tab, he read as part of the
@@ -180,7 +180,7 @@ export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue(
       }
       TABS.forEach((t, i) => {
         const pulled = b.pulled?.[i];
-        const ti = S.get(`props/${pulled ? 'cup-tab-pulled' : 'cup-tab'}.png`);
+        const ti = S.get(`props/${pulled ? 'cup-tab-pulled' : 'cup-tab'}.webp`);
         const now = i === b.phase - 1 && !pulled;
         const w = (pulled ? 0.9 : 1.1) * T, h = w * (ti ? ti.height / ti.width : 0.3);
         const x = t.x + (i === 0 ? -w * 0.3 : i === 1 ? w * 0.3 : 0) - w / 2, y = ROCK.top - (i === 2 ? 0.25 * T : 1.6 * T) - h / 2;

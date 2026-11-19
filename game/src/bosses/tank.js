@@ -74,7 +74,7 @@ const Cup = {
   draw(c) {
     const s = this, e = s.e, floorY = cupFloor(e);
     // the feeder cup (its lower half: the lid is off), behind Pip
-    const im = S.get('props/feeder-cup.png');
+    const im = S.get('props/feeder-cup.webp');
     if (im) { const cx = ((e.cup?.[0] ?? 11) + (e.cup?.[1] ?? 17)) / 2 * T, w = ((e.cup?.[1] ?? 17) - (e.cup?.[0] ?? 11) + 1.2) * T, h = w * 0.5;
       c.save(); c.globalAlpha = 0.85; c.drawImage(im, 0, im.height * 0.48, im.width, im.height * 0.52, cx - w / 2, floorY - h + 4, w, h); c.restore(); }
     if (s.mode === 'gone' && s.tipY < -5 * T) return;
@@ -84,7 +84,7 @@ const Cup = {
       c.beginPath(); c.ellipse(s.x, floorY - 4, 26, 7, 0, 0, 7); c.fill(); c.restore();
     }
     const h = 11 * T, w = h * 68 / 474;
-    if (!img(c, 'props/tongs.png', s.x, s.tipY + 6, w * 1.1, h)) {
+    if (!img(c, 'props/tongs.webp', s.x, s.tipY + 6, w * 1.1, h)) {
       c.save(); c.strokeStyle = '#8A7A5A'; c.lineWidth = 8; c.beginPath(); c.moveTo(s.x - 6, s.tipY - h); c.lineTo(s.x - 3, s.tipY); c.moveTo(s.x + 6, s.tipY - h); c.lineTo(s.x + 3, s.tipY); c.stroke(); c.restore();
     }
   },
@@ -191,7 +191,7 @@ const Decor = {
   draw(c) {
     const s = this, g = s.g, [LW, LH] = landSize(s);
     const big = LH > 1, h = big ? (s.mode === 'step' ? LH * T + 6 : LH * T * 0.92) : (s.mode === 'step' ? 1.1 * T : 0.9 * T), w = big ? LW * T * 1.18 : h * 343 / 233;
-    if (!img(c, 'props/pebble.png', s.px, s.py + (s.mode === 'step' ? 4 : 2), w * (s.mode === 'step' && !big ? 1.15 : 1), h, 1, s.rot)) {
+    if (!img(c, 'props/pebble.webp', s.px, s.py + (s.mode === 'step' ? 4 : 2), w * (s.mode === 'step' && !big ? 1.15 : 1), h, 1, s.rot)) {
       c.fillStyle = '#9A9486'; c.beginPath(); c.ellipse(s.px, s.py - h / 2, w / 2, h / 2, 0, 0, 7); c.fill();
     }
     if (s.mode === 'sit' && (g.frame % 90) < 45) { c.save(); c.globalAlpha = 0.6; c.fillStyle = '#F4EBDD'; c.font = 'bold 22px "Patrick Hand", sans-serif'; c.fillText('?', s.px - 5, s.py - h - 8); c.restore(); }
@@ -229,7 +229,7 @@ const Lid = {
   },
   draw(c) {
     const s = this, g = s.g, gx = s.e.gap[0], gy = s.e.gap[1];
-    const mesh = S.get('props/mesh-lid.png');
+    const mesh = S.get('props/mesh-lid.webp');
     if (mesh) {
       const y0 = gy * T - 6, hh = T + 10;
       for (const [a, b] of [[2, gx], [gx + 1, 30]]) { c.drawImage(mesh, 0, 0, mesh.width, mesh.height, a * T, y0, (b - a) * T, hh); }
@@ -237,7 +237,7 @@ const Lid = {
     }
     const tipped = s.mode === 'leap' || s.mode === 'done';
     const h = tipped ? 2.2 * T : 2.8 * T;
-    img(c, tipped ? 'props/feeder-cup-tipped.png' : 'props/feeder-cup.png', s.cupX, s.cupY, h * (tipped ? 415 / 255 : 274 / 312), h, 1, s.cupRot);
+    img(c, tipped ? 'props/feeder-cup-tipped.webp' : 'props/feeder-cup.webp', s.cupX, s.cupY, h * (tipped ? 415 / 255 : 274 / 312), h, 1, s.cupRot);
     if (s.mode === 'wait' && s.held > 0) { c.save(); c.globalAlpha = 0.7; c.strokeStyle = '#F2C46D'; c.lineWidth = 4; c.beginPath(); c.arc(g.player.cx, g.player.y - 14, 12, -Math.PI / 2, -Math.PI / 2 + (s.held / 30) * Math.PI * 2); c.stroke(); c.restore(); }
   },
 };

@@ -363,15 +363,15 @@ section('no-refight', () => {
 section('enemies', () => {
   // sprites: every type's folder has 0/1 (and 2 for bonkables) in the asset list
   for (const [id, T] of Object.entries(TYPES)) {
-    const has = (n) => ASSETS.includes(`${T.sprite}/${n}.png`);
-    ok(has(0) && has(1) && (!T.bonkable || has(2)), `${id}: sprites ${T.sprite}/0,1${T.bonkable ? ',2' : ''}.png`);
+    const has = (n) => ASSETS.includes(`${T.sprite}/${n}.webp`);
+    ok(has(0) && has(1) && (!T.bonkable || has(2)), `${id}: sprites ${T.sprite}/0,1${T.bonkable ? ',2' : ''}.webp`);
   }
   const room = (ents, rows = []) => zoneOf([mkRoom(`en${cellX}`, rows, ents)]);
   const one = (type, ent = {}, opts = {}, rows) => { const z = room([{ type, x: 20, y: 15, ...ent }], rows); const t = game(z, z.rooms[0].id, { x: 3, y: 15, ...opts }); t.e = t.g.enemies[0]; return t; };
   const kickAt = (t, side) => { const e = t.e; t.p.x = side > 0 ? e.x + e.w + 2 : e.x - t.p.w - 2; t.p.y = 15 * TILE + 16; t.p.state = 'ground'; t.p.facing = -side; t.p.invuln = 99; t.step({ kick: true }, 2); t.step({}, 2); };
   // ant
   let t = one('ant', { range: [15, 25] }); const ax = t.e.x; t.step({}, 30); ok(t.e.x !== ax, 'ant patrols');
-  kickAt(t, 1); ok(t.e.state === 'flipped', 'ant: kick flips it (2.png)');
+  kickAt(t, 1); ok(t.e.state === 'flipped', 'ant: kick flips it (2.webp)');
   t.step({}, 80 + 90 + 365); ok(t.e.state === 'walk', 'ant comes back after scurrying off');
   // chirp stun and Rin's lullaby
   t = one('ant'); t.p.x = t.e.x - 40; t.step({ chirp: true }, 1); const pipStun = t.e.stun;

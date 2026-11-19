@@ -10,7 +10,7 @@ import { seeded } from './world.js';
 
 const INK = '#5A4632';
 function prop(c, name, x, feetY, h, o = {}) {
-  const img = S.get(`props/${name}.png`);
+  const img = S.get(`props/${name}.webp`);
   if (!img) return false;
   const w = (h * img.width) / img.height;
   c.save(); c.globalAlpha = o.alpha ?? 1; c.translate(x, feetY);
@@ -136,7 +136,7 @@ function drawPush(c, b) {
   const T = TILE, x = b.x * T - b.adir * b.anim, y = b.y * T - b.fall, w = b.w * T, h = b.h * T;
   const name = pushProp(b.def, b.kind);
   if (name) {
-    const img = S.get(`props/${name}.png`);
+    const img = S.get(`props/${name}.webp`);
     if (img) { c.drawImage(img, x - 2, y - 2, w + 4, h + 4); return; }
   }
   if (b.kind === 'box') { // [polish] a painted detergent box (cardboard painter, cached) with its label band

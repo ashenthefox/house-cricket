@@ -29,7 +29,7 @@ export const ITEM_ART = {
   booties: 'tape-booties', floss: 'floss-line', raft: 'bottle-cap-raft', band: 'rubber-band', glider: 'dryer-sheet',
   thimble: 'thimble-helmet', glow: 'glow-bead', earplugs: 'cotton-earplugs', feather: 'swift-feather', cloak: 'cellophane-cloak',
 };
-export const itemArt = (id) => `items/${ITEM_ART[id] || id}.png`;
+export const itemArt = (id) => `items/${ITEM_ART[id] || id}.webp`;
 
 // Near-layer props per bg folder (zone modules may set `near: ['spool', ...]` instead).
 export const NEAR = {
@@ -98,12 +98,12 @@ export function nearList(room) {
   for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
   return list;
 }
-// a prop name ('spool') or any assets path ('carrier/lamp.png') -> its file
-export const propPath = (prop) => (prop.includes('/') ? prop : `props/${prop}.png`);
+// a prop name ('spool') or any assets path ('carrier/lamp.webp') -> its file
+export const propPath = (prop) => (prop.includes('/') ? prop : `props/${prop}.webp`);
 // a hiding spot's art: entity art ('sock', a path, or 'none'); default the hide log, small spots none
 export const hideArtOf = (e, small = e?.type === 'hideSmall' || !!e?.small) => e?.art || (small ? null : 'hide-log');
 // an enemy's frames (drawEnemies): 0 and 1 walk, 2 flipped
-export const enemyFrames = (sprite) => [0, 1, 2].map((f) => `${sprite}/${f}.png`);
+export const enemyFrames = (sprite) => [0, 1, 2].map((f) => `${sprite}/${f}.webp`);
 
 // [polish] a room's render-only fields with data/look overlay merged in (memoised per room def).
 // Overlay paint regions come first (the first region that holds a tile wins); decor is appended.
@@ -583,7 +583,7 @@ export class Renderer {
   nearSilhouette(prop, col) {
     const key = prop;
     if (this.nearCache.has(key)) return this.nearCache.get(key);
-    const img = S.get(`props/${prop}.png`);
+    const img = S.get(`props/${prop}.webp`);
     if (!img) return null;
     // blur by downscale then upscale (cheap and works where ctx.filter doesn't)
     // padded so the blur fades out instead of being cut at the canvas edge
@@ -788,7 +788,7 @@ export class Renderer {
   // Room data: decor: [{ prop: 'spool', x, y, h?: tiles tall (default: 1.5), flip?, rot?, alpha?,
   //   layer?: 'back' (default, behind platforms) | 'mid' (in front of platforms, behind actors)
   //   | 'front' (in front of the cricket) }]. x = centre column, y = the row it stands in.
-  // `prop` may be any assets path ('carrier/lamp.png') or a props/ name.
+  // `prop` may be any assets path ('carrier/lamp.webp') or a props/ name.
   drawDecor(c, game, layer) {
     const list = roomLook(game.room).decor;
     if (!list.length) return;
@@ -806,7 +806,7 @@ export class Renderer {
   drawCarrierGrowth(c, game, d) {
     let stage = 0; try { stage = shellStage(rescueCount(game)); } catch { /* no meta */ }
     if (!stage) return;
-    const img = S.get('props/carrier-keeper.png'); if (!img) return;
+    const img = S.get('props/carrier-keeper.webp'); if (!img) return;
     const h = (d.h || 1.5) * TILE, w = h * img.width / img.height, X = (d.x + 0.5) * TILE - w / 2, Y = (d.y + 1) * TILE - h;
     const P = (ix, iy) => [X + ix * w / 640, Y + iy * h / 440], S1 = w / 640;
     const t = this.t;
@@ -890,7 +890,7 @@ export class Renderer {
     return true;
   }
 
-  // hiding-spot art: entity { type: 'hide', x, y, w, art?: 'sock' | 'props/x.png' | 'none' }
+  // hiding-spot art: entity { type: 'hide', x, y, w, art?: 'sock' | 'props/x.webp' | 'none' }
   hideArt(game, s) {
     const e = game.room.entities.find((en) => (en.type === 'hide' || en.type === 'hideSmall') && en.x * TILE === s.x);
     return hideArtOf(e, s.small);
@@ -922,12 +922,12 @@ export class Renderer {
     this.drawDecor(c, game, 'mid');
     for (const b of game.beacons || []) {
       for (let i = 0; i < 3; i++) { const r = ((t * 0.6 + i * 12) % 36) + 4; c.strokeStyle = `rgba(244,235,221,${0.6 - r / 70})`; c.lineWidth = 2; c.beginPath(); c.arc(b.x, b.y, r, 0, 7); c.stroke(); }
-      const img = S.get('props/sound-hole.png');
+      const img = S.get('props/sound-hole.webp');
       if (img) c.drawImage(img, b.x - 16, b.y - 16, 32, 32 * img.height / img.width);
       else { c.fillStyle = '#26303D'; c.beginPath(); c.ellipse(b.x, b.y, 7, 5, 0, 0, 7); c.fill(); }
     }
     for (const s of game.saves || []) {
-      const img = S.get('props/save-crack.png');
+      const img = S.get('props/save-crack.webp');
       c.fillStyle = `rgba(242,196,109,${0.25 + 0.15 * Math.sin(t / 20)})`; c.beginPath(); c.ellipse(s.x + 20, s.y + TILE - 14, 22, 26, 0, 0, 7); c.fill();
       if (img) { const h = 52, w = h * img.width / img.height; c.drawImage(img, s.x + 20 - w / 2, s.y + TILE - h + 4, w, h); continue; }
       c.fillStyle = '#1E1612'; c.beginPath(); c.moveTo(s.x + 14, s.y + TILE); c.lineTo(s.x + 18, s.y + 4); c.lineTo(s.x + 24, s.y + 10); c.lineTo(s.x + 27, s.y + TILE); c.fill();
@@ -948,7 +948,7 @@ export class Renderer {
     for (const h of game.hooks || []) {
       const near = p.has('floss') && Math.hypot(h.x - p.cx, h.y - p.cy) < TILE * 2;
       if (near) { c.fillStyle = 'rgba(242,196,109,0.35)'; c.beginPath(); c.arc(h.x, h.y, 16 + Math.sin(t / 6) * 2, 0, 7); c.fill(); }
-      const img = S.get('props/hook.png');
+      const img = S.get('props/hook.webp');
       // the art is a screw-in cup hook (screw on the left); the hook's curve sits at the hook point
       if (img) { const w = 46, hh = w * img.height / img.width; c.drawImage(img, h.x - w * 0.62, h.y - hh * 0.62, w, hh); continue; }
       c.fillStyle = '#7A5636'; c.fillRect(h.x - 3, h.y - 14, 6, 8);
@@ -980,7 +980,7 @@ export class Renderer {
   drawCage(c, it, game) {
     const x = it.x, y = it.y, w = it.w, h = it.h;
     drawCricket(c, it.cricket, x + w / 2, y + h - 6, -1, { look: Math.floor(this.t / 200) % 2 ? 'listen' : 'idle', t: this.t, scale: 0.8 });
-    const img = S.get('props/bamboo-cage.png');
+    const img = S.get('props/bamboo-cage.webp');
     if (img) { const ch = h + 12, cw = ch * img.width / img.height; c.drawImage(img, x + w / 2 - cw / 2, y + h - ch + 4, cw, ch); return; }
     c.strokeStyle = '#8C8F99'; c.lineWidth = 2;
     for (let i = 0; i <= 6; i++) { c.beginPath(); c.moveTo(x + (i * w) / 6, y + 6); c.lineTo(x + (i * w) / 6, y + h); c.stroke(); }
@@ -988,7 +988,7 @@ export class Renderer {
     void game;
   }
 
-  // ---- enemies: 2-frame walk (0.png, 1.png), the flipped frame (2.png) when bonked ----
+  // ---- enemies: 2-frame walk (0.webp, 1.webp), the flipped frame (2.webp) when bonked ----
   drawEnemies(c, game) {
     for (const e of game.enemies || []) {
       if (e.state === 'gone') continue;
@@ -1033,7 +1033,7 @@ export class Renderer {
   // ---- NPCs (Not-Crickets, recruits): idle / talk flap ----
   // drawNPC(ctx, 'peeper', x, feetY, { talking, h: px tall (default 46), facing: 1|-1, t })
   drawNPC(c, name, x, y, o = {}) {
-    const img = S.get(npcFrame(name, o.talking, o.t ?? this.t)) || S.get(`sprites/npcs/${name}.png`);
+    const img = S.get(npcFrame(name, o.talking, o.t ?? this.t)) || S.get(`sprites/npcs/${name}.webp`);
     if (!img) return false;
     const h = o.h || 46, w = h * img.width / img.height;
     const bob = Math.abs(Math.sin(((o.t ?? this.t) + hash(name) % 100) / 9)) * (o.bob ?? 2);
@@ -1164,8 +1164,8 @@ export class Renderer {
 // For DOM dialog portraits too: <img src="assets/` + npcFrame(name, talking, frame) + `">.
 export function npcFrame(name, talking, t = 0) {
   const flap = talking && Math.floor(t / 8) % 2;
-  const talk = `sprites/npcs/${name}-talk.png`;
-  return flap && S.exists(talk) ? talk : `sprites/npcs/${name}.png`;
+  const talk = `sprites/npcs/${name}-talk.webp`;
+  return flap && S.exists(talk) ? talk : `sprites/npcs/${name}.webp`;
 }
 
 // [polish] a soft, slightly wobbly rounded box (screen-local px) and its top edge (for the rim)

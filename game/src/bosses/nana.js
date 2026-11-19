@@ -58,7 +58,7 @@ function chorusMembers(g) {
 function nanaArt(g) {
   const crickets = { chip: ['idle', 'leap'] }, props = STONES.map((s) => s.prop);
   for (const m of g ? chorusMembers(g) : []) {
-    if (m.kind === 'npc') props.push(`sprites/npcs/${m.id}.png`);
+    if (m.kind === 'npc') props.push(`sprites/npcs/${m.id}.webp`);
     else crickets[m.id] = ['idle', 'chirp'];
   }
   return { props, crickets };

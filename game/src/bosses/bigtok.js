@@ -137,7 +137,7 @@ export default makeBoss('bigtok', { postLines: true, // [playtest] base.rescue()
     // the decoy
     const d = b.decoy;
     if (d && d.state !== 'gone' && d.state !== 'chewed') {
-      const im = S.get(`props/${d.kind}.png`);
+      const im = S.get(`props/${d.kind}.webp`);
       if (im) { const h = d.h, w = h * im.width / im.height; c.save(); c.translate(d.x, d.y - h / 2); c.rotate(d.rot); c.drawImage(im, -w / 2, -h / 2, w, h); c.restore(); }
       if (d.state === 'sit' && Math.floor((r?.t || 0) / 20) % 2) { c.save(); c.strokeStyle = '#F2C46D'; c.lineWidth = 3; c.beginPath(); c.arc(d.x, d.y - d.h / 2, 26, 0, 7); c.stroke(); c.restore(); }
     }
