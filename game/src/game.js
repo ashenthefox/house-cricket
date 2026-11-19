@@ -28,6 +28,7 @@ export class Game {
     this.levelComplete = false; this.gameWon = false; this.bossPhase = null;
     this.hold = 0;           // frames the sim is held (transition wipe, item freeze)
     this.trans = null;       // {f, dur, kind}
+    this.bossWait = false;   // [art] set by main.js while the boss's gecko art loads: the boss doesn't act yet (never set headless)
     this.onSave = opts.onSave || null;
     this.lastCall = -999;
     this.player = new Player('pip');
@@ -171,7 +172,7 @@ export class Game {
     if (kb) kickEnemies(this.enemies, kb, p.facing, this);
     updateEnemies(this.enemies, this);
     Mech.updateMech(this); // [mech]
-    if (this.boss) { this.boss.update(this); this.bossPhase = this.boss.phase; }
+    if (this.boss && !this.bossWait) { this.boss.update(this); this.bossPhase = this.boss.phase; }
     this.checkTriggers();
     this.checkHazards();
     this.checkExits();
@@ -316,7 +317,14 @@ export class Game {
     if (next.needs && !p.has(next.needs)) {
       // gate by kind: bounce back with a hint
       if (cx < 0) p.x = 0; else if (cx >= room.pw) p.x = room.pw - p.w;
-      if (cy < 0) { p.y = 0; p.vy = Math.max(p.vy, 0); } else if (cy >= room.ph) { p.y = room.ph - p.h; p.vy = Math.min(p.vy, 0); }
+      if (cy < 0) { p.y = 0; p.vy = Math.max(p.vy, 0); } else if (cy >= room.ph) {
+        p.y = room.ph - p.h; p.vy = Math.min(p.vy, 0);
+        // A locked room is not a landing tile: stop the pound and bounce into controllable air.
+        if (p.state === 'pound') {
+          p.state = 'air'; p.prof = p.P.fall; p.cutDone = true; p.poundT = 0;
+          p.vy = -TILE * 6;
+        }
+      }
       p.vx = 0; p.dashT = 0;
       this.toast(next.needsMsg || `You need the ${ITEMS[next.needs]?.name || next.needs} to go on.`, 150);
       return;

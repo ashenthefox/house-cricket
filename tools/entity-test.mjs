@@ -62,6 +62,37 @@ const at = (p, tx, ty) => { p.x = tx * TILE + (TILE - p.w) / 2; p.y = (ty + 1) *
 const fxCount = (g, type, since = 0) => g.fx.filter((e) => e.type === type && e.f > since).length;
 const enemy = (g, type) => g.enemies.find((e) => e.type === type);
 
+// A pound crossing an item-locked lower-room edge must not leave input stuck in pound.
+section('locked-room-pound', () => {
+  const upper = mkRoom('pound-upper', Array(18).fill(''));
+  const lower = mkRoom('pound-lower', [], [], { needs: 'glow', dark: true });
+  lower.x = upper.x; lower.y = upper.y + 1;
+  const z = zoneOf([upper, lower]);
+
+  // Use the real Game.update -> Player._pound -> Game.checkExits path.
+  const locked = game(z, upper.id, { x: 10, y: 14, items: ['thimble'] });
+  const p = locked.p, g = locked.g;
+  p.x = 10 * TILE; p.y = g.room.ph - p.h - 8;
+  p.vx = 0; p.vy = 0; p.state = 'air';
+  locked.step({ down: true, jump: true }, 1);
+  ok(p.state === 'pound', 'Down+Jump actually starts a Thimble pound');
+  locked.step({}, 25);
+  ok(g.room.id === upper.id, 'without Glow Bead, the lower room remains locked');
+  ok(p.state !== 'pound', 'locked lower-room bounce terminates the pound state');
+  const priorX = p.x;
+  locked.step({ right: true }, 10);
+  ok(p.x > priorX, 'horizontal input works again after the blocked pound');
+
+  // Same crossing with its actual required item must still enter the lower room.
+  const allowed = game(z, upper.id, { x: 10, y: 14, items: ['thimble', 'glow'] });
+  allowed.p.x = 10 * TILE; allowed.p.y = allowed.g.room.ph - allowed.p.h - 8;
+  allowed.p.vx = 0; allowed.p.vy = 0; allowed.p.state = 'air';
+  allowed.step({ down: true, jump: true }, 1);
+  ok(allowed.p.state === 'pound', 'the same real Down+Jump input starts the permitted pound');
+  allowed.step({}, 12);
+  ok(allowed.g.room.id === lower.id, 'with Glow Bead, a downward pound still enters the lower room');
+});
+
 // =========================================================================================
 section('gates', () => {
   let { g, p, step } = game(null, 'et-gates', { items: ['thimble'], rescued: ['stripe'] });
