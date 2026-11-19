@@ -28,6 +28,7 @@ sk.r(1, 10, 11, 1, '=');                             // the window-well sill (dr
 sk.r(12, 10, 9, 3, 'G');                             // the utility sink (porcelain, on the wall)
 sk.r(21, 12, 3, 4).r(24, 14, 3, 2);                  // a detergent box and a bucket: steps up to the rim
 sk.r(5, 14, 3, 2).r(8, 12, 3, 4);                    // a bucket and a crate under the sill (back up from the dryer door)
+sk.r(11, 14, 2, 2);                                  // [issue #4] a pail under the sink: back up out of the gap below it (was 4 up)
 sk.r(46, 7, 5, 6, 'G').r(46, 13, 1, 3).r(50, 13, 1, 3); // the water heater on its legs
 sk.r(35, 12, 4, 1).r(38, 13, 1, 3);                  // the thermostat cubby (its gate is an entity)
 

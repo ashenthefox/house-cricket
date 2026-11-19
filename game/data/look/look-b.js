@@ -26,6 +26,7 @@ export default {
       shelf(15, 12, 48, 1, '#A8794C'),                                              // the low shelf over the sneak
       { obj: 'wood', x: 6, y: 12, w: 4, h: 4, color: '#B58A58', planks: 16 },       // crates: steps up on the left
       { obj: 'wood', x: 10, y: 14, w: 4, h: 2, color: '#9C7046', planks: 16 },
+      { obj: 'wood', x: 4, y: 14, w: 2, h: 2, color: '#9C7046', planks: 16 },        // a step back up from the jar wall
     ],
   },
   'pan-shelves': {
@@ -80,6 +81,7 @@ export default {
       { obj: 'metal', x: 24, y: 14, w: 3, h: 2, color: '#9CA6B4', axis: 'v', bands: 34 }, // a bucket
       { obj: 'metal', x: 5, y: 14, w: 3, h: 2, color: '#8E9AAE', axis: 'v', bands: 34 },  // a bucket
       { obj: 'wood', x: 8, y: 12, w: 3, h: 4, color: '#A2805E', planks: 16 },       // a crate under the sill
+      { obj: 'metal', x: 11, y: 14, w: 2, h: 2, color: '#8E9AAE', axis: 'v', bands: 34 }, // a pail under the sink
       { obj: 'appliance', x: 46, y: 7, w: 5, h: 6, color: '#C9C3CC', panel: false, seams: 2 }, // the water heater
       { obj: 'metal', x: 46, y: 13, w: 5, h: 3, color: '#6F7487', axis: 'v' },      // its legs
       { obj: 'wood', x: 35, y: 12, w: 4, h: 4, color: '#9A8FB0' },                  // the thermostat cubby
