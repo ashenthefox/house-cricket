@@ -36,7 +36,17 @@ function img(c, path, x, y, w, h, alpha = 1, rot = 0) {
 // ---------------------------------------------------------------- beat 1-2: the tongs
 const CUP_XS = Object.freeze([12.5, 15.5, 14]); // tile columns of the three dips (left, right, middle)
 const cupFloor = (e) => (e.floor ?? 10) * T;   // the cup floor (px)
+// [issue 6] The feeding cup (props/feeder-cup-open: the frosted tub Duchess's crickets are served in) is
+// drawn whole, 6.2 tiles wide, its rim on the 2-tile walls. Every picture of it (open, lidded, tipped) is
+// drawn at this width and this vertical stretch, so it's the same cup in every scene.
+export const FEEDER = Object.freeze({ w: 6.2 * T, stretch: 1.26 });
 function cup(g, e) {
+  // its walls are slick tiles (solid, never clingable): make them props (the same, but unpainted) so the
+  // painted cup stands in for them instead of two dark glass slabs
+  const x0 = e.cup?.[0] ?? 11, x1 = (e.cup?.[1] ?? 17) - 1, fy = e.floor ?? 10;
+  let n = 0;
+  for (const x of [x0, x1]) for (let y = fy - 2; y < fy; y++) if (g.grid.at(x, y) === K.SLICK) { g.grid.set(x, y, K.PROP); n++; }
+  if (n) g.gridVersion++;
   return Object.assign(Object.create(Cup), { g, e, phase: null, music: 'title', i: 0, t: -90, mode: 'wait', tipY: -6 * T, x: CUP_XS[0] * T, caught: 0, done: false });
 }
 const Cup = {
@@ -82,10 +92,11 @@ const Cup = {
   },
   draw(c) {
     const s = this, e = s.e, floorY = cupFloor(e);
-    // the feeder cup (its lower half: the lid is off), behind Pip
-    const im = S.get('props/feeder-cup.webp');
-    if (im) { const cx = ((e.cup?.[0] ?? 11) + (e.cup?.[1] ?? 17)) / 2 * T, w = ((e.cup?.[1] ?? 17) - (e.cup?.[0] ?? 11) + 1.2) * T, h = w * 0.5;
-      c.save(); c.globalAlpha = 0.85; c.drawImage(im, 0, im.height * 0.48, im.width, im.height * 0.52, cx - w / 2, floorY - h + 4, w, h); c.restore(); }
+    // the feeding cup, whole and open, behind Pip: its rim (the lip's widest row, 25.4% down the
+    // picture) on the 2-tile walls, its base on the floor
+    const im = S.get('props/feeder-cup-open.webp');
+    if (im) { const cx = ((e.cup?.[0] ?? 11) + (e.cup?.[1] ?? 17)) / 2 * T, w = FEEDER.w, h = w * im.height / im.width * FEEDER.stretch;
+      c.save(); c.globalAlpha = 0.96; c.drawImage(im, cx - w / 2, floorY + 2 - h * 0.99, w, h); c.restore(); }
     if (s.mode === 'gone' && s.tipY < -5 * T) return;
     if (s.mode === 'gone') s.tipY += (-7 * T - s.tipY) * 0.05;
     if (s.mode === 'aim') { // the shadow where they'll land
@@ -416,9 +427,11 @@ const Lid = {
       for (const [a, b] of [[2, gx], [gx + 1, 30]]) { c.drawImage(mesh, 0, 0, mesh.width, mesh.height, a * T, y0, (b - a) * T, hh); }
       c.save(); c.fillStyle = 'rgba(46,53,80,0.55)'; c.fillRect(gx * T + 4, gy * T, T - 8, T); c.restore();
     }
+    // [issue 6] the pet-store cup Pip came home in (the white paper cup of the opening panels), on the
+    // lid: the same cup upright and tumbling (lying on its side its length is the upright cup's height)
     const tipped = s.mode === 'leap' || s.mode === 'done';
-    const h = tipped ? 2.2 * T : 2.8 * T;
-    img(c, tipped ? 'props/feeder-cup-tipped.webp' : 'props/feeder-cup.webp', s.cupX, s.cupY, h * (tipped ? 415 / 255 : 274 / 312), h, 1, s.cupRot);
+    const h = tipped ? 1.92 * T : 2.8 * T;
+    img(c, tipped ? 'props/store-cup-tipped.webp' : 'props/store-cup.webp', s.cupX, s.cupY, h * (tipped ? 440 / 277 : 346 / 400), h, 1, s.cupRot);
     if (s.mode === 'wait' && s.held > 0) { c.save(); c.globalAlpha = 0.7; c.strokeStyle = '#F2C46D'; c.lineWidth = 4; c.beginPath(); c.arc(g.player.cx, g.player.y - 14, 12, -Math.PI / 2, -Math.PI / 2 + (s.held / 30) * Math.PI * 2); c.stroke(); c.restore(); }
   },
 };
@@ -426,8 +439,8 @@ const Lid = {
 const BEATS = { cup, sand, decor, lid };
 // [art] what each beat draws (room-art.js loads it before the room shows); the sand's Duchess rig
 const ART = {
-  cup: { gecko: null, props: ['feeder-cup', 'tongs'] }, sand: { gecko: 'duchess', props: [] },
-  decor: { gecko: null, props: ['pebble'] }, lid: { gecko: null, props: ['mesh-lid', 'feeder-cup', 'feeder-cup-tipped'] },
+  cup: { gecko: null, props: ['feeder-cup-open', 'tongs'] }, sand: { gecko: 'duchess', props: [] },
+  decor: { gecko: null, props: ['pebble'] }, lid: { gecko: null, props: ['mesh-lid', 'store-cup', 'store-cup-tipped'] },
 };
 export default {
   create(game, e) { return (BEATS[e.beat] || cup)(game, e); },

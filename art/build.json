@@ -528,7 +528,7 @@
 ]
 },
 "props/cup-tab-pulled.webp": {
-"src": "4363fba11e4b698aabbd562f4a9d05cf42b6fa7a",
+"src": "2ca71fafed6804c981a3a2289c9ebe3dd87e5cef",
 "set": {
 "q": 90,
 "m": 6,
@@ -536,11 +536,11 @@
 },
 "size": [
 128,
-102
+58
 ]
 },
 "props/cup-tab.webp": {
-"src": "f98354b50fcb07b98a2a9eb05036627ba3f273c3",
+"src": "344ce756675dbe0245ca60c8a0d1e649c25c490a",
 "set": {
 "q": 90,
 "m": 6,
@@ -548,7 +548,7 @@
 },
 "size": [
 152,
-42
+88
 ]
 },
 "props/cushion.webp": {
@@ -635,28 +635,40 @@
 225
 ]
 },
-"props/feeder-cup-tipped.webp": {
-"src": "35e1b8a824b5f77b0cd1c93a6015293776d50694",
+"props/feeder-cup-open.webp": {
+"src": "9f06c84bdfd3585a139cbe8d6166e0fe30a64784",
 "set": {
 "q": 90,
 "m": 6,
-"max": null
+"max": 760
 },
 "size": [
-415,
-255
+760,
+271
+]
+},
+"props/feeder-cup-tipped.webp": {
+"src": "92ed417ee8ea3c29bcc10db16aa75b572bab66f6",
+"set": {
+"q": 90,
+"m": 6,
+"max": 760
+},
+"size": [
+760,
+309
 ]
 },
 "props/feeder-cup.webp": {
-"src": "e75fe981bce677b17a24d9fff052c0004ed0156d",
+"src": "b0b219f875b899841afcf49993be5e1d2fcce352",
 "set": {
 "q": 90,
 "m": 6,
-"max": null
+"max": 760
 },
 "size": [
-274,
-312
+760,
+274
 ]
 },
 "props/furnace-grate.webp": {
@@ -1029,6 +1041,30 @@
 "size": [
 213,
 336
+]
+},
+"props/store-cup-tipped.webp": {
+"src": "c2d658afd0c9718d378723483004ab97f1011c4e",
+"set": {
+"q": 90,
+"m": 6,
+"max": 380
+},
+"size": [
+380,
+239
+]
+},
+"props/store-cup.webp": {
+"src": "991c49a2bca1a268f4ead99249096f4d8917329b",
+"set": {
+"q": 90,
+"m": 6,
+"max": 340
+},
+"size": [
+294,
+340
 ]
 },
 "props/thermostat-lock.webp": {

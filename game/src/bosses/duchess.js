@@ -14,6 +14,7 @@
 import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
+import { FEEDER } from './tank.js';
 import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -163,13 +164,16 @@ export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue(
     b.tip = Math.min(1, (b.tip || 0) + 0.04);
   },
   draw(b, c, r) {
-    // Stripe's feeding cup on the rock, with its three pull tabs
+    // Stripe's feeding cup on the rock, with its three pull tabs. [issue 6] It's the feeding cup Pip
+    // started in (tank.js FEEDER: the same width and stretch), lidded; rescued, it lies upside down
+    // against the rock's foot, its base the step (cols 26-27, top at row 14).
     const tipped = b.done;
-    const cupH = 3.3 * T;
-    if (tipped) { const im = S.get('props/feeder-cup-tipped.webp'); if (im) c.drawImage(im, 25.2 * T, ROCK.top + 2.2 * T - cupH * 0.8, cupH * 0.8 * im.width / im.height, cupH * 0.8); }
+    const lid = S.get('props/feeder-cup.webp');
+    const cupH = lid ? FEEDER.w * lid.height / lid.width * FEEDER.stretch : 2.8 * T;
+    // (2.45 tiles tall: the near edge of its upturned base is the step's top, where Pip stands)
+    if (tipped) { const im = S.get('props/feeder-cup-tipped.webp'); if (im) c.drawImage(im, 27 * T - FEEDER.w / 2, FLOOR + 3 - 2.45 * T, FEEDER.w, 2.45 * T); }
     else {
-      const im = S.get('props/feeder-cup.webp');
-      if (im) c.drawImage(im, CUP_X - cupH * 0.44, ROCK.top - cupH + 4, cupH * 0.88, cupH);
+      if (lid) c.drawImage(lid, CUP_X - FEEDER.w / 2, ROCK.top + 4 - cupH, FEEDER.w, cupH);
       // [issue 13] Stripe, full size on the cup's floor and facing Pip, with a hop up to the lid now
       // and then: at 0.8 scale, floating mid-cup behind the front tab, he read as part of the
       // cup's painted texture and the cup looked empty
@@ -178,14 +182,17 @@ export default makeBoss('duchess', { postLines: true, // [playtest] base.rescue(
         const face = b.game?.player && b.game.player.cx > CUP_X ? 1 : -1;
         r.drawCricketAt(c, 'stripe', CUP_X - face * 0.1 * T, ROCK.top - cupH * 0.12 - hop, face, { look: hop ? 'leap' : 'idle' });
       }
+      // the tabs hang from the lid's front edge (36% down the lidded picture) over their kick spots;
+      // a pulled tab is folded back up over a cracked rim
+      const rimY = ROCK.top + 4 - cupH * 0.64;
       TABS.forEach((t, i) => {
         const pulled = b.pulled?.[i];
         const ti = S.get(`props/${pulled ? 'cup-tab-pulled' : 'cup-tab'}.webp`);
         const now = i === b.phase - 1 && !pulled;
-        const w = (pulled ? 0.9 : 1.1) * T, h = w * (ti ? ti.height / ti.width : 0.3);
-        const x = t.x + (i === 0 ? -w * 0.3 : i === 1 ? w * 0.3 : 0) - w / 2, y = ROCK.top - (i === 2 ? 0.25 * T : 1.6 * T) - h / 2;
-        if (ti) { c.save(); if (i === 0) { c.translate(x + w, y); c.scale(-1, 1); c.drawImage(ti, 0, 0, w, h); } else c.drawImage(ti, x, y, w, h); c.restore(); }
-        if (now && Math.floor(b.t / 20) % 2 === 0) { c.save(); c.strokeStyle = '#F2C46D'; c.lineWidth = 3; c.beginPath(); c.arc(t.x, y + h / 2, 18, 0, 7); c.stroke(); c.restore(); }
+        const w = 1.1 * T, h = w * (ti ? ti.height / ti.width : 0.58);
+        const x = t.x - w / 2, y = pulled ? rimY - 0.02 * T - h : rimY - 0.24 * T;
+        if (ti) { c.save(); c.shadowColor = 'rgba(70,45,20,0.55)'; c.shadowBlur = 5; c.shadowOffsetY = 2; c.drawImage(ti, x, y, w, h); c.restore(); } // a soft shadow: white on the white lid
+        if (now && Math.floor(b.t / 20) % 2 === 0) { c.save(); c.strokeStyle = '#F2C46D'; c.lineWidth = 3; c.beginPath(); c.arc(t.x, y + h * 0.6, 18, 0, 7); c.stroke(); c.restore(); }
       });
     }
     if (b.gone) return true;  // she's dozing on the dresser now
