@@ -27,8 +27,8 @@ import { roomLook, bgFolder, bgFor, NEAR, itemArt, npcFrame } from './render.js'
 import { secretKind } from './meta.js';
 import { ASSET_FILES } from '../data/assets.js';
 
-const STALL_MS = 30000;  // nothing new arrived for this long: show the room anyway (one 1 MB file on Slow 3G takes ~20 s)
-const CAP_MS = 90000;    // never hold longer than this, even while files keep arriving
+const STALL_MS = 6000;   // nothing new arrived for this long: show the room anyway (missing art then draws its stand-in until it lands)
+const CAP_MS = 10000;   // never hold longer than this: a short wait beats a long ink screen on a slow line
 const LABEL_MS = 600;    // "Loading" appears on the cover after this
 const FADE = 12;         // frames the cover fades over after a hold (when no transition runs)
 const BG_SLOTS = 2;      // background (neighbour) loads at a time, so the next room never queues behind them
