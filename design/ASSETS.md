@@ -93,7 +93,7 @@ $20 in all, of which up to $5 goes on mockups for the shared design. Running tot
 ### Polish pass [polish-V]: $0
 - `sprites/geckos/bigtok/portrait.png`, `sprites/geckos/nana/portrait.png`: face portraits for the Ready? card and dialogs, cropped from each rig's `idle.png` (soft fade at the bottom edge). No generation.
 
-### Issue #6, the feeder cup and the pet-store cup: about $1.21
+### Issue #6, the feeder cup and the pet-store cup: about $1.37
 | ID | File | Tool | Prompt (short) | Tries | Est. cost |
 |---|---|---|---|---|---|
 | cup-open a-d | .gamegen/candidates/i6/cup-{a,b,c,d}.png | imagegen2 2.6-flare medium 1536×1024, transparent; Pip anchor + feeder-cup refs | open pet-store cricket cup from the side: clear + egg crate (a), frosted white + egg crate (b), amber-clear + bran and potato (c), clear + egg crate + lid leaning (d) | 4 (came out about 2:1, too tall for the 6×2-tile cup) | $0.20 (1132 out, 1896 image in each) |
@@ -102,4 +102,6 @@ $20 in all, of which up to $5 goes on mockups for the shared design. Running tot
 | store-cup | art/props/store-cup.png, store-cup-tipped.png | imagegen2 2.6-flare medium, transparent; a crop of open-1's front cup + Pip anchor (tipped: store-cup as ref) | the white paper cricket cup of the opening panels, lidded; the same cup tumbling, lid popping off | 2 | $0.13 |
 | open-3 edit | game/assets/story/open-3.webp | nanogen 2.1 2K edit of the old panel, with cup-b2 and store-cup as refs | store cup on the tank's mesh lid, the tongs lowering Pip into the feeding tub (2 takes, then a second turn to open the mesh under the hand and widen the tub) | 3 | about $0.24 (2.1 isn't priced in the skill; counted like 3.1 flash 2K plus thinking) |
 
-Issue #6 total: about $1.21 ($0.45 candidates + $0.76 final).
+| open-4 edit | game/assets/story/open-4.webp | nanogen 2.1 2K edit of the old panel, with open-3 and store-cup as refs | only the falling cup: the white store cup with its lid popping off (2 takes; kept the one that keeps the cup's spot and size) | 2 | about $0.16 |
+
+Issue #6 total: about $1.37 ($0.45 candidates + $0.76 final + $0.16 panel 4).
