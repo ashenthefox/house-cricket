@@ -100,3 +100,23 @@ test('crumb HUD labels explain the counter before and after meeting Rolo', async
   assert.match(ui.crumbs.title, /Rolo's Crumb Shop/);
   assert.match(ui.crumbs.attrs['aria-label'], /^8 crumbs\./);
 });
+
+test('first duet reward saves its song and crumb hint, without repeating them on reload', () => {
+  const x = fixture(fresh(), []);
+  x.runner.event('secret', { id: 'stu-duet' });
+  assert.equal(x.g.meta.crumbs, 100);
+  assert.ok(x.g.meta.songs.includes('finale'), 'duet song unlocks with the crumb award');
+  assert.equal(x.g.meta.flags.crumbHintShown, true);
+  assert.equal(x.toasts.filter(t => t === firstCopy).length, 1);
+  assert.equal(x.saved.length, 1, 'autosave happens after the song and secret are recorded');
+  assert.ok(x.saved[0].songs.includes('finale'));
+  assert.ok(x.saved[0].secrets.includes('stu-duet'));
+
+  const resumed = fixture(x.saved[0], []);
+  resumed.runner.event('secret', { id: 'stu-duet' });
+  assert.equal(resumed.g.meta.crumbs, 100, 'the same duet cannot be awarded twice');
+  resumed.runner.event('secret', { id: 'att-duet' });
+  assert.equal(resumed.g.meta.crumbs, 250);
+  assert.equal(resumed.toasts.filter(t => t === firstCopy).length, 0,
+    'subsequent duet rewards should not repeat the one-time explanation');
+});
