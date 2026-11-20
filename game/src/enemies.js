@@ -1,5 +1,5 @@
 // Enemies, data-driven (design: "Enemies"). Two kinds:
-//  - bonkable critters: a kick flips them (2.png), a chirp stuns them (radius and stun from the
+//  - bonkable critters: a kick flips them (2.webp), a chirp stuns them (radius and stun from the
 //    Chirp stat; Rin's Lullaby x3); they scurry off and come back to their spawn 6 s later.
 //  - unbeatable hazards (darkling beetle, robot vacuum): kicks clonk, chirps do nothing; hide.
 // Add a type: an entry in TYPES naming a behaviour in BEHAVIOURS (or write a new one).
@@ -40,7 +40,7 @@ export const TYPES = {
   vacuum:      E('vacuum',      { bonkable: false, behaviour: 'vacuum', w: 120, h: 44, speed: 110, damage: 0, loud: 2.5, caught: 'checkpoint', kick: 'none', chirp: 'none', flash: 'none', drawW: 150, name: 'Robot vacuum', color: '#3A3A42', dark: '#121216' }),
 };
 // friendlier spellings builders may use
-const ALIAS = { dustmites: 'mites', mite: 'mites', 'fruit-flies': 'fruitflies', soldier: 'antsoldier', moth: 'clothesmoth', bunny: 'dustbunny', centipedes: 'centipede', spider: 'wolfspider' };
+export const ALIAS = { dustmites: 'mites', mite: 'mites', 'fruit-flies': 'fruitflies', soldier: 'antsoldier', moth: 'clothesmoth', bunny: 'dustbunny', centipedes: 'centipede', spider: 'wolfspider' };
 
 const flipFrames = 80, scurryFrames = 90, goneFrames = 360;
 const f = (s) => Math.round(s * FPS);
@@ -307,7 +307,7 @@ function grow(e, g, n) {
   Object.assign(e, b);
 }
 
-// Flip (kicked): lies on its back (2.png), falls to the floor, scurries off, comes back later.
+// Flip (kicked): lies on its back (2.webp), falls to the floor, scurries off, comes back later.
 function flip(e, g, dir) {
   e.state = 'flipped'; e.flipT = flipFrames; e.vy = -360; e.vx = dir * 120; e.dir = dir; e.stun = 0; e.mode = 'idle';
   g.emit('bonk', { x: ecx(e), y: e.y, type: e.type });

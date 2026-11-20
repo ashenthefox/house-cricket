@@ -30,7 +30,17 @@ export const TEXT = {
       duchessWakes: ['Mm? Is it Saturday already?', '...Oh, hello, dinner.'],
       kick: '{kick} kicks. Loose pebbles make good steps.',
       squeeze: 'Hold {up} to squeeze through the gap.',
-      waitTell: 'Not yet! Duchess is right behind you. Watch her tail.', // [final-G] the exit waits for her two lunges
+      // [issue 7] the hunt in the sand room (src/bosses/tank.js Sand): no damage, hide in the log to lose her
+      hideLog: 'Hide in the log!',            // the sign the script puts up (after her first lunge, or near the log)
+      exitShut: "She'd follow you out! Lose her first: hide in the log.",
+      caughtFirst: 'Too close! Move when the tail wiggles.', // the first catch
+      caughtWalk: "Hey! She's not a pillow.",  // walking into her snout
+      caughtLog: 'Run to the log! →',          // from the second catch (the log's outline pulses)
+      caughtLogBack: '← Run back to the log!', // ... when the skitter lands him past the log
+      bermBite: "Sand won't hide you. A cricket-sized gap will.", // once, when she bites a berm
+      sniff: 'Mm? Where did dinner go?',
+      shrug: 'Hmph. Nap time.',
+      lost: "She's lost you. Go!",            // the exit opens
     },
   },
 
@@ -38,7 +48,7 @@ export const TEXT = {
   signs: {
     move: '{left} {right} to move. {jump} to jump.',
     tell: 'When the tail tip wiggles, MOVE.',
-    berm: 'When her tail wiggles, stand behind a sand berm. She bites the sand: run up her back!', // [final-G]
+    berm: 'Tail wiggling? Get behind a sand berm. She bites the sand: run up her back!', // [final-G] [issue 9]
     squeeze: 'Hold {up} to squeeze through the gap.',
     jumpHold: 'Hold {jump} to jump higher. Tap it for a little hop.',
     kick: '{kick} kicks. Bugs flip over, scurry off and come back later. Nobody gets hurt.',
@@ -46,10 +56,10 @@ export const TEXT = {
     listen: 'Stand still and hold {listen}. Crickets hear through their front legs.',
     listenStrip: 'The strip under the arrow shows the rhythm. Crickets chirp in short, steady groups.',
     carrier: 'Press {up} at the Carrier to go inside.', // [polish-T] a verb, then the key
-    save: 'Press {up} at a crack in the baseboard to save. Every crack leads home to the Carrier.',
+    save: 'Press {up} at a baseboard crack to save. Every crack leads home to the Carrier.', // [issue 9] 2 lines on a phone
     hide: 'Press {up} near a cricket-sized gap to hide. Nothing big can see you in there.',
     drop: '{down} + {jump} drops through thin platforms.',
-    wallJump: 'Jump at a wall to stick to it. {jump} again to kick off. Shiny things (glass, porcelain) are too slippery.',
+    wallJump: 'Jump at a wall to stick, {jump} again to kick off. Glass and porcelain are too slick.', // [issue 9]
     floss: 'Press {use} near a hook to grab it. {left} {right} to swing. {jump} to let go with a fling.',
     flossDrop: '{use} again lets go straight down.',
     raft: 'Walk onto water with the Raft. Currents carry you along.',
@@ -69,7 +79,7 @@ export const TEXT = {
     syrup: 'Sticky! Syrup slows you down.',
     cushion: 'Cushions are bouncy.',
     aphids: 'Aphids are harmless. And bouncy.',
-    thermostat: 'A thermostat lock. It wants {n}°F. Someone who can tell the temperature by ear might help.',
+    thermostat: 'A thermostat lock. It wants {n}°F. Someone who hears temperature could help.', // [issue 9]
     beaconMaze: 'Four sounds. Only one is a cricket. Listen to the rhythm.',
     cloak: 'Hold {up} in the open to vanish for a few seconds.',
     chute: 'The old laundry chute. One way only.',
@@ -106,7 +116,14 @@ export const TEXT = {
     crumbs: '+{n} crumbs',
     duet: 'Pip and Chip, together! The music box opens: +{n} crumbs, and the Duet for the Stage.', // [fixer]
     shortcut: 'A secret shortcut!', // [fixer]
-    indicatorHint: 'The ear at the screen edge points to a trapped cricket\'s call. It pulses with each chirp and grows as you get closer. Hold {listen} to listen.', // [final-S] first time, in the Bedroom
+    // [issue 10] the ear guide: the first time it ever comes out, and what a click on it did
+    earFirst: 'The ear points the way to go. Tap it to keep it out.',
+    earPinned: 'Ear guide: pinned out. Double-click: {dbl}',
+    earResting: 'Ear guide: resting. It comes out when it helps. Double-click: {dbl}',
+    earDismissed: 'Ear guide: tucked away until it can help again.',
+    earStaysOut: 'Ear guide: it stays out while Beacon chirps is Off.',
+    earDblCall: 'the cricket sings only when you call.',
+    earDblAuto: 'the cricket sings on its own.',
     checkpoint: 'Checkpoint',
     gentleOffer: 'That gecko is tricky. Try Gentle Mode? (Hits cost half, tells are slower.)',
     gentleOn: 'Gentle Mode is on.',
@@ -373,7 +390,7 @@ export const TEXT = {
   },
   damper: { shut: 'Only a proper chorus will shake it.', missing: 'Still missing:', allFound: 'Everyone\'s found. Go home to the Carrier and sing together.', /* [polish-T] */ open: 'The damper is open. The Attic is up there.' },
   nana: { rule: 'Her stones want a low, a middle and a high voice.', low: 'Low (3.5 kHz or under)', mid: 'Middle (4 to 5 kHz)', high: 'High (5.5 kHz or over)', suggest: 'Suggest a trio', need: 'Your trio needs a {voice} voice.', chorus: 'Sing! {chirp} on the beat.', louder: 'Louder!',
-    p1: 'Kick {kick} each music stone to wake it. When her tail tip wiggles, hide ({up} at a gap) or get out of its way.',
+    p1: 'Kick {kick} each music stone to wake it. Tail wiggling? Hide ({up} at a gap) or dodge.', // [issue 9] 2 lines
     p2: 'Each stone wants one voice. {swapPrev} {swapNext} swap, then {chirp} beside the stone.',
     wants: 'The {stone} wants a {voice} voice.', fork: 'tuning fork', glass: 'glass', bell: 'bell' },
   hump: { cheer: "I'll cheer from here.", tap: '(tap tap tap)' },
@@ -474,6 +491,7 @@ export const TEXT = {
     padNote: 'Plug in a PS5 or other controller and press any button. Works best in Chrome or Edge.',
     touchNote: 'Turn your phone sideways. The stick appears where your left thumb lands.',
     report: 'Ctrl+Shift+F: report a bug',
+    ear: 'The ear beside the sound button comes out to point the way to go: while you listen, after the cricket answers your chirp, and when you seem lost. Tap it to keep it out. Settings > Ear guide.', // [issue 10]
   },
   shop: {
     heart: { name: 'Seed-heart', desc: '+1 heart' },

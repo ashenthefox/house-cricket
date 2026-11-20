@@ -89,3 +89,70 @@ Every item is in the design:
 - a range of enemies (16 types)
 - the Not-Crickets joke and puzzle (bat, tree frog, chimney swift, smoke alarm, a chirping gecko, squeaks)
 - gamepad support
+
+## Change: issue #10, the ear guide (one round, 2026-11-19)
+
+Player and Builder reviewed the change (no art or sound, so no art director).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Listen arrow points at the cricket while the ear points along the path | must-fix (Player) | Fixed: one direction everywhere; while Listening the ear is the arrow |
+| Beacon chirps Off leaves almost no guide | must-fix (Player), should-fix (Builder) | Fixed: with Off, When it helps counts as Always out |
+| "The doorway after" isn't in the path data; twin doorway nodes; door links | must-fix (Builder) | Fixed in design: switch on passing through the doorway, twins count as one, doors aimed at themselves; build records predecessors |
+| Reusing the boolean `indicator` key; migration | must-fix (Builder) | Fixed: a new `ear` setting; old saves move to When it helps |
+| Ear state must stay out of game state (replays, rewind, heardAt) | must-fix (Builder) | Fixed: pure display, own module, reset on rewind |
+| Clicking an auto-out ear did nothing; decide at press | should-fix (both) | Fixed: dismiss until the next reason; decided at press; ignored while Listening |
+| Lost and answer timing undefined | should-fix (both) | Fixed: in-control time, closer = beats best by a tile, out until 1280 px closer, 4 s from the answer |
+| Smoothing wrap-around, exact flip, stale angle | should-fix (Builder) | Fixed: short way round, keep sign on a half-turn, snap on out/room change/rewind |
+| No explanation when it appears | should-fix (Player) | Fixed: first-time toast, a "this way" pulse and cue when lost |
+| Doorway pointing needs to read as a route | should-fix (Player) | Fixed: a glint on the target doorway when on screen |
+| "Never" ambiguous; two "Ear" buttons on phones | should-fix (Player) | Fixed: renamed "Ear guide", "Only when I listen" |
+| "Followable zone" not defined | should-fix (Builder) | Fixed: Carrier, Tank, rescued, unreachable and fights excluded |
+| Keep the pulse and grow-with-closeness | nice | Kept |
+| Testability: pure module, headless test, debug hook | nice | Taken into the build plan |
+
+## Change: issue #7, Duchess hunts in the tank's sand room (one round, 2026-11-19)
+
+Player and Builder reviewed (no new art or sound; existing growl/snore reused).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Waiting ~30 s for her to plod home before the exit opens | must-fix (both) | Fixed: the exit opens when she turns away; the plod and nap are ambient |
+| Rushers reach a shut exit before any lunge; hiding before a lunge undefined | must-fix (Player), should-fix (Builder) | Fixed: hiding works whenever she's awake; she tells and lunges into the log; the sign also shows near the log; a new exit toast |
+| Phone stick drift pops Pip out of the log mid-sniff | must-fix (Player) | Fixed: only Jump leaves the log while she comes and sniffs |
+| z00.md is generated from house.js and gen-zone-briefs.mjs | must-fix (Builder) | Fixed: the spec lives in GAME_DESIGN.md; the build updates house.js and the generator and regenerates z00.md |
+| Knockback could push Pip out of the room; only the snout should catch | must-fix (Builder) | Fixed: snout-only catches, skitter in her facing direction, never out of the room, she stays right of tile 8 |
+| Don't reuse daze (earplugs toast) or hurt | must-fix (Builder) | Taken into the build: a plain shove with no event or damage |
+| Gentle Mode not wired into the tank | must-fix (Builder) | Fixed: the tank uses the shared tell timing |
+| Recorded solutions break; full-run pins the Bedroom's start frame | must-fix (Builder) | Taken into the build: re-author zone-00-path, pad to keep the full run's G0, or re-record and re-check |
+| Skitter direction and grace period; repeated toasts | should-fix (Player) | Fixed: away from her head toward the log; a shake-off after a roar; rotating toasts |
+| She must keep up with a rusher | should-fix (Player) | Fixed: scurry speed when he's far ahead or hidden |
+| Odd moves: jumping over her, going back left, hiding mid-lunge | should-fix (Player) | Fixed: body and tail harmless, she turns; a lunge at a hidden Pip thunks into the log |
+| Sleep flag storage; walking into her while asleep | should-fix (Builder) | Fixed: room state (survives rewind); asleep she's harmless |
+| Berms: she must cross them; a berm isn't cover | should-fix (both) | Fixed: she follows the berm tops, lunges stop at a berm face, standing on a berm is safe, a one-time toast |
+| Being seen at the log corners Pip | should-fix (Builder) | Fixed: a recoil without skitter; a Chirp from the log gives him away |
+| Signs, text, snore preload, header comments | should-fix (Builder) | Taken into the build |
+| Rewind and determinism; the checker can't see the gate | should-fix (Builder) | Taken into the build: plain fields, seeded RNG only, new rewind cases, a headless gate test |
+| Staging of the sniff; one-time wake line | nice | Taken |
+
+## Change: issue #9, tutorial notes on the path (one round, 2026-11-19)
+
+Player and Builder reviewed (art is drawn in code, so no art director).
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| Trigger zones up to 14 tiles wide, note at the zone's left edge | must-fix (Player) | Fixed: about 2 tiles around the note, minimum show time, wide zones become notes where the lesson starts |
+| The card covers the tongs in the first ten seconds | must-fix (Player) | Fixed: hazards and the gecko's tell are kept clear; per-tip lower slot (the tongs tip) |
+| The card lands on the toasts | must-fix (both) | Fixed: one centred column, card first, toasts under it |
+| A flat paper is a 2 px line from the side | must-fix (Player) | Fixed: a propped paper card with a "!" scribble, an outline and a shadow |
+| "First solid ground" undefined for ~25 of 111 signs | must-fix (Builder) | Fixed: an anchor rule (spot or nx, at most 1 tile down, never water or hazard) plus data fixes in generators and a build check |
+| Notes on breakable or gated ground float afterwards | must-fix (Builder) | Fixed: read from the live grid; the note retires when its ground breaks |
+| Nana's moving hint isn't a note | must-fix (Builder) | Fixed: a card-only kind |
+| The card jumps around mid-climb or mid-fight | should-fix (both) | Fixed: its slot is chosen once and it fades instead of moving; fights use the taller free band |
+| Appear and disappear behaviour unspecified | should-fix (Player) | Fixed: dwell, calm fade, minimum time, hysteresis |
+| The ear guide's spot collides with the card | should-fix (both) | Fixed: the ear avoids the card's rectangle |
+| Dark rooms hide notes | should-fix (Builder) | Fixed: the unread glint draws through the darkness |
+| "Read" undefined; storage | should-fix (both) | Fixed: 1.5 s fully shown; saved with the slot outside play state |
+| Long tips on phones; the old width rules; held frames | should-fix (both) | Fixed: a wider card, 2 lines max with a build check, one card rule, hidden during transitions |
+| Prompts taking over abruptly | nice | Fixed: a 300 ms fade, counted as read |
+| Notes beside other floor props; test hooks | nice | Fixed: a sideways step; a sign check, a `__game.tips()` hook and sample screenshots in the build |

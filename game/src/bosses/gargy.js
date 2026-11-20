@@ -14,17 +14,20 @@ import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { TEXT } from '../../data/text.js';
 import { makeBoss } from './base.js';
 import * as Geckos from '../geckos.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const LEN = 360, BACK = 7 * T, SEAT = 14 * T;
-const CUSH = [{ x0: 15, x1: 24 }, { x0: 26, x1: 35 }, { x0: 37, x1: 46 }].map((c) => ({ ...c, cx: (c.x0 + c.x1 + 1) / 2 * T }));
-const PILLOWS = { 1: [1], 2: [0, 2], 3: [0, 1, 2] };
+const CUSH = constant([{ x0: 15, x1: 24 }, { x0: 26, x1: 35 }, { x0: 37, x1: 46 }].map((c) => ({ ...c, cx: (c.x0 + c.x1 + 1) / 2 * T })));
+const PILLOWS = constant({ 1: [1], 2: [0, 2], 3: [0, 1, 2] });
 const DAZED = 3 * FPS;
-const REMOTE = { x: 49.8 * T, y: 13 * T };
+const REMOTE = constant({ x: 49.8 * T, y: 13 * T });
 
 const head = (b) => b.x + b.facing * LEN * 0.4;
 
 export default makeBoss('gargy', {
+  sfx: ['gecko-growl', 'pillow-bonk'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
+  art: () => ({ props: ['throw-pillow', 'tv-remote'], crickets: { jam: ['idle', 'chirp'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {
     b.y = BACK; b.x = [0, 31, 31, 31][b.phase] * T; b.facing = -1;

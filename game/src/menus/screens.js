@@ -20,7 +20,7 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 const portrait = (id, cls = 'pic') => {
-  const p = S.exists(`sprites/crickets/${id}/portrait.png`) ? `assets/sprites/crickets/${id}/portrait.png` : null;
+  const p = S.exists(`sprites/crickets/${id}/portrait.webp`) ? `assets/sprites/crickets/${id}/portrait.webp` : null;
   const d = h('span', { class: cls });
   if (p) d.append(h('img', { src: p, alt: '' })); else { d.style.background = CRICKETS[id]?.color || '#888'; }
   return d;
@@ -70,6 +70,7 @@ function slotButton(A, n, data, action, opts = {}) {
   return b;
 }
 export function newGameSlots(A) {
+  A.warmOpening?.(); // [issue 16] the first story panel
   const list = h('div', { class: 'menu-list' });
   for (const { n, data } of A.Save.listSlots()) {
     list.append(slotButton(A, n, data, () => {
@@ -111,7 +112,7 @@ export function settings(A, back, focus) {
     { kind: 'slider', label: 'Sound volume', id: 'sfx', get: () => st.sfx, set: set('sfx') },
     { kind: 'slider', label: 'Beacon volume', id: 'beacon', get: () => st.beacon, set: set('beacon') },
     { kind: 'choice', label: 'Beacon chirps', id: 'beaconChirps', get: () => st.beaconChirps, set: set('beaconChirps'), options: [{ v: 'always', label: 'Always' }, { v: 'call', label: 'When I call' }, { v: 'off', label: 'Off' }] },
-    { kind: 'toggle', label: 'Chirp indicator', id: 'indicator', get: () => st.indicator, set: set('indicator') },
+    { kind: 'choice', label: 'Ear guide', id: 'ear', get: () => st.ear, set: set('ear'), options: [{ v: 'helps', label: 'When it helps' }, { v: 'always', label: 'Always out' }, { v: 'listen', label: 'Only when I listen' }] }, // [issue 10] With Beacon chirps Off, When it helps counts as Always out
     { kind: 'toggle', label: 'Always show beacon ripples', id: 'ripples', get: () => st.ripples, set: set('ripples') },
     { kind: 'toggle', label: 'Easier beacon pitch', id: 'easyPitch', get: () => st.easyPitch, set: set('easyPitch') },
     { kind: 'toggle', label: 'Mute', id: 'muted', get: () => st.muted, set: (v) => A.setMuted(v) },
@@ -160,6 +161,7 @@ export function howto(A, back, scheme) {
     grid.append(r);
   }
   body.append(grid);
+  body.append(h('p', { class: 'howto-note', text: line('howto.ear') })); // [issue 10] the ear guide
   const note = scheme === 'gamepad' ? line('howto.padNote') : scheme === 'touch' ? line('howto.touchNote') : 'Two layouts: arrows with Z X C V B, or WASD with Space and J K L I.';
   body.append(h('p', { class: 'howto-note', text: note }));
   if (A.showReport() && scheme === 'keyboard') body.append(h('p', { class: 'howto-note', text: line('howto.report') })); // [polish-T] a keyboard shortcut: the Keyboard tab only
@@ -307,6 +309,7 @@ function cricketsTab(A, common, sel) {
 function soundsTab(A, common) {
   const g = A.game, m = ensure(g);
   const ids = [...new Set([...m.sounds, ...RESCUABLE.filter((id) => g.rescued.has(id))])];
+  A.warmSongs?.(ids); // [issue 14] its recorded voices load as the book opens
   const body = h('div', { class: 'sound-book' });
   const fact = h('p', { class: 'sound-fact' });
   const grid = h('div', { class: 'sound-grid' });
@@ -407,8 +410,8 @@ export function lairReady(A, door) {
   const g = A.game, boss = door.boss, m = ensure(g);
   const nana = boss === 'nana';
   const gecko = h('div', { class: 'gecko-pic' });
-  // [builder C] no gecko rig (Sir Bartholomew): his golden eye from sprites/npcs/<boss>-eye.png
-  const gp = S.exists(`sprites/geckos/${boss}/portrait.png`) ? `assets/sprites/geckos/${boss}/portrait.png` : S.exists(`sprites/geckos/${boss}/idle.png`) ? `assets/sprites/geckos/${boss}/idle.png` : S.exists(`sprites/npcs/${boss}-eye.png`) ? `assets/sprites/npcs/${boss}-eye.png` : null; // [polish-V] portrait.png: a face portrait for the tall climbers (Big Tok, Nana)
+  // [builder C] no gecko rig (Sir Bartholomew): his golden eye from sprites/npcs/<boss>-eye.webp
+  const gp = S.exists(`sprites/geckos/${boss}/portrait.webp`) ? `assets/sprites/geckos/${boss}/portrait.webp` : S.exists(`sprites/geckos/${boss}/idle.webp`) ? `assets/sprites/geckos/${boss}/idle.webp` : S.exists(`sprites/npcs/${boss}-eye.webp`) ? `assets/sprites/npcs/${boss}-eye.webp` : null; // [polish-V] portrait.webp: a face portrait for the tall climbers (Big Tok, Nana)
   if (gp) gecko.append(h('img', { src: gp, alt: '' }));
   const trio = h('div', { class: 'ready-trio' });
   for (const id of g.player.trio) { const w = h('div', { class: 'rt' }, portrait(id), h('span', { text: CRICKETS[id].name })); if (nana && voiceOf(id)) w.append(h('span', { class: `cc-voice v-${voiceOf(id)}`, text: voiceOf(id) === 'mid' ? 'middle' : voiceOf(id) })); trio.append(w); }
@@ -483,7 +486,7 @@ export function post(A, back = () => A.resume()) {
   const here = g.saveCrack?.room;
   const items = m.cracks.filter((c) => g.world.rooms[c.room]).map((c) => {
     const r = g.world.rooms[c.room];
-    return { label: `${r.zone.name || ''}: ${r.name}`, disabled: !g.inCarrier && c.room === here, action: () => A.travel(c) };
+    return { label: `${r.zone.name || ''}: ${r.name}`, disabled: !g.inCarrier && c.room === here, action: () => A.travel(c), onFocus: () => A.artAhead?.(c.room) }; // [issue 16] its art loads while it's in focus
   });
   items.push({ label: 'Back', action: back });
   A.ui.menu('post', items, { title: line('npcs.shelly.facility'), sub: line('npcs.shelly.carrier'), back, class: 'panel-card' });

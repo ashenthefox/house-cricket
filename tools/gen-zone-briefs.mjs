@@ -13,11 +13,12 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const out = path.join(root, 'design/zones');
 fs.mkdirSync(out, { recursive: true });
 const ls = (p) => { try { return fs.readdirSync(path.join(root, 'game/assets', p)).sort(); } catch { return []; } };
-const PROPS = ls('props').map((f) => f.replace(/\.png$/, ''));
+const lsArt = (p) => { try { return fs.readdirSync(path.join(root, 'art', p)).sort(); } catch { return []; } }; // [issue 14] terrain swatches are sources only
+const PROPS = ls('props').map((f) => f.replace(/\.webp$/, ''));
 const ENEMIES = ls('sprites/enemies');
-const NPCS = ls('sprites/npcs').map((f) => f.replace(/\.png$/, ''));
-const TERRAIN = ls('terrain').map((f) => f.replace(/\.png$/, ''));
-const ITEM_ART = ls('items').map((f) => f.replace(/\.png$/, ''));
+const NPCS = ls('sprites/npcs').map((f) => f.replace(/\.webp$/, ''));
+const TERRAIN = lsArt('terrain').map((f) => f.replace(/\.png$/, ''));
+const ITEM_ART = ls('items').map((f) => f.replace(/\.webp$/, ''));
 const SFX = ls('audio/sfx').map((f) => f.replace(/\.mp3$/, ''));
 const MUSIC = ls('audio/music').map((f) => f.replace(/\.mp3$/, ''));
 
@@ -25,18 +26,19 @@ const MUSIC = ls('audio/music').map((f) => f.replace(/\.mp3$/, ''));
 const FLOW = {
   'z00-tank': {
     title: 'Opening: the Tank',
-    new: 'run, hop, variable-height jump, kick, the tell (tail-tip wiggle), squeeze (hold Up).',
+    new: 'run, hop, variable-height jump, kick, the tell (tail-tip wiggle), hiding (Up at a hide spot), squeeze (hold Up).',
     flow: [
       'Three story panels (open-1..3.webp, captions in TEXT.opening.panels), then control starts in the cup.',
       'tank-cup: dodge the tongs 3 times, then a held jump onto the rim (beats 1-2).',
-      'tank-sand: the no-fail chase, the tell is taught here (beat 3).',
+      'tank-sand: Duchess hunts (beat 3, issue #7): the tell is taught by real, dodgeable lunges; hide in the log until she sniffs, shrugs and turns away, then the exit opens.',
       'tank-decor: climb; kick the pebble off a ledge to make a step (beat 4).',
       'tank-lid: squeeze through the lid gap; the cup tips (beats 5-6) -> panel open-4 -> bed-carrier, first Chirp prompt (Stripe answers), Pip\'s vow (TEXT.opening.pipVow).',
     ],
     notes: [
       'These rooms sit off the house map at y 18-20 and are never revisited (the map hides zone z00).',
-      'No damage anywhere in the tank: Duchess\'s lunges are scripted misses; falls just reset to the last ground.',
-      'Recorded solution: design/solutions/opening.json (tools/solutions/opening.mjs).',
+      'No damage anywhere in the tank: only Duchess\'s snout catches, with a roar and a skitter (player.shove: no hurt, no daze); falls just reset to the last ground.',
+      'tank-sand\'s exit and her nap on coming back read the room flag duchess-asleep (g.rs(\'tank-sand\').taken), never her mode. Headless checks: tools/tank-test.mjs.',
+      'Recorded solution: design/solutions/zone-00-path.json (tools/solutions/zones-a.mjs, the zone-00 block); the full run replays it (tools/solutions/full-run.mjs, G0).',
       'Music: title (slowed, per the design). Palette and paintings: bg/z00-tank.',
       'Props: tongs, feeder-cup, feeder-cup-tipped, hide-log, fake-plant, water-dish, pebble, pebble-chip, mesh-lid, sand-berm.',
     ],
@@ -101,7 +103,7 @@ const FLOW = {
     ],
     notes: [
       'Zones 4-7 combine two movement skills per room and add tougher enemies (ant soldiers).',
-      'Syrup is a new terrain (terrain/syrup.png): see links.md engine features. Until then, paint it but keep it a plain floor.',
+      'Syrup is a new terrain (art/terrain/syrup.png): see links.md engine features. Until then, paint it but keep it a plain floor.',
       'pan-jars is the band playground; pan-high (Sgt. Crumb) is the 8-tile G wall above the door.',
     ],
   },
@@ -316,11 +318,11 @@ function zoneDoc(zid) {
 
 function assetsSection() {
   return ['## Art and sound you can use (real file names)', '',
-    `- props (assets/props/<name>.png): ${PROPS.join(', ')}`,
+    `- props (assets/props/<name>.webp): ${PROPS.join(', ')}`,
     `- enemies (engine type = sprites/enemies/<name>): ${ENEMIES.join(', ')}`,
-    `- npcs (sprites/npcs/<name>.png): ${NPCS.join(', ')}`,
-    `- items (assets/items/<name>.png): ${ITEM_ART.join(', ')}`,
-    `- terrain swatches (assets/terrain/<kind>.png): ${TERRAIN.join(', ')}`,
+    `- npcs (sprites/npcs/<name>.webp): ${NPCS.join(', ')}`,
+    `- items (assets/items/<name>.webp): ${ITEM_ART.join(', ')}`,
+    `- terrain swatches (art/terrain/<kind>.png): ${TERRAIN.join(', ')}`,
     `- music: ${MUSIC.join(', ')}`,
     `- sfx (Audio.play): ${SFX.join(', ')}`,
     '- synth voices (Audio.play): house banded twospot field snowy katydid mole ground bell knock alarm peeper chikchak tell sweep whoosh swish brush steam clonk thunk ping fall ring chime sting',

@@ -47,6 +47,7 @@ bs.r(31, 8, 1, 8, '.');                               // right: the piano (rows 
 bs.r(21, 16, 10, 1);                                  // shelf to the piano
 bs.r(25, 17, 1, 3, '.');                              // (a shadowy nook under it: its gate is an entity)
 bs.r(9, 14, 10, 1);                                   // the sewing basket's rim
+bs.r(19, 18, 2, 2);                                   // [issue #4] a ball of yarn: back out of the basket (its way in was 4 up from its floor)
 bs.r(1, 5, 1, 11, 'G');
 
 // ---- liv-piano (cell 21,6, 2x2) ----
@@ -95,7 +96,10 @@ for (const [x, y] of [[13, 29], [18, 25], [13, 21], [18, 17], [13, 13], [18, 9]]
 hr.r(18, 31, 2, 1);
 hr.r(12, 2, 2, 2);                                    // the smoke shelf (the flue's first lip is 4 up, 4 across: builder D)
 hr.r(0, 34, 32, 2);
-hr.r(14, 34, 4, 2, 'C');                              // the ash-dump soot plug (exact, cols 14-17)
+hr.r(14, 34, 4, 1, 'C');                              // the ash-dump soot plug (exact, cols 14-17)
+// [issue #4] under it, the ash-dump door: shut (a gate) until you carry the Glow Bead. The ash pit below is dark
+// (needs the Glow Bead): pounding through the plug without it left you hanging in the pound on the dark room's edge.
+hr.r(14, 35, 4, 1, '.');
 hr.r(31, 30, 1, 4, '.');                              // right: the Sunroom (exact, rows 12-15 of cell 24,8)
 hr.r(26, 30, 6, 4, 'C');                              // fallen plaster rubble in the threshold
 hr.r(22, 32, 4, 2);                                   // the hearth step
@@ -112,6 +116,7 @@ lr.r(6, 15, 3, 1);                                    // a pouf
 lr.r(10, 13, 4, 3, 'G');                              // the sofa's left arm
 lr.r(14, 15, 34, 1);                                  // the seat base (cushions on row 14 are entities)
 lr.r(48, 13, 4, 3, 'G');                              // the right arm (the remote caddy)
+lr.r(52, 15, 1, 1);                                   // [issue #4] a dropped coaster: back over the right arm (3 up, slick) from the end of the sofa
 lr.r(14, 7, 34, 1);                                   // the sofa back's top, 7 up (Gargy lounges on it)
 // (the back cushions are painted behind: the seat is open up to the back's top)
 
@@ -202,7 +207,7 @@ export default {
         { type: 'piano', id: 'liv-keys', x: 13, y: 24, kw: 2, keys: 5, melody: [0, 4, 2] },
         { type: 'gate', id: 'liv-lid', x: 24, y: 21, w: 1, h: 3, opens: { switch: 'liv-keys' }, msg: 'The music stand reads: first key, last key, middle key.' },
         { type: 'secret', id: 'liv-crumbs-keys', x: 26, y: 23 },
-        { type: 'sign', x: 10, y: 15, w: 4, text: 'The music stand: first key, last key, middle key. Pound them.' },
+        { type: 'sign', x: 6, y: 15, w: 4, text: 'The music stand: first key, last key, middle key. Pound them.' }, // [issue 9] on the ledge's end (was over the drop)
         { type: 'loud', x: 24, y: 5, w: 11, h: 3 },
         { type: 'secret', id: 'liv-seedheart-piano', x: 26, y: 7 },
         { type: 'secret', id: 'liv-jam', x: 55, y: 28 },
@@ -234,6 +239,7 @@ export default {
       ],
       entities: [
         { type: 'secret', id: 'liv-mote', x: 1, y: 33 },
+        { type: 'gate', id: 'liv-ash-door', x: 14, y: 35, w: 4, h: 1, opens: { item: 'glow' }, tile: '#', msg: 'Too dark down there without a light. (Glow Bead)' }, // [issue #4]
         { type: 'checkpoint', x: 3, y: 13 },
         { type: 'checkpoint', x: 23, y: 31 },
         { type: 'sign', x: 22, y: 31, w: 3, text: 'Packed solid. A good hard pound from above might break it.' },

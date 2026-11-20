@@ -28,8 +28,10 @@ sk.r(1, 10, 11, 1, '=');                             // the window-well sill (dr
 sk.r(12, 10, 9, 3, 'G');                             // the utility sink (porcelain, on the wall)
 sk.r(21, 12, 3, 4).r(24, 14, 3, 2);                  // a detergent box and a bucket: steps up to the rim
 sk.r(5, 14, 3, 2).r(8, 12, 3, 4);                    // a bucket and a crate under the sill (back up from the dryer door)
+sk.r(11, 14, 2, 2);                                  // [issue #4] a pail under the sink: back up out of the gap below it (was 4 up)
 sk.r(46, 7, 5, 6, 'G').r(46, 13, 1, 3).r(50, 13, 1, 3); // the water heater on its legs
 sk.r(35, 12, 4, 1).r(38, 13, 1, 3);                  // the thermostat cubby (its gate is an entity)
+sk.r(39, 14, 2, 2);                                  // [issue #4] a jug beside the cubby: back up out of the gap by the water heater (was 4 up)
 
 // ---- laun-dryer: the dryer (cell 3,9, 2x2) ----
 const dr = grid(2, 2).frame('#');
@@ -52,6 +54,7 @@ bk.r(9, 26, 15, 8);                                  // towels (a soft landing f
 bk.r(20, 24, 4, 2);                                  // a towel heap up to the rim
 bk.r(1, 26, 2, 8).r(1, 33, 1, 1, '.').r(2, 33, 1, 1, '%'); // the baseboard: a crack (Mote) and a cache behind it
 bk.r(27, 31, 4, 3);                                  // a sock pile by the door
+for (const r of [32, 30, 28, 26, 24, 22]) bk.r(5, r, 2, 1, '='); // [issue #4] clothes-pegs up behind the basket, to its rim (the gap was 8 deep)
 
 // ---- laun-washer: the washer (cell 7,10, 2x1) ----
 const ws = grid(2, 1).frame('#');
@@ -60,6 +63,7 @@ ws.r(0, 16, 64, 2);
 ws.r(44, 16, 6, 2, 'C');                             // rubble over the old basement stairs (exact: cols 12-17 of cell 8)
 ws.r(50, 13, 13, 3, '~');                            // the washer flood
 ws.r(14, 13, 5, 3).r(30, 13, 3, 3);                  // a laundry basket, a box
+ws.r(19, 15, 1, 1).r(33, 15, 1, 1);                  // [issue #4] a sock by each: they were 3 up (too high for Jump 2) from the floor between and past them
 ws.r(22, 10, 11, 1, '=');                            // a drying rack
 ws.r(36, 9, 6, 1, '=');
 
@@ -67,8 +71,10 @@ ws.r(36, 9, 6, 1, '=');
 const sf = grid(1, 1).frame('#');
 sf.r(0, 12, 1, 4, '.');                              // left: the flood
 sf.r(0, 16, 32, 2);
-sf.r(1, 1, 1, 15, 'G').r(30, 1, 1, 12, 'G');
+sf.r(1, 1, 1, 10, 'G').r(30, 1, 1, 12, 'G');
+sf.r(1, 11, 3, 1);                                   // [issue #19] a short shelf over the doorway (rows 12-15): the left upright ends on it
 sf.r(6, 12, 5, 4);                                   // detergent jugs
+sf.r(4, 14, 2, 2).r(11, 14, 2, 2);                   // [issue #19] a small bottle each side of the jugs: steps of 2 (Jump 2) on and off them
 sf.r(1, 3, 11, 1);                                   // the top shelf, 8 tiles up
 sf.r(14, 9, 10, 1, '=');                             // the ironing board
 sf.r(26, 13, 5, 1);                                  // the cubby under the shelf (rows 14-15); [fixer] the heavy
@@ -109,7 +115,7 @@ export default {
         { type: 'earwig', x: 28, y: 6, range: [24, 34] },
         { type: 'earwig', x: 44, y: 6, range: [38, 44], dir: 1 },
         { type: 'sign', x: 49, y: 6, w: 4, text: 'Too far to jump. If only you could float across.' },
-        { type: 'sign', x: 5, y: 15, w: 3, text: 'Down to the sink. Wall-jump back up the shaft.' },
+        { type: 'sign', x: 5, y: 15, w: 3, nx: 7, text: 'Down to the sink. Wall-jump back up the shaft.' }, // [issue 9] the note at the shaft's lip
         { type: 'sign', x: 21, y: 6, w: 3, text: 'Up the rungs to the Kitchen.' }, // [playtest] the ladder
       ],
     },
@@ -117,6 +123,9 @@ export default {
       id: 'laun-sink', name: 'The Utility Sink', x: 5, y: 10,
       grid: sk.rows(),
       temp: { left: 58, right: 86 },
+      // [issue 21] the drop from the stair head (cols 53-62) only comes down: the beacon's path
+      // (src/beacon.js) goes up by the pipe door or the shaft, never up through it
+      noWay: [{ from: [0, 0, 64, 18], to: [53, 0, 10, 1] }],
       bg: { v: 'a', x: 0.2, y: 0.6 },
       fx: [{ kind: 'steam', x: 48, y: 6, every: 6 }],
       decor: [
@@ -134,7 +143,7 @@ export default {
         { type: 'light', x: 4, y: 3 },
         { type: 'clothesmoth', x: 27, y: 6 },
         { type: 'clothesmoth', x: 57, y: 6 },
-        { type: 'sign', x: 30, y: 15, w: 4, text: 'A thermostat lock. It wants 72°F. Someone who can tell the temperature by ear might help.' },
+        { type: 'sign', x: 30, y: 15, w: 4, text: 'A thermostat lock. It wants 72°F. Someone who hears temperature could help.' },
       ],
     },
     {
@@ -193,7 +202,7 @@ export default {
         { type: 'earwig', x: 8, y: 15, range: [3, 12] },
         { type: 'earwig', x: 38, y: 15, range: [34, 43] },
         { type: 'crumbs', x: 39, y: 8, n: 5 },
-        { type: 'sign', x: 45, y: 15, w: 4, text: 'Plaster rubble over the old basement stairs. A good hard pound from above might break it.' },
+        { type: 'sign', x: 45, y: 15, w: 4, text: 'Plaster rubble over the basement stairs. A hard pound from above might break it.' },
       ],
     },
     {

@@ -16,7 +16,9 @@ function fridge() {
   g.box(54, 1, 8, 31, '#');
   g.box(38, 0, 6, 2, '#').clear(39, 1, 4, 1);  // the thermostat cubby on top (gate on its left)
   // magnets and shelves up the fridge's left side to the stove door
-  [[50, 16, 19], [48, 12, 15], [46, 16, 19], [44, 12, 15], [42, 16, 19], [40, 12, 15], [38, 16, 19], [36, 12, 15]]
+  // [issue #4] the bottom shelf runs on over the drip tray to its glass (cols 5-15, was 12-15): back up from Rolo's
+  // corner without the Raft (you could drop in from the shelves and not climb out)
+  [[50, 16, 19], [48, 5, 15], [46, 16, 19], [44, 12, 15], [42, 16, 19], [40, 12, 15], [38, 16, 19], [36, 12, 15]]
     .forEach(([r, a, b]) => g.row(a, r, b - a + 1, '='));
   // the drip tray (Rolo behind it)
   g.box(4, 50, 1, 2, 'G').box(15, 50, 1, 2, 'G').box(5, 50, 10, 2, '~');
@@ -31,7 +33,8 @@ function stove() {
   g.clear(62, 12, 2, 4).row(56, 16, 8, '#');   // from the fridge (right, rows 12-15)
   g.clear(0, 30, 2, 4);                        // to under the sink (left, rows 30-33)
   g.clear(48, 0, 4, 1);                        // up to the counter
-  g.box(2, 14, 12, 16, '#');                   // the cabinet base (the kick-plate crawl inside)
+  g.box(2, 6, 12, 24, '#');                    // the cabinet base, flush with the oven top (the kick-plate crawl inside)
+                                               // [issue #4] was 8 lower: a well beside the oven glass with no way back up
   g.clear(3, 23, 11, 2);
   g.box(14, 6, 34, 16, 'G');                   // the oven (enamel and glass)
   g.row(14, 25, 38, '=');                      // the oven-door handle
@@ -281,7 +284,7 @@ export default {
       decor: [{ prop: 'bottle-cap', x: 50, y: 33, h: 1.1 }],
       entities: [
         { type: 'sign', x: 54, y: 33, w: 5, text: S.raft },
-        { type: 'sign', x: 14, y: 33, w: 4, text: 'Down to the Laundry: {down} + {jump} through the rungs.' }, // [playtest] the ladder
+        { type: 'sign', x: 42, y: 33, w: 4, nx: 43, text: 'The gap in the spill goes down to the Laundry: {down} + {jump} through the rungs.' }, // [playtest] the ladder; [issue 9] its note on the dry floor before the spill (was in the water)
         { type: 'crumbs', x: 56, y: 20, n: 10 },
         { type: 'cockroach', x: 54, y: 20, range: [49, 58] },
       ],

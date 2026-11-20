@@ -16,11 +16,12 @@ import { TILE, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as Geckos from '../geckos.js';
 import * as S from '../sprites.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const LEN = 190;                                  // nose-to-tail px on screen (he fits a shelf)
-const GLINT = { normal: 1.0, gentle: 1.5 };       // s
-const RELOCATE = [3, 2, 1.5];                     // s per phase
-const ALPHA = { hidden: 0.1, gentleHidden: 0.16, moving: 0.45 };
+const GLINT = constant({ normal: 1.0, gentle: 1.5 });       // s
+const RELOCATE = constant([3, 2, 1.5]);                     // s per phase
+const ALPHA = constant({ hidden: 0.1, gentleHidden: 0.16, moving: 0.45 });
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 
 function spotsOf(b) {
@@ -46,6 +47,8 @@ function moveTo(b, g, spot, secs) {
 }
 
 export default makeBoss('mossy', {
+  sfx: ['gecko-chomp', 'pillow-bonk'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
+  art: (e, o) => ({ props: ['bamboo-cage'], crickets: { [o.cricket || 'rin']: ['idle', 'listen'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   // [polish-V] the arena camera frames him only while he can be seen (it must not give a hiding place
   // away), and for a first look as the fight starts
@@ -151,7 +154,7 @@ export default makeBoss('mossy', {
       const cx = b.cage.x, cy = b.cage.y;
       c.save(); c.strokeStyle = 'rgba(90,70,50,0.8)'; c.lineWidth = 2; c.beginPath(); c.moveTo(cx, 40); c.lineTo(cx, cy - 64); c.stroke(); c.restore();
       if (!b.done) renderer.drawCricketAt(c, b.cricket || 'rin', cx, cy - 6, -1, { look: Math.floor(t / 90) % 2 ? 'listen' : 'idle', t, scale: 0.8 });
-      const img = S.get('props/bamboo-cage.png');
+      const img = S.get('props/bamboo-cage.webp');
       if (img) {
         const h = 72, w = h * img.width / img.height;
         c.save(); c.translate(cx, cy - 36); c.rotate(Math.sin(t / 50) * 0.04 + (b.done ? 0.5 : 0)); c.globalAlpha = b.done ? 0.85 : 1;

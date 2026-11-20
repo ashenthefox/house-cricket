@@ -17,6 +17,7 @@ import { drawCricket, drawCricketShape } from './cricket-art.js';
 import * as Geckos from './geckos.js'; // [builder B] dozing-gecko decor
 import { paintObject, OBJ_EDGE } from './objpaint.js'; // [polish] object painters
 import { LOOK } from '../data/look/index.js';
+import { noteLive, noteTilt } from './notes.js'; // [issue 9] tutorial notes on the path
 import { rescueCount, shellStage } from './meta.js'; // [final-G] the Carrier's outside grows with its stages      // [polish] render-only per-room look overlay
 
 const VW = 1280, VH = 720;
@@ -29,10 +30,10 @@ export const ITEM_ART = {
   booties: 'tape-booties', floss: 'floss-line', raft: 'bottle-cap-raft', band: 'rubber-band', glider: 'dryer-sheet',
   thimble: 'thimble-helmet', glow: 'glow-bead', earplugs: 'cotton-earplugs', feather: 'swift-feather', cloak: 'cellophane-cloak',
 };
-export const itemArt = (id) => `items/${ITEM_ART[id] || id}.png`;
+export const itemArt = (id) => `items/${ITEM_ART[id] || id}.webp`;
 
 // Near-layer props per bg folder (zone modules may set `near: ['spool', ...]` instead).
-const NEAR = {
+export const NEAR = {
   'z00-tank': ['hide-log', 'water-dish', 'pebble'], 'z01-bedroom': ['sock', 'throw-pillow', 'book-spine'],
   'z02-bathroom': ['sponge', 'soap-dish', 'faucet-handle'], 'z03-kitchen': ['wooden-spoon', 'tongs', 'grape'],
   'z04-pantry': ['spice-rack', 'cork', 'dice'], 'z05-laundry': ['sock', 'spool', 'dryer-vent'],
@@ -67,7 +68,43 @@ export function zoneColors(zone) {
   colCache.set(key, col);
   return col;
 }
-const bgFolder = (zone) => zone?.bg || zone?.id || 'none';
+export const bgFolder = (zone) => zone?.bg || zone?.id || 'none';
+// a room's far painting: { v: 'a' | 'b', mirror, x, y } (see drawBackground)
+export function bgFor(room) {
+  const d = roomLook(room).bg;
+  const h = hash(room.id);
+  const o = { v: h & 1 ? 'b' : 'a', mirror: !!(h & 2), x: ((h >>> 3) % 100) / 100, y: ((h >>> 10) % 100) / 100 };
+  if (typeof d === 'string') o.v = d;
+  else if (d && typeof d === 'object') Object.assign(o, d);
+  return o;
+}
+// [art] The drawing rules room-art.js lists a room's files by (kept here, next to the drawing):
+// terrain swatches a room paints with (screenCanvas repaints as they arrive)
+export function terrainKinds(room) {
+  const d = roomLook(room), out = new Set(['cereal', 'soil']);
+  for (const v of Object.values(d.terrainKinds || {})) out.add(v);
+  for (const p of d.paint || []) if (p.kind) out.add(p.kind);
+  return [...out];
+}
+export const terrainPath = (kind) => `textures/terrain-${kind}.webp`;
+// near-layer silhouettes (drawNear). Room data: near: [{ prop, x: tiles, scale: 3..5, flip }] or
+// near: false; default: two props per screen from the zone's `near` list (or NEAR).
+export function nearList(room) {
+  const d = roomLook(room);
+  if (d.near === false || room.dark) return [];
+  if (d.near) return d.near;
+  const props = room.zone?.near || NEAR[bgFolder(room.zone)] || [];
+  if (!props.length) return [];
+  const rnd = seeded(room.id + ':near'), list = [];
+  for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
+  return list;
+}
+// a prop name ('spool') or any assets path ('carrier/lamp.webp') -> its file
+export const propPath = (prop) => (prop.includes('/') ? prop : `props/${prop}.webp`);
+// a hiding spot's art: entity art ('sock', a path, or 'none'); default the hide log, small spots none
+export const hideArtOf = (e, small = e?.type === 'hideSmall' || !!e?.small) => e?.art || (small ? null : 'hide-log');
+// an enemy's frames (drawEnemies): 0 and 1 walk, 2 flipped
+export const enemyFrames = (sprite) => [0, 1, 2].map((f) => `${sprite}/${f}.webp`);
 
 // [polish] a room's render-only fields with data/look overlay merged in (memoised per room def).
 // Overlay paint regions come first (the first region that holds a tile wins); decor is appended.
@@ -121,22 +158,44 @@ export class Renderer {
     this.fx.touch = coarse;
   }
 
-  // ---- per-zone art: load the current zone's, release the last one's, preload neighbours ----
+  // ---- per-zone caches. [art] Loading, holding and releasing the art is src/room-art.js's job
+  // (main.js runs it on every room change): each room's art, its neighbours' in the background.
   syncZone(game) {
     const folder = bgFolder(game.zone);
     if (folder === this.zoneKey) return;
     this.zoneKey = folder;
-    S.setZone([`bg/${folder}/`, `textures/${folder}.webp`]);
     this.nearCache.clear();
-    S.preload([S.bgPath(folder, 'a'), S.bgPath(folder, 'b'), `textures/${folder}.webp`].filter(Boolean));
-    // the next zone preloads at its exit: any zone whose rooms border this room
-    try {
-      const w = game.world, r = game.room;
-      for (let y = r.cy - 1; y <= r.cy + r.sh; y++) for (let x = r.cx - 1; x <= r.cx + r.sw; x++) {
-        const nb = w.cells?.get?.(`${x},${y}`); const z = nb && (nb.zone || w.rooms?.[nb]?.zone);
-        if (z && bgFolder(z) !== folder) S.preload([S.bgPath(bgFolder(z), 'a')].filter(Boolean));
-      }
-    } catch { /* world without cells map */ }
+  }
+
+  // [issue 16] a held transition: the frame before the room change (snapshot(), taken before the
+  // held room is drawn), dimming under the transition's ink (alpha < 1: it never reads as a flat
+  // cover). Without a snapshot: the ink.
+  snapshot() {
+    const cv = this.canvas;
+    if (!this.snap) this.snap = document.createElement('canvas');
+    if (this.snap.width !== cv.width || this.snap.height !== cv.height) { this.snap.width = cv.width; this.snap.height = cv.height; }
+    const g = this.snap.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(cv, 0, 0);
+    this.snapOk = true;
+  }
+  dropSnapshot() { this.snapOk = false; }
+  drawHeld(alpha, ink) {
+    if (!this.snapOk) { this.drawCover(1, '', ink); return; }
+    const c = this.ctx;
+    c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(this.snap, 0, 0);
+    this.drawCover(alpha, '', ink);
+  }
+  // [art] the cover while a room's art loads (src/room-art.js): ink, then "Loading" if it lasts.
+  // ink 'wipe': a door / edge wipe held on its first frame (drawTransition's ink, opaque)
+  drawCover(alpha, label, ink) {
+    if (alpha <= 0) return;
+    const c = this.ctx;
+    c.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    c.fillStyle = `rgba(${ink === 'wipe' ? '42,32,26' : '20,16,14'},${Math.min(1, alpha)})`; c.fillRect(0, 0, VW, VH * 2); // [final-G] a wide phone's view is taller than VH
+    if (!label) return;
+    c.save(); c.globalAlpha = Math.min(1, alpha);
+    c.fillStyle = 'rgba(244,235,221,0.8)'; c.font = '28px "Patrick Hand", sans-serif'; c.textAlign = 'center';
+    c.fillText(label, VW / 2, VH / 2);
+    c.restore();
   }
 
   // ---- platform painter (cached per screen) ----
@@ -163,14 +222,8 @@ export class Renderer {
   terrainReady(game) {
     // repaint once terrain swatches arrive
     let n = 0;
-    for (const k of ['cereal', 'soil', ...(this.extraKinds(game))]) if (S.get(`textures/terrain-${k}.webp`)) n++;
+    for (const k of terrainKinds(game.room)) if (S.get(terrainPath(k))) n++;
     return n;
-  }
-  extraKinds(game) {
-    const d = roomLook(game.room), out = new Set();
-    for (const v of Object.values(d.terrainKinds || {})) out.add(v);
-    for (const p of d.paint || []) if (p.kind) out.add(p.kind);
-    return [...out];
   }
 
   // which paint class a tile belongs to (null = not solid)
@@ -459,14 +512,7 @@ export class Renderer {
   // ---- background: far painting per room ----
   // Room data (optional): bg: { v: 'a' | 'b', mirror: bool, x: 0..1, y: 0..1 } (x/y = where the
   // view sits in the painting). Default: a deterministic hash of the room id.
-  bgFor(room) {
-    const d = roomLook(room).bg;
-    const h = hash(room.id);
-    const o = { v: h & 1 ? 'b' : 'a', mirror: !!(h & 2), x: ((h >>> 3) % 100) / 100, y: ((h >>> 10) % 100) / 100 };
-    if (typeof d === 'string') o.v = d;
-    else if (d && typeof d === 'object') Object.assign(o, d);
-    return o;
-  }
+  bgFor(room) { return bgFor(room); }
   drawBackground(c, game, cam) {
     const zone = game.zone, col = zoneColors(zone), room = game.room;
     const folder = roomLook(room).bg?.folder || bgFolder(zone); // [builder A] a room may borrow another zone's painting (Duchess's tank)
@@ -538,7 +584,7 @@ export class Renderer {
   nearSilhouette(prop, col) {
     const key = prop;
     if (this.nearCache.has(key)) return this.nearCache.get(key);
-    const img = S.get(`props/${prop}.png`);
+    const img = S.get(`props/${prop}.webp`);
     if (!img) return null;
     // blur by downscale then upscale (cheap and works where ctx.filter doesn't)
     // padded so the blur fades out instead of being cut at the canvas edge
@@ -563,14 +609,8 @@ export class Renderer {
     const room = game.room, d = roomLook(room);
     if (d.near === false || room.dark) return;
     const col = zoneColors(game.zone);
-    let list = d.near;
-    if (!list) {
-      const props = game.zone?.near || NEAR[bgFolder(game.zone)] || [];
-      if (!props.length) return;
-      const rnd = seeded(room.id + ':near');
-      list = [];
-      for (let i = 0; i < room.sw * 2; i++) list.push({ prop: props[Math.floor(rnd() * props.length)], x: (i + 0.2 + rnd() * 0.6) * (room.tw / (room.sw * 2)), scale: 3 + rnd() * 2, flip: rnd() < 0.5 });
-    }
+    const list = nearList(room);
+    if (!list.length) return;
     const z = cam.zoom;
     for (const n of list) {
       const sil = this.nearSilhouette(n.prop, col);
@@ -591,7 +631,7 @@ export class Renderer {
   draw(game, view = {}) {
     const c = this.ctx;
     const t0 = performance.now();
-    this.t++;
+    this.t++; this.view = view; // [issue 9] view.tipRead: whether a note has been read (main.js)
     c.setTransform(this.scale, 0, 0, this.scale, 0, 0);
     if (!game.room) { c.fillStyle = PAPER; c.fillRect(0, 0, VW, VH); return; }
     const cam = game.camera, room = game.room;
@@ -619,9 +659,11 @@ export class Renderer {
     this.drawEnemies(c, game);
     if (this.drawMech) this.drawMech(c, game, this.t); // [mech] lifts, springs, gates, levers, keys, projectiles (src/mech-draw.js, set by main.js)
     if (game.boss?.draw) game.boss.draw(c, this);
+    if (game.boss?.notesOver) for (const sg of game.signs || []) if (noteLive(game, sg)) this.drawNote(c, game, sg); // [issue 9] over a set piece drawn on the floor (the feeder cup)
     this.drawPlayer(c, game);
     this.drawDecor(c, game, 'front');
     this.fx.draw(c);
+    if (view.glint) this.drawGlint(c, view.glint); // [issue 10] the ear guide's doorway
     if (this.debug) this.drawDebug(c, game);
     c.restore();
     this.drawNear(c, game, cam);
@@ -629,8 +671,23 @@ export class Renderer {
     if (room.dark) { if (game.boss?.drawDark) game.boss.drawDark(c, this, game); else this.drawDark(c, game); }
     if (game.boss?.drawOver) game.boss.drawOver(c, this, game);
     this.fx.drawScreen(c, game, VW, VH * (cam.hFrac || 1)); // [final-G] the view's real height (a wide phone)
-    this.drawTransition(c, game);
+    if (!view.held) this.drawTransition(c, game); // [issue 16] held: main.js draws the held transition over this frame
     this.perf.frame = performance.now() - t0;
+  }
+
+  // [issue 10] A small pulsing glint at the doorway the ear guide aims at (room coordinates; main.js only
+  // passes one while the ear is out), so the ear reads as "go there".
+  drawGlint(c, g) {
+    const k = 0.5 + 0.5 * Math.sin(this.t / 9), r = 9 + 5 * k;
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    const gr = c.createRadialGradient(g.x, g.y, 0, g.x, g.y, r * 2.4);
+    gr.addColorStop(0, `rgba(255,236,180,${(0.55 + 0.35 * k).toFixed(2)})`); gr.addColorStop(0.35, `rgba(232,184,90,${(0.3 + 0.2 * k).toFixed(2)})`); gr.addColorStop(1, 'rgba(232,184,90,0)');
+    c.fillStyle = gr; c.beginPath(); c.arc(g.x, g.y, r * 2.4, 0, 7); c.fill();
+    c.strokeStyle = `rgba(255,244,214,${(0.6 + 0.4 * k).toFixed(2)})`; c.lineWidth = 2.5; c.lineCap = 'round';
+    const s = r * 1.1; // a four-point sparkle
+    c.beginPath(); c.moveTo(g.x - s, g.y); c.lineTo(g.x + s, g.y); c.moveTo(g.x, g.y - s); c.lineTo(g.x, g.y + s); c.stroke();
+    c.restore();
   }
 
   // [final-G] on touch the camera may look past the room's floor (so the cricket stays above the thumbs) or
@@ -749,7 +806,7 @@ export class Renderer {
   // Room data: decor: [{ prop: 'spool', x, y, h?: tiles tall (default: 1.5), flip?, rot?, alpha?,
   //   layer?: 'back' (default, behind platforms) | 'mid' (in front of platforms, behind actors)
   //   | 'front' (in front of the cricket) }]. x = centre column, y = the row it stands in.
-  // `prop` may be any assets path ('carrier/lamp.png') or a props/ name.
+  // `prop` may be any assets path ('carrier/lamp.webp') or a props/ name.
   drawDecor(c, game, layer) {
     const list = roomLook(game.room).decor;
     if (!list.length) return;
@@ -767,7 +824,7 @@ export class Renderer {
   drawCarrierGrowth(c, game, d) {
     let stage = 0; try { stage = shellStage(rescueCount(game)); } catch { /* no meta */ }
     if (!stage) return;
-    const img = S.get('props/carrier-keeper.png'); if (!img) return;
+    const img = S.get('props/carrier-keeper.webp'); if (!img) return;
     const h = (d.h || 1.5) * TILE, w = h * img.width / img.height, X = (d.x + 0.5) * TILE - w / 2, Y = (d.y + 1) * TILE - h;
     const P = (ix, iy) => [X + ix * w / 640, Y + iy * h / 440], S1 = w / 640;
     const t = this.t;
@@ -839,8 +896,7 @@ export class Renderer {
     }
   }
   drawProp(c, prop, x, y, h, o = {}) {
-    const path = prop.includes('/') ? prop : `props/${prop}.png`;
-    const img = S.get(path);
+    const img = S.get(propPath(prop));
     if (!img) return false;
     const w = h * img.width / img.height;
     c.save(); c.translate(x, y);
@@ -852,10 +908,10 @@ export class Renderer {
     return true;
   }
 
-  // hiding-spot art: entity { type: 'hide', x, y, w, art?: 'sock' | 'props/x.png' | 'none' }
+  // hiding-spot art: entity { type: 'hide', x, y, w, art?: 'sock' | 'props/x.webp' | 'none' }
   hideArt(game, s) {
     const e = game.room.entities.find((en) => (en.type === 'hide' || en.type === 'hideSmall') && en.x * TILE === s.x);
-    return e?.art || (s.small ? null : 'hide-log');
+    return hideArtOf(e, s.small);
   }
   drawHideSpot(c, game, s, front) {
     const art = this.hideArt(game, s);
@@ -884,12 +940,12 @@ export class Renderer {
     this.drawDecor(c, game, 'mid');
     for (const b of game.beacons || []) {
       for (let i = 0; i < 3; i++) { const r = ((t * 0.6 + i * 12) % 36) + 4; c.strokeStyle = `rgba(244,235,221,${0.6 - r / 70})`; c.lineWidth = 2; c.beginPath(); c.arc(b.x, b.y, r, 0, 7); c.stroke(); }
-      const img = S.get('props/sound-hole.png');
+      const img = S.get('props/sound-hole.webp');
       if (img) c.drawImage(img, b.x - 16, b.y - 16, 32, 32 * img.height / img.width);
       else { c.fillStyle = '#26303D'; c.beginPath(); c.ellipse(b.x, b.y, 7, 5, 0, 0, 7); c.fill(); }
     }
     for (const s of game.saves || []) {
-      const img = S.get('props/save-crack.png');
+      const img = S.get('props/save-crack.webp');
       c.fillStyle = `rgba(242,196,109,${0.25 + 0.15 * Math.sin(t / 20)})`; c.beginPath(); c.ellipse(s.x + 20, s.y + TILE - 14, 22, 26, 0, 0, 7); c.fill();
       if (img) { const h = 52, w = h * img.width / img.height; c.drawImage(img, s.x + 20 - w / 2, s.y + TILE - h + 4, w, h); continue; }
       c.fillStyle = '#1E1612'; c.beginPath(); c.moveTo(s.x + 14, s.y + TILE); c.lineTo(s.x + 18, s.y + 4); c.lineTo(s.x + 24, s.y + 10); c.lineTo(s.x + 27, s.y + TILE); c.fill();
@@ -901,16 +957,11 @@ export class Renderer {
       c.fillStyle = ck.on ? '#F2C46D' : 'rgba(244,235,221,0.7)'; c.strokeStyle = 'rgba(90,70,50,0.6)'; c.lineWidth = 1;
       c.beginPath(); c.moveTo(x, y - 30); c.quadraticCurveTo(x + 8, y - 28 + wv, x + 15, y - 25 + wv); c.lineTo(x, y - 20); c.closePath(); c.fill(); c.stroke();
     }
-    for (const sg of game.signs || []) {
-      const x = sg.x + 10, y = sg.y + TILE;
-      c.fillStyle = '#7A5636'; c.fillRect(x + 8, y - 6, 4, 26);
-      c.fillStyle = '#C9A57A'; c.strokeStyle = INK; c.lineWidth = 1.5; c.beginPath(); c.roundRect(x, y - 12, 22, 14, 2); c.fill(); c.stroke();
-      c.strokeStyle = 'rgba(90,70,50,0.6)'; c.beginPath(); c.moveTo(x + 4, y - 7); c.lineTo(x + 18, y - 7); c.moveTo(x + 4, y - 3); c.lineTo(x + 14, y - 3); c.stroke();
-    }
+    if (!game.boss?.notesOver) for (const sg of game.signs || []) if (noteLive(game, sg)) this.drawNote(c, game, sg); // [issue 9] notes on the path (was a signpost)
     for (const h of game.hooks || []) {
       const near = p.has('floss') && Math.hypot(h.x - p.cx, h.y - p.cy) < TILE * 2;
       if (near) { c.fillStyle = 'rgba(242,196,109,0.35)'; c.beginPath(); c.arc(h.x, h.y, 16 + Math.sin(t / 6) * 2, 0, 7); c.fill(); }
-      const img = S.get('props/hook.png');
+      const img = S.get('props/hook.webp');
       // the art is a screw-in cup hook (screw on the left); the hook's curve sits at the hook point
       if (img) { const w = 46, hh = w * img.height / img.width; c.drawImage(img, h.x - w * 0.62, h.y - hh * 0.62, w, hh); continue; }
       c.fillStyle = '#7A5636'; c.fillRect(h.x - 3, h.y - 14, 6, 8);
@@ -939,10 +990,45 @@ export class Renderer {
     for (const d of game.doors || []) { c.fillStyle = '#2A1E16'; c.beginPath(); c.roundRect(d.x + 6, d.y + 10, TILE - 12, 2 * TILE - 10, [12, 12, 0, 0]); c.fill(); }
   }
 
+  // [issue 9] A tip's note: a small paper card propped up off the ground (a corner lifted, leaning on
+  // a pin), an ink "!" scribble, a dark outline and a contact shadow; its tilt comes from its position.
+  // Unread, a soft glint pulses on it; read, it stays still. A script note flutters down as it appears.
+  drawNote(c, game, sg) {
+    const read = this.view?.tipRead ? this.view.tipRead(sg) : false, t = this.t;
+    const w = this.fx.touch ? 30 : 24, h = 14, { tilt, flip } = noteTilt(sg);
+    let x = sg.nx, y = sg.ny, rot = tilt + flip * 0.1, lift = 5, shadow = 1;
+    const age = sg.born != null ? game.frame - sg.born : 1e9;
+    if (age < 45) { const k = 1 - age / 45; y -= k * k * 3 * TILE; x += Math.sin(age / 4) * 10 * k; rot += Math.sin(age / 5) * 0.9 * k; lift += 6 * k; shadow = 1 - k; }
+    c.save();
+    c.fillStyle = `rgba(20,14,10,${(0.45 * shadow).toFixed(2)})`; c.beginPath(); c.ellipse(sg.nx, sg.ny - 1, w * 0.66, 3.5, 0, 0, 7); c.fill();
+    if (!read && age >= 45) { // the unread glint
+      const k = 0.5 + 0.5 * Math.sin(t / 14 + sg.tx), r = w * (1.1 + 0.15 * k);
+      c.globalCompositeOperation = 'lighter';
+      const gr = c.createRadialGradient(x, y - h * 0.7, 0, x, y - h * 0.7, r);
+      gr.addColorStop(0, `rgba(255,236,180,${(0.22 + 0.2 * k).toFixed(2)})`); gr.addColorStop(1, 'rgba(232,184,90,0)');
+      c.fillStyle = gr; c.beginPath(); c.arc(x, y - h * 0.7, r, 0, 7); c.fill();
+      c.globalCompositeOperation = 'source-over';
+    }
+    c.translate(x, y); c.rotate(rot * 0.5);
+    // the pin it leans on (behind the paper): from its back to the ground
+    c.strokeStyle = INK; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-flip * w * 0.15, -h * 0.8); c.lineTo(-flip * (w * 0.15 + 7), 0); c.stroke();
+    // the paper: the bottom edge on the ground, one corner lifted, leaning back a little (a quad)
+    const L = -w / 2, R = w / 2, liftL = flip > 0 ? 0 : lift, liftR = flip > 0 ? lift : 0, lean = flip * 3;
+    c.beginPath(); c.moveTo(L, -liftL); c.lineTo(R, -liftR); c.lineTo(R + lean, -h - liftR); c.lineTo(L + lean, -h - liftL); c.closePath();
+    c.fillStyle = '#F2D98E'; c.fill(); c.strokeStyle = '#2A201A'; c.lineWidth = 2; c.lineJoin = 'round'; c.stroke(); // a yellowed card: reads on cream, sand, tile and wood
+    // the lifted corner's fold (a darker triangle) and the ink "!"
+    const fx = flip > 0 ? R : L, fy = flip > 0 ? -liftR : -liftL;
+    c.fillStyle = '#C9A85E'; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx - flip * 5, fy); c.lineTo(fx + lean * 0.3, fy - 5); c.closePath(); c.fill(); c.stroke();
+    const mx = lean / 2, my = -h / 2 - (liftL + liftR) / 2;
+    c.strokeStyle = '#2A1A10'; c.lineWidth = 2.8; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(mx + 0.8, my - 4.5); c.quadraticCurveTo(mx + 0.4, my - 1, mx - 0.3, my + 1.5); c.stroke();
+    c.beginPath(); c.arc(mx - 0.5, my + 4.6, 1.5, 0, 7); c.fillStyle = '#2A1A10'; c.fill();
+    c.restore();
+  }
   drawCage(c, it, game) {
     const x = it.x, y = it.y, w = it.w, h = it.h;
     drawCricket(c, it.cricket, x + w / 2, y + h - 6, -1, { look: Math.floor(this.t / 200) % 2 ? 'listen' : 'idle', t: this.t, scale: 0.8 });
-    const img = S.get('props/bamboo-cage.png');
+    const img = S.get('props/bamboo-cage.webp');
     if (img) { const ch = h + 12, cw = ch * img.width / img.height; c.drawImage(img, x + w / 2 - cw / 2, y + h - ch + 4, cw, ch); return; }
     c.strokeStyle = '#8C8F99'; c.lineWidth = 2;
     for (let i = 0; i <= 6; i++) { c.beginPath(); c.moveTo(x + (i * w) / 6, y + 6); c.lineTo(x + (i * w) / 6, y + h); c.stroke(); }
@@ -950,7 +1036,7 @@ export class Renderer {
     void game;
   }
 
-  // ---- enemies: 2-frame walk (0.png, 1.png), the flipped frame (2.png) when bonked ----
+  // ---- enemies: 2-frame walk (0.webp, 1.webp), the flipped frame (2.webp) when bonked ----
   drawEnemies(c, game) {
     for (const e of game.enemies || []) {
       if (e.state === 'gone') continue;
@@ -961,10 +1047,10 @@ export class Renderer {
       const flipped = e.state === 'flipped';
       const rate = e.state === 'scurry' ? 4 : e.stun > 0 ? 9999 : (e.T.frameRate || 9);
       const fr = Math.floor(e.t / rate) % 2;
-      const dir = e.T.sprite;
+      const art = enemyFrames(e.T.sprite);
       let img = null, upside = false;
-      if (flipped) { img = S.get(`${dir}/2.png`); if (!img) { img = S.get(`${dir}/0.png`); upside = !!img; } }
-      else img = S.get(`${dir}/${fr}.png`) || S.get(`${dir}/0.png`);
+      if (flipped) { img = S.get(art[2]); if (!img) { img = S.get(art[0]); upside = !!img; } }
+      else img = S.get(art[fr]) || S.get(art[0]);
       if (e.dir > 0) c.scale(-1, 1); // sprites face LEFT
       if (upside || (flipped && !img)) { c.translate(0, -e.h / 2); c.scale(1, -1); c.translate(0, e.h / 2); }
       if (img) {
@@ -995,7 +1081,7 @@ export class Renderer {
   // ---- NPCs (Not-Crickets, recruits): idle / talk flap ----
   // drawNPC(ctx, 'peeper', x, feetY, { talking, h: px tall (default 46), facing: 1|-1, t })
   drawNPC(c, name, x, y, o = {}) {
-    const img = S.get(npcFrame(name, o.talking, o.t ?? this.t)) || S.get(`sprites/npcs/${name}.png`);
+    const img = S.get(npcFrame(name, o.talking, o.t ?? this.t)) || S.get(`sprites/npcs/${name}.webp`);
     if (!img) return false;
     const h = o.h || 46, w = h * img.width / img.height;
     const bob = Math.abs(Math.sin(((o.t ?? this.t) + hash(name) % 100) / 9)) * (o.bob ?? 2);
@@ -1091,6 +1177,14 @@ export class Renderer {
       const gg = c.createRadialGradient(bx, by, 2, bx, by, 50); gg.addColorStop(0, 'rgba(244,235,221,0.5)'); gg.addColorStop(1, 'rgba(244,235,221,0)');
       c.fillStyle = gg; c.beginPath(); c.arc(bx, by, 50, 0, 7); c.fill();
     }
+    // [issue 9] an unread note's glint shows through the dark too (smaller and warmer than a beacon's)
+    for (const sg of game.signs || []) {
+      if (!noteLive(game, sg) || this.view?.tipRead?.(sg)) continue;
+      const bx = (sg.nx - cam.x) * cam.zoom, by = (sg.ny - 8 - cam.y) * cam.zoom, k = 0.5 + 0.5 * Math.sin(this.t / 14 + sg.tx), rr = (26 + 6 * k) * cam.zoom;
+      if (bx < -60 || bx > VW + 60 || by < -60 || by > VH + 60) continue;
+      const gg = c.createRadialGradient(bx, by, 1, bx, by, rr); gg.addColorStop(0, `rgba(255,236,180,${(0.45 + 0.25 * k).toFixed(2)})`); gg.addColorStop(0.3, `rgba(232,184,90,${(0.2 + 0.1 * k).toFixed(2)})`); gg.addColorStop(1, 'rgba(232,184,90,0)');
+      c.fillStyle = gg; c.beginPath(); c.arc(bx, by, rr, 0, 7); c.fill();
+    }
     if (p.has('glow')) { const gl = c.createRadialGradient(sx, sy, 4, sx, sy, r * 0.7); gl.addColorStop(0, 'rgba(207,242,122,0.10)'); gl.addColorStop(1, 'rgba(207,242,122,0)'); c.fillStyle = gl; c.beginPath(); c.arc(sx, sy, r * 0.7, 0, 7); c.fill(); }
   }
 
@@ -1126,8 +1220,8 @@ export class Renderer {
 // For DOM dialog portraits too: <img src="assets/` + npcFrame(name, talking, frame) + `">.
 export function npcFrame(name, talking, t = 0) {
   const flap = talking && Math.floor(t / 8) % 2;
-  const talk = `sprites/npcs/${name}-talk.png`;
-  return flap && S.exists(talk) ? talk : `sprites/npcs/${name}.png`;
+  const talk = `sprites/npcs/${name}-talk.webp`;
+  return flap && S.exists(talk) ? talk : `sprites/npcs/${name}.webp`;
 }
 
 // [polish] a soft, slightly wobbly rounded box (screen-local px) and its top edge (for the rim)

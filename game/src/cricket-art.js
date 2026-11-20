@@ -45,6 +45,30 @@ function fitOf(id, key) {
   return a?.fit || 1;
 }
 
+// [art] the files drawing `looks` can use (resolveLook's search, every frame), plus anchors and
+// fit: what room-art.js loads before a room with this cricket shows
+export function lookFiles(id, looks) {
+  const base = `sprites/crickets/${id}`, out = new Set([`${base}/anchors.json`, `${base}/poses/fit.json`]);
+  for (const look of looks) {
+    if (look === 'glide') out.add('items/dryer-sheet.webp'); // the sheet over a glider
+    let want = look || 'idle', guard = 0;
+    while (want && guard++ < 6) {
+      if (ANIMS.includes(want)) {
+        const fr = S.frames(`${base}/anim/${want}`);
+        if (fr.length) { fr.forEach((f) => out.add(f)); break; }
+        if (want === 'run') ['run-a', 'run-b'].forEach((k) => S.exists(`${base}/poses/${k}.webp`) && out.add(`${base}/poses/${k}.webp`));
+      }
+      if (want === 'base') { out.add(`${base}/base.webp`); break; }
+      const p = `${base}/poses/${want}.webp`;
+      if (S.exists(p)) { out.add(p); break; }
+      want = FALLBACK[want];
+    }
+  }
+  return [...out];
+}
+// every look a cricket can be drawn in
+export const LOOKS = [...ANIMS, 'leap', 'cling', 'hang', 'glide', 'pound', 'listen', 'dig', 'run-a', 'run-b', 'crouch', 'base'];
+
 // -> { img, key, idx, path } or null
 export function resolveLook(id, look, t = 0, frame) {
   const base = `sprites/crickets/${id}`;
@@ -58,10 +82,10 @@ export function resolveLook(id, look, t = 0, frame) {
         if (img) return { img, key: want, idx, path: fr[idx] };
         if (S.exists(fr[idx])) return null; // still loading: draw nothing rather than flicker shapes
       }
-      if (want === 'run') { const k = Math.floor(t / 6) % 2 ? 'run-a' : 'run-b'; const p = `${base}/poses/${k}.png`; const img = S.get(p); if (img) return { img, key: k, idx: 0, path: p }; }
+      if (want === 'run') { const k = Math.floor(t / 6) % 2 ? 'run-a' : 'run-b'; const p = `${base}/poses/${k}.webp`; const img = S.get(p); if (img) return { img, key: k, idx: 0, path: p }; }
     }
-    if (want === 'base') { const p = `${base}/base.png`; const img = S.get(p); return img ? { img, key: 'base', idx: 0, path: p } : null; }
-    const p = `${base}/poses/${want}.png`;
+    if (want === 'base') { const p = `${base}/base.webp`; const img = S.get(p); return img ? { img, key: 'base', idx: 0, path: p } : null; }
+    const p = `${base}/poses/${want}.webp`;
     if (S.exists(p)) { const img = S.get(p); return img ? { img, key: want, idx: 0, path: p } : null; }
     want = FALLBACK[want];
   }
@@ -125,9 +149,9 @@ export function drawCricket(c, id, x, y, facing = 1, o = {}) {
   c.restore();
 }
 
-// the Dryer-Sheet Glider held overhead (items/dryer-sheet.png, or a code sheet)
+// the Dryer-Sheet Glider held overhead (items/dryer-sheet.webp, or a code sheet)
 function drawSheet(c, a, t, k) {
-  const img = S.get('items/dryer-sheet.png');
+  const img = S.get('items/dryer-sheet.webp');
   const w = 88 * k, h = w * 0.8; // ~70 world px wide (k: world px -> canvas px)
   c.save();
   c.translate(a.head[0] - 70, a.head[1] - 22);

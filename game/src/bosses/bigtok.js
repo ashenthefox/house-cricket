@@ -15,24 +15,27 @@ import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as S from '../sprites.js';
 import * as Geckos from '../geckos.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const LEN = 560;                                   // drawn height (tall rig), px
-const HOME = { x: 31 * T, y: 18.5 * T };            // body centre on the backsplash
+const HOME = constant({ x: 31 * T, y: 18.5 * T });            // body centre on the backsplash
 const COUNTER = 30 * T, BASIN = [24 * T, 38 * T];
-const SHELF = [0, 26 * T, 18 * T, 10 * T];         // phase goals: ledge 1, ledge 2, the top
+const SHELF = constant([0, 26 * T, 18 * T, 10 * T]);         // phase goals: ledge 1, ledge 2, the top
 const STUCK = 5 * FPS, WAVE = 9 * T;
-const EVERY = [0, 4.5, 4, 3.5].map((s) => Math.round(s * FPS));
-const DECOYS = [
+const EVERY = constant([0, 4.5, 4, 3.5].map((s) => Math.round(s * FPS)));
+const DECOYS = constant([
   null,
   { kind: 'cork', x: 39.5 * T, y: COUNTER, h: 0.9 * T },
   { kind: 'wooden-spoon', x: 9 * T, y: SHELF[1], h: 0.55 * T },
   { kind: 'sponge', x: 9 * T, y: SHELF[2], h: 0.9 * T },
-];
-const JAR = { x: 3.6 * T, y: SHELF[3] };
+]);
+const JAR = constant({ x: 3.6 * T, y: SHELF[3] });
 const reach = (p) => p.cx > 10 * T && p.cx < 52 * T;
 
 export default makeBoss('bigtok', { postLines: true, // [playtest] base.rescue() emits geckos.<name>.post
+  sfx: ['bigtok-bellow', 'gecko-chomp', 'gecko-growl', 'raft-splash'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
+  art: () => ({ props: DECOYS.filter(Boolean).map((d) => d.kind), crickets: { duo: ['idle'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
  
   phases: 3, len: LEN,
   // [polish-V] the arena camera frames his head and shoulders (where he is drawn round his HOME)
@@ -134,7 +137,7 @@ export default makeBoss('bigtok', { postLines: true, // [playtest] base.rescue()
     // the decoy
     const d = b.decoy;
     if (d && d.state !== 'gone' && d.state !== 'chewed') {
-      const im = S.get(`props/${d.kind}.png`);
+      const im = S.get(`props/${d.kind}.webp`);
       if (im) { const h = d.h, w = h * im.width / im.height; c.save(); c.translate(d.x, d.y - h / 2); c.rotate(d.rot); c.drawImage(im, -w / 2, -h / 2, w, h); c.restore(); }
       if (d.state === 'sit' && Math.floor((r?.t || 0) / 20) % 2) { c.save(); c.strokeStyle = '#F2C46D'; c.lineWidth = 3; c.beginPath(); c.arc(d.x, d.y - d.h / 2, 26, 0, 7); c.stroke(); c.restore(); }
     }

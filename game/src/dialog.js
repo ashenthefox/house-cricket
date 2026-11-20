@@ -4,9 +4,9 @@
 //
 //   dialog.open(lines, {id, onDone})
 //   lines: [{who, text}] or [[who, text]] or strings ('narrator' lines). `who` is a cricket id,
-//   an npc id (sprites/npcs/<id>.png + <id>-talk.png flap), a gecko id (sprites/geckos/<id>/),
+//   an npc id (sprites/npcs/<id>.webp + <id>-talk.webp flap), a gecko id (sprites/geckos/<id>/),
 //   or null. `*slurp*` (any *word*) is a beat: shown in italics with a short pause; for Lashes
-//   the portrait licks its eye (lick.png) during the beat.
+//   the portrait licks its eye (lick.webp) during the beat.
 import { CRICKETS } from '../data/crickets.js';
 import * as S from './sprites.js';
 import { line } from './lines.js';
@@ -21,13 +21,13 @@ const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) 
 
 export function speakerInfo(who) {
   if (!who) return { name: '', base: null, talk: null, kind: 'none' };
-  if (CRICKETS[who]) return { name: CRICKETS[who].name, base: `sprites/crickets/${who}/portrait.png`, talk: null, kind: 'cricket' };
+  if (CRICKETS[who]) return { name: CRICKETS[who].name, base: `sprites/crickets/${who}/portrait.webp`, talk: null, kind: 'cricket' };
   if (GECKOS.includes(who)) {
-    const base = S.exists(`sprites/geckos/${who}/portrait.png`) ? `sprites/geckos/${who}/portrait.png` : `sprites/geckos/${who}/idle.png`; // [polish-V] Big Tok's and Nana's face portraits
-    return { name: line(`geckos.${who}.name`), base, talk: null, lick: S.exists(`sprites/geckos/${who}/lick.png`) ? `sprites/geckos/${who}/lick.png` : null, kind: 'gecko' };
+    const base = S.exists(`sprites/geckos/${who}/portrait.webp`) ? `sprites/geckos/${who}/portrait.webp` : `sprites/geckos/${who}/idle.webp`; // [polish-V] Big Tok's and Nana's face portraits
+    return { name: line(`geckos.${who}.name`), base, talk: null, lick: S.exists(`sprites/geckos/${who}/lick.webp`) ? `sprites/geckos/${who}/lick.webp` : null, kind: 'gecko' };
   }
-  const base = `sprites/npcs/${who}.png`, talk = `sprites/npcs/${who}-talk.png`;
-  if (who === 'barty') return { name: line('npcs.barty.name'), base: 'sprites/npcs/barty-head.png', talk: null, kind: 'npc' };
+  const base = `sprites/npcs/${who}.webp`, talk = `sprites/npcs/${who}-talk.webp`;
+  if (who === 'barty') return { name: line('npcs.barty.name'), base: 'sprites/npcs/barty-head.webp', talk: null, kind: 'npc' };
   if (who === 'kid') return { name: 'The kid', base: null, talk: null, kind: 'none' };
   return { name: line(`npcs.${who}.name`), base: S.exists(base) ? base : null, talk: S.exists(talk) ? talk : null, kind: 'npc' };
 }

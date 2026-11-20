@@ -11,7 +11,7 @@
 //
 // Anchor: wide geckos (side view, tail to the right in the art): (x, y) is the floor point under
 // the middle of the body (nose to tail base). Tall geckos (clinging upright, tail down: bigtok,
-// nana): (x, y) is the centre of the body (without tail). meta.json is in idle.png pixels.
+// nana): (x, y) is the centre of the body (without tail). meta.json is in idle.webp pixels.
 //
 // Drawing (the design's pipeline): the tail is ONE strip bent along a curve and drawn as 4 px
 // slices (1 px overlap) so it bends without gaps; the body covers the 12 px seam overlap; the two
@@ -30,7 +30,7 @@ const SLICE = 4;
 const TUNE = {
   default: { amp: 0.10, walkAmp: 0.22, curl: 1.7, leg: 0.32, breath: 0.012, wig: 0.55 },
   nana:    { amp: 0.04, walkAmp: 0.08, curl: 0.5, wig: 0.35,   // fat curled tail already
-             // [final-G] both eyes in body.png pixels [cx, cy, rx, ry] (near, far) for drowsy lids (rig.lids 0..1)
+             // [final-G] both eyes in body.webp pixels [cx, cy, rx, ry] (near, far) for drowsy lids (rig.lids 0..1)
              eyes: [[375, 170, 74, 66], [152, 78, 46, 50]], lid: '#BE9862' },
   bigtok:  { amp: 0.12, walkAmp: 0.18, curl: 1.2 },
   mossy:   { amp: 0.07, curl: 0.9, pivots: { sleep: [975, 518] } }, // leaf tail: stiffer; meta's sleep pivot missed the stub
@@ -45,11 +45,16 @@ export function setOnTell(fn) { onTell = fn; }
 export const opts = { touch: false };
 
 const base = (n) => `sprites/geckos/${n}`;
+// [art] every picture a rig can draw: body, tail, legs, strike/sleep frames and the extra poses
+// (Kite's glide, Lashes' lick): each .webp in its folder but idle.webp and portrait.webp (dialog
+// portraits, never drawn by the rig). From the asset list, so it doesn't wait on meta.json.
+const filesMemo = new Map();
 export function files(name) {
-  const m = S.getJSON(`${base(name)}/meta.json`);
-  const list = [`${base(name)}/body.png`, `${base(name)}/tail.png`];
-  if (m) { for (const l of m.legs || []) list.push(`${base(name)}/${l.file}`); for (const f of Object.values(m.frames || {})) list.push(`${base(name)}/${f.file}`); }
-  return list;
+  if (!filesMemo.has(name)) {
+    const dir = base(name) + '/';
+    filesMemo.set(name, S.list(dir).filter((f) => f.endsWith('.webp') && !f.includes('/', dir.length) && !/\/(idle|portrait)\.webp$/.test(f)));
+  }
+  return filesMemo.get(name);
 }
 // start loading a gecko's art (call on entering the lair room or earlier); held with the zone
 export function preload(name) { S.getJSON(`${base(name)}/meta.json`); S.preload(files(name)); S.zoneHold(base(name) + '/'); }
@@ -93,7 +98,7 @@ export class GeckoRig {
 
   // art-space anchor (see header)
   anchor() {
-    const m = this.meta, bb = S.bbox(`${this.dir}/body.png`) || { x: 0, y: 0, w: m.size[0], h: m.size[1] };
+    const m = this.meta, bb = S.bbox(`${this.dir}/body.webp`) || { x: 0, y: 0, w: m.size[0], h: m.size[1] };
     if (m.frame === 'tall') return [bb.x + bb.w / 2, bb.y + (m.pivot[1] - bb.y) / 2];
     return [(bb.x + m.pivot[0]) / 2, m.size[1]];
   }
@@ -109,7 +114,7 @@ export class GeckoRig {
   }
   box(x, y, scale, facing) {
     const m = this.meta; if (!m) return { x, y, w: 0, h: 0 };
-    const bb = S.bbox(`${this.dir}/body.png`) || { x: 0, y: 0, w: m.size[0], h: m.size[1] };
+    const bb = S.bbox(`${this.dir}/body.webp`) || { x: 0, y: 0, w: m.size[0], h: m.size[1] };
     const xf = this._xf(x, y, scale, facing);
     const a = xf(bb.x, bb.y), b = xf(m.frame === 'tall' ? bb.x + bb.w : m.pivot[0], m.frame === 'tall' ? m.pivot[1] : bb.y + bb.h);
     return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) };
@@ -117,7 +122,7 @@ export class GeckoRig {
   point(name, x, y, scale, facing) {
     const m = this.meta; if (!m) return { x, y };
     const xf = this._xf(x, y, scale, facing);
-    const bb = S.bbox(`${this.dir}/body.png`) || { x: 0, y: 0, w: m.size[0], h: m.size[1] };
+    const bb = S.bbox(`${this.dir}/body.webp`) || { x: 0, y: 0, w: m.size[0], h: m.size[1] };
     if (name === 'eye') return xf(m.eye[0], m.eye[1]);
     if (name === 'pivot') return xf(m.pivot[0], m.pivot[1]);
     if (name === 'nose') return m.frame === 'tall' ? xf(m.eye[0], bb.y) : xf(bb.x, m.eye[1] + 0.12 * bb.h);
@@ -129,7 +134,7 @@ export class GeckoRig {
   draw(c, x, y, scale = 0.5, facing = -1) {
     if (this.autoTick) this.tick();
     const m = this.meta;
-    const body = S.get(`${this.dir}/body.png`), tail = S.get(`${this.dir}/tail.png`);
+    const body = S.get(`${this.dir}/body.webp`), tail = S.get(`${this.dir}/tail.webp`);
     if (!m || !body || !tail) return false;
     const [ax, ay] = this.anchor();
     const flip = facing === this.artFacing() ? 1 : -1;
@@ -145,7 +150,7 @@ export class GeckoRig {
     const bob = pose === 'walk' ? -Math.abs(Math.sin(this.phase)) * 6 : 0;
     c.translate(-ax, -ay + bob);
 
-    const extra = !['idle', 'walk', 'strike', 'sleep'].includes(pose) ? S.get(`${this.dir}/${pose}.png`) : null;
+    const extra = !['idle', 'walk', 'strike', 'sleep'].includes(pose) ? S.get(`${this.dir}/${pose}.webp`) : null;
     if (extra) {
       c.drawImage(extra, m.size[0] / 2 - extra.width / 2, m.size[1] - extra.height);
     } else {
@@ -167,7 +172,7 @@ export class GeckoRig {
       const k = 1 - this.wiggleT / this.wiggleDur;
       const pop = Math.min(1, k * 6), s = (opts.touch ? 1.5 : 1) / scale * pop;
       // [polish-V] above the head only (never over the eye): clear of the body's top by the splat's size
-      const bbT = (S.bbox(`${this.dir}/body.png`) || { y: 0 }).y;
+      const bbT = (S.bbox(`${this.dir}/body.webp`) || { y: 0 }).y;
       const hx = m.eye[0], hy = Math.min(m.eye[1] - 80 / scale, bbT - 46 * (opts.touch ? 1.5 : 1) / scale);
       tellMarks.at = performance.now();
       c.save(); c.translate(hx, hy); c.scale(s * flip, s);

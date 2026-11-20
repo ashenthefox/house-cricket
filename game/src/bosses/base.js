@@ -29,7 +29,7 @@
 // Deterministic: b.rng is seeded per boss and phase. No DOM in update.
 import { TILE, FPS } from '../../data/movement.js';
 import { LAIRS } from '../../data/house.js';
-import { seeded } from '../world.js';
+import { seeded, constant } from '../world.js';
 import * as Geckos from '../geckos.js';
 
 export const TELL = { normal: 0.8, gentle: 1.2 };
@@ -53,12 +53,13 @@ export class BossBase {
     this.rig = null;
     // [builder C] optional render hooks (render.js): drawDark replaces a dark room's darkness,
     // drawOver paints after it (eyes that shine in the dark, screen-space overlays)
-    if (spec.drawDark) this.drawDark = (c, r, g) => spec.drawDark(this, c, r, g);
-    if (spec.drawOver) this.drawOver = (c, r, g) => spec.drawOver(this, c, r, g);
     // [polish] drawBack: render-only, behind the platforms (after the far painting and back decor)
-    if (spec.drawBack) this.drawBack = (c, r, g) => spec.drawBack(this, c, r, g);
+    // [issue 11] getters below, not closures over `this`: a rewound boss (a copy) draws itself
     this.setPhase(1);
   }
+  get drawDark() { return this.spec.drawDark ? (c, r, g) => this.spec.drawDark(this, c, r, g) : undefined; }
+  get drawOver() { return this.spec.drawOver ? (c, r, g) => this.spec.drawOver(this, c, r, g) : undefined; }
+  get drawBack() { return this.spec.drawBack ? (c, r, g) => this.spec.drawBack(this, c, r, g) : undefined; }
   get tellFrames() { return Math.round((this.game.gentle ? TELL.gentle : this.tellS) * FPS); }
   get telling() { return this.game.frame < this.tellUntil; }
 
@@ -155,5 +156,16 @@ export class BossBase {
 
 // A boss module from a spec (see the top of this file). Register it in bosses/index.js.
 export function makeBoss(name, spec = {}) {
-  return { create(game, e) { return new BossBase(game, e, { name, ...spec }); } };
+  const full = constant({ name, ...spec }); // [issue 11] frozen: shared, never copied, by a rewind
+  return { create(game, e) { return new BossBase(game, e, full); }, art: (e, game) => bossArt(name, spec, e, game), sfx: spec.sfx || [] }; // [issue 14] sfx: src/zone-sfx.js
+}
+// [art] What a fight draws, for src/room-art.js to load before the lair shows:
+//   { gecko: the rig's name or null, props: ['props/ names or paths'], crickets: { id: [looks] } }
+// spec.art(e, { game, cricket }) lists the fight's own props and captives (next to its draw code;
+// cricket: the lair's captive, game: may be null); the rig defaults
+// to the one draw() uses (e.rig, spec.rig, else the boss's name when it is a gecko).
+export function bossArt(name, spec, e, game = null) {
+  const a = spec.art?.(e, { game, cricket: e.cricket || spec.cricket || LAIRS[name]?.cricket || null }) || {};
+  const rig = e.rig || spec.rig || name;
+  return { gecko: a.gecko !== undefined ? a.gecko : (Geckos.NAMES.includes(rig) ? rig : null), props: a.props || [], crickets: a.crickets || {} };
 }

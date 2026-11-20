@@ -22,10 +22,12 @@ export default {
       { obj: 'cardboard', x: 49, y: 10, w: 8, h: 1, color: '#C98A34', tape: false },              // its bottom edge
       { obj: 'fabric', x: 30, y: 9, w: 6, h: 3, color: '#C9A57A', stitch: true },   // rice sack
       { obj: 'fabric', x: 44, y: 10, w: 5, h: 2, color: '#BC9868', stitch: true },  // rice sack
+      { obj: 'fabric', x: 36, y: 11, w: 1, h: 1, color: '#C9A57A', stitch: true },  // a spilled grain bag
       shelf(6, 0, 58, 4, '#8E6440'),                                                // the shelf board overhead
       shelf(15, 12, 48, 1, '#A8794C'),                                              // the low shelf over the sneak
       { obj: 'wood', x: 6, y: 12, w: 4, h: 4, color: '#B58A58', planks: 16 },       // crates: steps up on the left
       { obj: 'wood', x: 10, y: 14, w: 4, h: 2, color: '#9C7046', planks: 16 },
+      { obj: 'wood', x: 4, y: 14, w: 2, h: 2, color: '#9C7046', planks: 16 },        // a step back up from the jar wall
     ],
   },
   'pan-shelves': {
@@ -80,9 +82,11 @@ export default {
       { obj: 'metal', x: 24, y: 14, w: 3, h: 2, color: '#9CA6B4', axis: 'v', bands: 34 }, // a bucket
       { obj: 'metal', x: 5, y: 14, w: 3, h: 2, color: '#8E9AAE', axis: 'v', bands: 34 },  // a bucket
       { obj: 'wood', x: 8, y: 12, w: 3, h: 4, color: '#A2805E', planks: 16 },       // a crate under the sill
+      { obj: 'metal', x: 11, y: 14, w: 2, h: 2, color: '#8E9AAE', axis: 'v', bands: 34 }, // a pail under the sink
       { obj: 'appliance', x: 46, y: 7, w: 5, h: 6, color: '#C9C3CC', panel: false, seams: 2 }, // the water heater
       { obj: 'metal', x: 46, y: 13, w: 5, h: 3, color: '#6F7487', axis: 'v' },      // its legs
       { obj: 'wood', x: 35, y: 12, w: 4, h: 4, color: '#9A8FB0' },                  // the thermostat cubby
+      { obj: 'appliance', x: 39, y: 14, w: 2, h: 2, color: '#7FA6C8', panel: false }, // a detergent jug beside it
     ],
   },
   'laun-dryer': {
@@ -107,14 +111,19 @@ export default {
     paint: [
       { obj: 'wood', x: 14, y: 13, w: 5, h: 3, color: '#C9A46A', grain: 'v' },      // a laundry basket
       { obj: 'cardboard', x: 30, y: 13, w: 3, h: 3, color: '#C49A66', tape: true }, // a box
+      { obj: 'fabric', x: 19, y: 15, w: 1, h: 1, color: '#B7A6D3', pattern: 'dots', accent: '#F4EBDD' }, // a sock
+      { obj: 'fabric', x: 33, y: 15, w: 1, h: 1, color: '#E8B4A8', pattern: 'stripe', accent: '#F4EBDD' }, // a sock
     ],
   },
   'laun-shelf': {
     paint: [
       shelf(1, 3, 11, 1, '#A2805E'),                                                // the top shelf
-      { obj: 'wood', x: 1, y: 1, w: 1, h: 15, color: '#D8D0DC', grain: 'v' },       // painted shelf uprights
+      shelf(1, 11, 3, 1, '#A2805E'),                                                // the short shelf over the doorway (issue #19)
+      { obj: 'wood', x: 1, y: 1, w: 1, h: 10, color: '#D8D0DC', grain: 'v' },       // painted shelf uprights (the left one ends on the doorway's shelf: issue #19)
       { obj: 'wood', x: 30, y: 1, w: 1, h: 12, color: '#D8D0DC', grain: 'v' },
       { obj: 'appliance', x: 6, y: 12, w: 5, h: 4, color: '#7FA6C8', panel: false }, // detergent jugs (plastic)
+      { obj: 'appliance', x: 4, y: 14, w: 2, h: 2, color: '#E8C24A', panel: false }, // small bottles: steps up to the jugs (issue #19)
+      { obj: 'appliance', x: 11, y: 14, w: 2, h: 2, color: '#E8B4A8', panel: false },
       shelf(26, 13, 5, 1, '#A2805E'),                                               // the cubby's shelf
     ],
   },
@@ -150,6 +159,7 @@ export default {
   'liv-basket': {
     paint: [
       { obj: 'wood', x: 9, y: 14, w: 10, h: 1, color: '#C9A46A' },                  // the sewing basket's rim
+      { obj: 'fabric', x: 19, y: 18, w: 2, h: 2, color: '#D48A8A', pattern: 'knit', accent: '#F2D2B8' }, // a ball of yarn
       { obj: 'cardboard', x: 20, y: 21, w: 5, h: 14, color: '#C49A66', tape: false }, // the cracker chute (a cardboard tube)
       shelf(8, 20, 13, 1, '#8A5E44'), shelf(24, 20, 7, 1, '#8A5E44'),               // the table top
       { obj: 'fabric', x: 9, y: 21, w: 11, h: 14, color: '#8C8F55', pattern: 'knit', accent: '#E8964A' }, // shelves of yarn
@@ -193,6 +203,7 @@ export default {
       { obj: 'fabric', x: 6, y: 15, w: 3, h: 1, color: '#E8964A', pattern: 'knit' }, // a pouf
       { obj: 'fabric', x: 10, y: 13, w: 4, h: 3, color: '#7E8150' },               // the sofa's left arm
       { obj: 'fabric', x: 48, y: 13, w: 4, h: 3, color: '#7E8150' },               // the right arm
+      { obj: 'wood', x: 52, y: 15, w: 1, h: 1, color: '#9C7046' },                 // a dropped coaster
       { obj: 'fabric', x: 14, y: 15, w: 34, h: 1, color: '#8C8F55', pattern: 'quilt', accent: '#D48A8A' }, // the seat base
       { obj: 'fabric', x: 14, y: 7, w: 34, h: 1, color: '#8C8F55' },               // the sofa back's top
     ],

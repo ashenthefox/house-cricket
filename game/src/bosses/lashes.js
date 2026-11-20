@@ -16,14 +16,15 @@ import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { makeBoss } from './base.js';
 import * as Mech from '../mechanics.js';
 import * as Geckos from '../geckos.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const MID = 11 * T, TOP = 5 * T;                       // shelf surfaces (feet y)
-const HOLES = [15 * T, 31 * T];                         // hole centres in the top shelf
+const HOLES = constant([15 * T, 31 * T]);                         // hole centres in the top shelf
 const LEN = 320;                                        // nose to tail, px
-const JAR = { x: 1.5 * T, y: 2.6 * T, w: 2.2 * T, h: 2.4 * T }; // Frost's jar on the top shelf (far left)
-const RANGES = { 1: [26, 46], 2: [20, 48], 3: [13, 46] };
-const SPEED = { 1: 1.6, 2: 2.7, 3: 2.2 };              // tiles/s
+const JAR = constant({ x: 1.5 * T, y: 2.6 * T, w: 2.2 * T, h: 2.4 * T }); // Frost's jar on the top shelf (far left)
+const RANGES = constant({ 1: [26, 46], 2: [20, 48], 3: [13, 46] });
+const SPEED = constant({ 1: 1.6, 2: 2.7, 3: 2.2 });              // tiles/s
 const WALK = 100, LICK = 60, EAT = 6 * FPS, REFORM = 3 * FPS;
 
 function onShelf(p, y) { return Math.abs(p.y + p.h - y) < 6 && (p.state === 'ground' || p.state === 'charge' || p.state === 'hide'); }
@@ -36,6 +37,8 @@ function makeFruit(phase) {
 }
 
 export default makeBoss('lashes', {
+  sfx: ['gecko-chomp', 'pillow-bonk', 'splat', 'unlock'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
+  art: () => ({ props: ['grape', 'banana-slice', 'jam-blob'], crickets: { frost: ['idle', 'chirp'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {
     const [r0, r1] = RANGES[b.phase];

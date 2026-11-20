@@ -280,6 +280,18 @@ export class Camera {
 export function seeded(seed) {
   let s = 0;
   for (const ch of String(seed)) s = (s * 31 + ch.charCodeAt(0)) >>> 0;
-  s = s || 1;
-  return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+  return rngFrom(s || 1);
+}
+// [issue 11] A module constant that sim state may point at (and compare by identity): deep-frozen,
+// so a rewind (src/rewind.js) shares it instead of copying it. Returns obj.
+export function constant(obj) {
+  if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) { Object.freeze(obj); for (const v of Object.values(obj)) constant(v); }
+  return obj;
+}
+// [issue 11] The generator from its raw state. rngState() reads that state, so a rewind snapshot
+// (src/rewind.js) can copy a generator that is part way through its sequence.
+export function rngFrom(s) {
+  const r = () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+  r.rngState = () => s;
+  return r;
 }

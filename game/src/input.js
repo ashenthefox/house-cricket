@@ -5,7 +5,7 @@
 import { FORGIVE } from '../data/movement.js';
 
 export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'use', 'chirp', 'kick', 'listen',
-  'swapPrev', 'swapNext', 'map', 'pause', 'mute', 'confirm', 'back'];
+  'swapPrev', 'swapNext', 'map', 'pause', 'mute', 'confirm', 'back', 'rewind']; // [issue 11] rewind: Backspace only (main.js: a debug flag)
 
 // Two layouts that never collide: arrows + Z X C V B, or WASD + Space J K L I.
 export const KEYMAP = {
@@ -18,7 +18,7 @@ export const KEYMAP = {
   KeyB: ['listen'], KeyL: ['listen'],
   KeyQ: ['swapPrev'], KeyE: ['swapNext'],
   Tab: ['map'], Escape: ['pause', 'back'], KeyP: ['pause'], KeyM: ['mute'],
-  Enter: ['confirm'], NumpadEnter: ['confirm'], Backspace: ['back'],
+  Enter: ['confirm'], NumpadEnter: ['confirm'], Backspace: ['back', 'rewind'],
 };
 const ARROW_LAYOUT = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB']);
 const WASD_LAYOUT = new Set(['KeyA', 'KeyD', 'KeyW', 'KeyS', 'Space', 'KeyJ', 'KeyK', 'KeyL', 'KeyI']);

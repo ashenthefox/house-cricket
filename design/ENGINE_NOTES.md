@@ -108,7 +108,7 @@ A room:
 | `=` | one-way platform: jump up through it; Down+Jump drops through |
 | `C` | cereal wall/floor: solid; a ground-pound landing on it breaks the **whole connected clump** (Thimble) |
 | `%` | crack: solid for everyone except Mote (Tiny) |
-| `~` | water: a pit without the Raft; its top surface is a floor with it |
+| `~` | water: a pit without the Raft; its top surface is a floor with it, and in it below the surface the Raft bobs you up to it (issue 20: no wading along the bottom; an overhang stops you under it until you drift out) |
 | `^` | tacks/thorns: 1 heart, back on the last solid ground |
 | `s` | soft soil: solid (Digby's dig is a later perk) |
 
@@ -134,12 +134,20 @@ A room:
 { type: 'hide', x: 4, y: 33, w: 1, small: false }        // same as the h / m markers, with a width
 { type: 'hook', x: 18, y: 10 }                            // same as H
 { type: 'checkpoint', x: 3, y: 33 }  { type: 'save', x: 6, y: 15 }  { type: 'beacon', x: 27, y: 10 }
-{ type: 'sign', x: 1, y: 15, w: 9, text: '{jump} jumps (hold it for higher).' }
+{ type: 'sign', x: 1, y: 15, w: 9, text: '{jump} jumps (hold it for higher).' } // a tip's paper note (see below); nx, kind, at optional
 { type: 'loud', x: 20, y: 28, w: 5, h: 6 }                // loud zone: shoves you back out without Earplugs
 { type: 'current', x: 7, y: 13, w: 14, h: 3, vx: 1.2 }    // pushes the raft, tiles per second
 { type: 'door', x: 5, y: 15, to: 'room-id', at: [3, 15] } // Up to use; for non-adjacent links (auto, needs: see Entities and mechanics)
 { type: 'boss', boss: 'duchess', x: 16, y: 15 }           // see Bosses
 ```
+
+**Signs are notes on the path** ([issue 9], `src/notes.js`): the note stands at column `nx` (else the span's centre
+column) on the first standable tile at the sign's row or one below (never water or a hazard; a one-way plank counts; a
+solid tile at the row holds it on top), stepping up to 2 columns to keep clear of a save, checkpoint, hide, door, lair
+door, item or cage; if its ground breaks or opens later it retires. `kind: 'card'` is a card with no note (Nana's phase
+hints); `at: 'low'` asks for the card's lower slot (the tongs). The HUD card shows when the cricket comes within 2 tiles
+of the note on its floor (ui.js `updateTips`). A script tip mid-scene: `game.scriptNote(textId, signEntity)` (it flutters
+down). `node tools/sign-check.mjs` checks every note (and `--wrap`: every tip fits 2 lines at 667x375).
 
 **Text with `{action}` tokens** (signs; also usable via `ui.richText`) renders each token as a
 key cap or pad glyph for whatever the player used last (`{jump}`, `{use}`, `{down}`, `{left}`…).
@@ -278,8 +286,33 @@ it does not trace real arcs). Items are collected when reached, to a fixpoint, s
 order is covered. Passes: `pip`, `weakest` (Jump 2 / Speed 2, −0.5 tile) and `strongest`
 (+0.5 tile). Real zones default to weakest + strongest; it exits 1 if the main pass misses an item
 or rescue. Mechanics (gates, doors, lifts, springs, terrain, thermostats) are understood: see "Entities
-and mechanics". **Not done yet:** "no gate opens before its item" across zones, "every spot can
-get back to a save crack", moving enemies. ([cracks] `tools/check-cracks.mjs` proves every save crack can be
+and mechanics". **Traps** ([issue #4]): in every state of the zone (one change at a time: an item, a
+rescue, a switch, a side gate; from every entry state `data/zones.js` allows), every spot reached
+must reach a way out (an edge into another zone, a save crack, a door out, the Carrier, the tank's
+lid) or a way on (a change, a gecko fight's ground) with the abilities held then. Reach and escape
+use the pass's exact stats; the strongest pass is the crickets home in that state ([issue #17]: each
+cricket nobody home beats on both rise and gap, any of whom can make a move; a rescue in the zone adds
+its cricket), and both passes start from every entry state that differs in the crickets the zone reads
+(its own, Frost for a thermostat, Duo for a push block, a rescue gate's) or, in the strongest pass, in
+the best crickets home (so the Laundry is judged without Frost and with her). The escape graph is
+strict: a wall kick goes away from its wall. The kick peaks at 2 for every cricket, Duo included;
+catching a wall again (kick to kick up a shaft) nets `reach.js` `wallClimb`, about 1.64-1.78
+depending on the cricket (gen-reach measures both). The graph still counts a kick to another cling as up to 2 cells: a
+cling cell can't hold the quarter tile (kicked from the top of its cell, a cricket does reach the cell
+two up), and charging 1.75 an edge made the bath-sink floor read as stuck when the sim gets Duo, Pip
+and Stripe out. The climb keeps gaining, so only the final hop of a long chain to a ledge can read a little better
+than it is (escape-test is the proof); a bounce edge into a room you can't enter yet is a floor, as in the game since [issue #15] (stand,
+walk, jump off it). It exits 1 on any pocket that can't, in any pass. Never resolved by the
+fall-respawn or damage: deliberate hazards (walls over thorns) and the test zones are listed in
+`data/trap-exempt.js`, with the fights' ground; every exempted pocket, the hazard-wall rule's
+included, prints an `exempt stuck` line. Duo's push blocks ([issue #17]) are solid where they are; with
+Duo home a shove (one tile, or on until it stops, then any fall) makes a state that is judged too
+(not searched on from, and not itself a way on). **Moving enemies are not modelled**: an enemy is
+never a step, a block or a way on, so a spot that only an enemy's back gets you out of reads as
+stuck, and one an enemy walls off reads as fine. `tools/escape-test.mjs` puts the cricket on a
+reported spot in the headless sim and searches the controls for a way out (`--traps-json` writes
+the candidates; strongest-pass pockets list each of the best crickets home). **Not done yet:** "no
+gate opens before its item" across zones. ([cracks] `tools/check-cracks.mjs` proves every save crack can be
 left on foot: see Builder changes.) The recorded
 solutions are the real proof of a route.
 
@@ -430,6 +463,9 @@ terrainKinds: { C: 'plaster', s: 'sand' },      // what C and s tiles look like 
 near: false | [{ prop, x, scale: 3..5, flip }], // near layer for this room (false = none)
 fx: [{ kind: 'steam', x, y, every: 8 },         // ambient emitters: steam puffs rising from (x, y)
      { kind: 'motes' | 'dust', x, y, w, h }],   // light motes / falling dust in a box
+noWay: [{ from: [x, y, w, h], to: [x, y, w, h] }], // tiles: nothing in `from` can get to `to` inside this room
+        // (a floor below an unclimbable side, a drop that only comes down). The beacon's path (src/beacon.js)
+        // otherwise takes every straight line between a room's openings as walkable. sun-bench, laun-sink.
 ```
 
 Hiding spots: `{ type: 'hide', x, y, w, art: 'sock' }` picks the art (`props/<art>.png` or a path;
@@ -455,6 +491,18 @@ hidden cricket is drawn tucked (hide loop, then held; a peek every ~3 s) and sha
   which releases the previous zone's paintings, textures and anything added with `S.zoneHold()`
   (gecko rigs add their folder). Rooms bordering another zone preload its painting. Phones (coarse
   pointer and short side < 500, or a small backing store) get the `-phone` paintings via `S.bgPath()`.
+- Art ahead of need (`src/room-art.js`, issue #16): the gate holds a room until its art is in (#5),
+  but the art is asked for well before: during the title (`main.js warmTitle`: the Continue save's
+  room, its zone's critical art and neighbours, then the new game's tank and first Bedroom room),
+  on entering a zone (`zoneArt`: every room's gecko rigs, boss props, captives, decor, hiding spots,
+  mechanics, enemies and near layer, the lairs first; a small-memory device, `S.lowMemory()`
+  (touch-first small screen, or `navigator.deviceMemory` <= 4, never the canvas size): the lairs
+  only), aboard the Carrier (the way back) and for the Post destination in focus. A wait that is
+  left goes into what's on screen, never with a "Loading" label: the last story panel stays up
+  without its hints (`foldIntoStory`; Pause waits), Continue keeps the title up, dimming; a door /
+  edge wipe or a travel fade shows the frame before the room change dimming under its ink
+  (`renderer.snapshot/drawHeld`). The bare "Loading" ink cover is the fallback (a debug
+  `goToRoom`). Check: per frame, the room visible, flat ink or a label drawn, rig and props loaded.
 
 ### Crickets
 
@@ -741,7 +789,7 @@ Once on, a switch stays on (`sw:<id>`); emits `switch {id, x, y}`.
 
 `at` = the tile whose bottom the feet land on (default: the target room's `P`/`S` marker). No door
 back = one-way. A door keeps health (no heal) and downward speed. The beacon's path distance and
-check-world follow doors.
+check-world follow doors, one way (in at the door, out at `at`).
 
 ### Lifts (steam vents, dryer updrafts, misters)
 
@@ -1027,7 +1075,7 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   falls. Heavy blocks (default) move only for the `shove` perk (Duo; others get a toast), `heavy: false` for anyone.
   Push speed `(1 + wt) / 2` tiles/s (`Mech.pushSpeed`: Duo 3, Pip 2, Frost 1). Position saved in
   `flags['push:<room>:<id>']`; push tiles are never "last safe ground". Event `shove`. check-world treats a block as
-  solid where it starts. Used: laun-shelf's detergent box (the `laun-duo` cubby behind it).
+  solid where it starts (reach); its trap check also judges each shove ([issue #17], see check-world). Used: laun-shelf's detergent box (the `laun-duo` cubby behind it).
 - [fixer] **Chip's Duet** (`{ type: 'duet', id, x, y, hear: 6, window: 2, then: [[event, data], ...] }`): a two-keyhole
   music box. A chirp by Pip or Chip within `hear` tiles lights its keyhole; the other one's chirp within `window` s
   (swap in between) opens it (`sw:<id>`, `unlock`, `duet` events, then the `then` events once). Anyone else's chirp
@@ -1111,10 +1159,20 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   darkening). main.js: `viewFrac`/`resize()` fill and `phoneZoom()` 1.1 (marked [final-G] lines); `fx.drawScreen` and the near
   layer use the real view height. The camera is never read by the sim, so replays are unchanged.
 - [final-G] `text.js geckos.<name>.hint` (all ten geckos + barty): one line on the Ready? card; `screens.js lairReady` renders it
-  (`p.nana-rule.boss-hint`, a marked line). Also `opening.tank.waitTell`, `signs.berm`, `geckos.peridot.flicker`,
+  (`p.nana-rule.boss-hint`, a marked line). Also `signs.berm`, `geckos.peridot.flicker`,
   `geckos.gargy.again/otherSide`.
-- [final-G] `bosses/tank.js`: decor `land: [x, y, w, h]` (a 2x2 rock of `K.PROP` tiles); sand: Duchess catches up, lunges into each
-  berm once, and the exit (`e.exit`, col 60) holds you until her second lunge. zone-00 tank-decor: a sand bank at cols 24-29.
+- [final-G] `bosses/tank.js`: decor `land: [x, y, w, h]` (a 2x2 rock of `K.PROP` tiles). zone-00 tank-decor: a sand bank at cols 24-29.
+- [issue 7] `bosses/tank.js` sand, **Duchess hunts** (design: Screens, Opening, beat 3): a state machine of plain fields on the beat
+  (no closures, no randomness). Real lunges after the tell (`TELL` from base.js: Gentle Mode's longer tell, `'tell'` with `frames`),
+  the end fixed at the lunge's start and stopped at a berm face (`e.berms`: the berms' middle columns); only the snout box catches:
+  a roar (`gecko-growl` at rate 0.7) and **`player.shove(dir, ctx, {vx, vy, lock})`** (a plain push: state air, fall profile, lock,
+  no event, no damage, no flash; not `daze()`, whose event shows the earplugs toast, nor `hurt()`), a roar cooldown, the skitter
+  clamped 1.5 tiles from the left edge. Hidden in the log ('h') while she's awake: she comes, tells and lunges into it if she hasn't
+  lunged yet, sniffs 2 s and shrugs; the beat sets **`player.hideHold`** each step while she's awake and he's hidden (player.js
+  `_hide`: only Jump leaves; ui.js prompts "Jump to leave"). A Chirp in the log (the `'reveal'` event, read from `game.fx`) or a Jump
+  out while she's at it: a recoil, no skitter. The shrug adds `'duchess-asleep'` to `g.rs('tank-sand').taken`: the exit hold
+  (`e.exit`, col 60) and a quiet nap on coming back read that flag, never her mode. The "Hide in the log!" note is put up at the log's mouth by
+  the script (`g.scriptNote`, [issue 9]). Checks: `tools/tank-test.mjs`; rewind cases in tools/rewind-test.mjs.
 - [final-G] `chikchak.js`: `b.away` (2.5 s facing away at every phase start: no sight), knock-back clamp at x 2 tiles.
   `peridot.js` phase 1: two tugs (`b.half`, `b.needFloor`, lamp flicker). `gargy.js` phase 1: two bonks, the second from the
   other side cushion (`b.once`, `b.side1`).
@@ -1139,7 +1197,7 @@ gen-reach also measures spring bounces (power 4/6/8 must rise exactly that, any 
   jump or super-jump, flutter at the apex, rise beside a lip and land on it); design/solutions/full-run.json re-recorded.
 - [fullrun] **Absolute game.frame in the sim:** gargy.js phase 1 sways with `sin(game.frame / 90)` (and peridot's tap toast uses
   `frame % 150`), so a headless model must start on the browser's game frame: full-run.mjs sets the RunAuthor's
-  `game.frame` to G0 (2884, the frame the Bedroom starts on after the opening and the tank; `--g0` to change) and the
+  `game.frame` to G0 (3123, the frame the Bedroom starts on after the opening and the tank; `--g0` to change) and the
   browser part checks it. Without this the browser's Gargy fight diverged (phase lost, rescue never came).
 - [final-2] **No refights:** every gecko's `start()` ends the fight at once when its cricket is already rescued
   (`b.done = true`, as duchess/chikchak/bigtok did): Lashes dozes on his shelf (`b.dozing`, `lashes-stairs` set), Peridot

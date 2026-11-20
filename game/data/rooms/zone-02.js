@@ -99,6 +99,7 @@ function lair() {
   g.row(4, 6, 8, 'G');                         // the mirror ledge (Chikchak's perch)
   g.box(42, 6, 2, 8, '#');                    // the shower riser: tiled pillars around a 3-wide shaft (crawl in under the left one)
   g.box(47, 6, 3, 10, '#');
+  for (const r of [14, 12, 10, 8, 6]) g.row(50, r, 2, '='); // [issue #4] ledges up the pillar's far side: back out from behind the riser (before the rescue the gate is shut)
   g.row(38, 6, 4, '#');                        // the riser's top shelf (faucet 3)
   g.row(57, 9, 5, 'G');                        // the soap dish (Katy), 7 tiles up
   g.box(60, 1, 2, 8, 'G').box(60, 10, 2, 2, 'G');
@@ -193,7 +194,7 @@ export default {
         { gecko: 'chikchak', pose: 'sleep', x: 56, y: 14, len: 240, after: 'katy', layer: 'mid' },
       ],
       entities: [
-        { type: 'sign', x: 14, y: 13, w: 6, text: S.floss },
+        { type: 'sign', x: 14, y: 14, w: 6, text: S.floss }, // [issue 9] a row lower: the note stands on the counter
         { type: 'secret', id: 'bath-songseed-cabinet', x: 11, y: 5 },
         { type: 'mosquito', x: 34, y: 6 },
       ],

@@ -73,7 +73,7 @@ const FACILITY_NAME = { shop: 'npcs.rolo.facility', library: 'npcs.page.facility
 
 // where an object is drawn in a given stage: {x, y (bottom), w, h, baseline (feet), level}
 function slot(id, stage) {
-  const o = OBJ[id]; const img = S.get(`carrier/${o.img}.png`);
+  const o = OBJ[id]; const img = S.get(`carrier/${o.img}.webp`);
   const ar = img ? img.width / img.height : 1;
   let h = o.h, w = o.w || h * ar, x = o.x, bottom, baseline = FLOOR, level = 'floor';
   switch (o.place) {
@@ -112,7 +112,7 @@ export class Hub {
     this.queueT = 50;
     this.buildResidents(game);
     S.preload([0, 1, 2, 3].map((i) => `bg/carrier/shell-${i}.webp`));
-    S.preload(Object.values(OBJ).map((o) => `carrier/${o.img}.png`));
+    S.preload(Object.values(OBJ).map((o) => `carrier/${o.img}.webp`));
   }
   leave(game) { this.active = false; game.inCarrier = false; this.opts.ui.extraPrompt = null; }
   buildResidents(game) {
@@ -222,7 +222,7 @@ export class Hub {
     const order = { hang: 0, wall: 1, shelf: 2, back: 2, flat: 3, floor: 4 };
     const objs = this.objectsShown(game).map((id) => ({ id, s: slot(id, this.shell), o: OBJ[id] })).sort((a, b) => (order[a.s.level === 'back' ? 'back' : a.o.place] - order[b.s.level === 'back' ? 'back' : b.o.place]) || a.s.x - b.s.x);
     for (const { id, s, o } of objs) {
-      const img = S.get(`carrier/${o.img}.png`);
+      const img = S.get(`carrier/${o.img}.webp`);
       if (!img) continue;
       const pop = this.pops.find((pp) => Math.abs(pp.x - s.x) < 1);
       const k = pop ? Math.min(1, pop.f / 14) * (1 + Math.sin(Math.min(1, pop.f / 14) * Math.PI) * 0.18) : 1;
@@ -240,7 +240,7 @@ export class Hub {
         renderer.drawCricketAt?.(c, r.id, r.x, r.y - (moving ? bob : 0), r.dir, { pose: moving ? 'run' : 'idle', t: renderer.t + hash(r.id) * 50, vx: moving ? r.speed * r.dir : 0, scale: 0.9 });
       } else {
         const talking = this.talk === r && Math.floor(this.t / 8) % 2;
-        const img = S.get(`sprites/npcs/${r.id}${talking ? '-talk' : ''}.png`) || S.get(`sprites/npcs/${r.id}.png`);
+        const img = S.get(`sprites/npcs/${r.id}${talking ? '-talk' : ''}.webp`) || S.get(`sprites/npcs/${r.id}.webp`);
         if (img) { const h = r.id === 'velvet' ? 60 : 46, w = h * img.width / img.height; c.save(); c.translate(r.x, r.y - bob * 0.6); c.scale(r.x > game.player.cx ? -1 : 1, 1); c.drawImage(img, -w / 2, -h + 4, w, h); c.restore(); }
       }
     }

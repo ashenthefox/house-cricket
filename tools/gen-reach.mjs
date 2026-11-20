@@ -148,6 +148,35 @@ function measureWallJump(stats) {
   return { rise: apexRise / TILE, out: outAtApex / TILE };
 }
 
+// [issue #17] Kicking up a shaft, wall to wall: the net height gained per kick. The kick itself rises
+// wallJump.rise (2) at its apex, but the cricket can only catch the far wall again once it has nearly
+// stopped rising, so a chain of kicks climbs less: about 1.75 a kick, every cricket alike. The least
+// over shafts 1 to 3 tiles wide (a wider shaft can't be climbed this way at all).
+function measureWallClimb(stats) {
+  let least = Infinity;
+  for (const w of [1, 2, 3]) {
+    const A = 100, B = A + w + 1; // walls at A and B, open cols A+1..B-1
+    const g = grid((x, y) => x === A || x === B || y >= FLOOR);
+    const p = mkPlayer(stats, ['booties']);
+    const ctx = ctxFor(g);
+    p.reset(); p.x = B * TILE - p.w; p.y = (FLOOR - 20) * TILE; p.state = 'air'; p.vy = 0;
+    let kicks = 0, first = null, last = null, toward = 1, held = false;
+    run(p, ctx, 2000, (f, pl) => {
+      if (pl.state === 'cling') {
+        if (first == null) first = pl.y;
+        last = pl.y;
+        if (!held) { held = true; kicks++; toward = -pl.clingDir; return { jump: true }; }
+        held = false; return { [pl.clingDir > 0 ? 'right' : 'left']: true };
+      }
+      held = false;
+      return { [toward > 0 ? 'right' : 'left']: true };
+    }, (f, pl) => kicks >= 8 || pl.state === 'ground');
+    if (p.state === 'ground' || kicks < 2) return 0;
+    least = Math.min(least, (first - last) / TILE / (kicks - 1));
+  }
+  return least;
+}
+
 function measureGlide(stats, perk) {
   const g = grid(() => false);
   const p = mkPlayer({ ...stats, perk }, ['glider']);
@@ -272,6 +301,8 @@ for (const [id, c] of Object.entries(CRICKETS)) {
     gap: check(`${id} gap`, m.gap, want),
     wallRise: check(`${id} wall-jump rise`, wj.rise, MOVES.wallJump.rise),
     wallOut: check(`${id} wall-jump out`, wj.out, MOVES.wallJump.out),
+    // [issue #17] up a shaft, kick to kick (no table entry: the kick is the designed move, this is what it nets)
+    wallClimb: check(`${id} wall-kick climb`, measureWallClimb(st), MOVES.wallJump.rise - TOL),
     flutter: check(`${id} flutter`, measureFlutter(st).rise, MOVES.flutter.rise),
   };
   if (c.perk === 'hugeLeap') { const l = measureLeap(st); results.crickets[id].leapRise = check(`${id} huge leap rise`, l.rise, MOVES.hugeLeap.rise); results.crickets[id].leapGap = check(`${id} huge leap gap`, l.gap, MOVES.hugeLeap.gap); }

@@ -13,7 +13,7 @@ Zone textures (design: "Platforms and walls"):
     painting behind them;
   -> game/assets/textures/<bg>.webp, 512x512 (the painter draws it at 0.75 world px per px).
 
-Terrain swatches (game/assets/terrain/<kind>.png, already painted as swatches):
+Terrain swatches (art/terrain/<kind>.png, already painted as swatches):
   - made seamless the same way, slightly deepened and lowered in contrast so they read as
     terrain, not as the light painting
   -> game/assets/textures/terrain-<kind>.webp, 256x256.
@@ -172,7 +172,7 @@ def zone_texture(key):
 
 
 def terrain_texture(kind):
-    src = os.path.join(ASSETS, 'terrain', f'{kind}.png')
+    src = os.path.join(ROOT, 'art', 'terrain', f'{kind}.png')  # sources only: the game draws the textures
     if not os.path.exists(src):
         print('skip (no swatch):', kind); return
     img = Image.open(src).convert('RGB').resize((256, 256), Image.LANCZOS)

@@ -28,8 +28,10 @@ floor.r(0, 16, 64, 2).r(0, 12, 1, 4, '.').r(63, 12, 1, 4, '.'); // floor; left: 
 floor.r(0, 0, 64, 4).r(0, 0, 2, 12).r(2, 0, 4, 4, '.'); // the shelf board overhead; the gap up to the shelves (cols 2-5)
 floor.r(15, 12, 48, 1);                              // the low shelf over the sneak corridor (rows 13-15)
 floor.r(10, 14, 4, 2).r(6, 12, 4, 4);                // crates: steps up on the left
+floor.r(4, 14, 2, 2);                                // [issue #4] ... and a step on their far side: back up from the jar wall (was 4 up)
 floor.r(9, 10, 3, 1, '=').r(6, 8, 3, 1, '=').r(2, 6, 4, 1, '=');  // brackets up to the gap
 floor.r(30, 9, 6, 3).r(44, 10, 5, 2);                // rice sacks on the low shelf (weevils)
+floor.r(36, 11, 1, 1);                               // [issue #4] a spilled grain bag: up the first sack from the gap (3 up was too high for Jump 2)
 floor.r(49, 4, 14, 6).r(49, 10, 8, 1);               // the cracker tunnel: a low ceiling over a crumbling floor
 floor.r(57, 8, 6, 1, '#');
 

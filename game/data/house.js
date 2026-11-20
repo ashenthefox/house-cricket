@@ -41,7 +41,7 @@ export const BUILDERS = {
 // ---------------------------------------------------------------------------------------------
 // Rooms. purpose tags: start save item soundHole lairDoor arena traversal tutorial secret sneak
 // recruit notCricket thermostat loud shortcut hub link carrier
-// features: enemies (engine type names = sprites/enemies/<name>), props (assets/props/<name>.png),
+// features: enemies (engine type names = sprites/enemies/<name>), props (assets/props/<name>.webp),
 // hides (hiding spots to place), secrets (ids in SECRETS), notes.
 // ---------------------------------------------------------------------------------------------
 const R = (id, zone, name, x, y, w, h, o = {}) => ({ id, zone, name, x, y, w, h, purpose: [], ...o });
@@ -50,16 +50,16 @@ export const ROOMS = [
   // ===== z00 The Tank (the opening; off the house map, never revisited) =====
   R('tank-cup', 'z00-tank', 'In the Cup', 0, 20, 1, 1, { purpose: ['start', 'tutorial'],
     brief: 'Beat 1-2. Pip starts inside the feeder cup on Duchess\'s rock. The tongs dip three times (left, right, middle): hop left and right to dodge (teaches move + jump). Then hold Jump for a full-height leap onto the cup rim (cup wall 2.5 tiles: only a held jump clears it) and drop to the sand on the right.',
-    props: ['feeder-cup', 'tongs'], signs: ['move', 'jumpHold'] }),
+    props: ['feeder-cup-open', 'tongs'], signs: ['move', 'jumpHold'] }),
   R('tank-sand', 'z00-tank', 'The Sand', 1, 20, 2, 1, { purpose: ['tutorial'],
-    brief: 'Beat 3: Duchess stirs. A no-fail chase across 2 screens of sand: she opens one eye, her tail tip wiggles with the rattle-swish (the tell, taught here: sign "When the tail tip wiggles, move!"), and she lunges slowly and misses into the sand berm. Low hops over sand ripples; nothing can hurt you here.',
+    brief: 'Beat 3: Duchess hunts (issue #7). A no-fail hunt across 2 screens of sand that teaches the tail tell and hiding; no damage. She wakes as Pip passes the first ripple (tile 18) and stalks after him (scurrying when he is far ahead, never left of tile 8). Every lunge is real: the tail tell with the rattle-swish (sign "When the tail tip wiggles, MOVE."; Gentle Mode\'s longer tell), then a lunge at where he was, stopping at a berm face; she bites sand, shakes it off (1.5 s) and hunts on. Only her snout catches: a roar and a skitter a few tiles the way she faces, never out of the room, with rotating toasts ("Run to the log! ->" and a pulsing log outline from the second catch). Standing on a berm is safe but no hiding place (a one-time toast). Hiding in the log ends it whenever she is awake (a "Hide in the log!" sign shows after her first lunge or near the log): she comes to the log (only Jump leaves it meanwhile), tells and lunges into it if she has not lunged yet (a thunk, bark chips), sniffs about 2 s, shrugs and turns away, and the exit opens right then ("She\'s lost you. Go!"). Leaving by Jump or a Chirp while she sniffs: a roar and a recoil (no skitter). The exit is held shut until then ("She\'d follow you out! Lose her first: hide in the log."). Coming back, she is asleep and quiet (room flag duchess-asleep).',
     props: ['sand-berm', 'water-dish', 'hide-log'], signs: ['tell'] }),
   R('tank-decor', 'z00-tank', 'The Decor', 3, 19, 1, 2, { purpose: ['tutorial'],
     brief: 'Beat 4: climb the decor, 2 screens tall: hide log, fake plant leaves (one-way), the water-dish rim. One ledge is 1 tile too high: a loose pebble sits on the ledge above; kick it off so it lands as a step (teaches kick). The kick target is a scripted prop (pebble) that becomes a solid tile when it lands.',
     props: ['hide-log', 'fake-plant', 'water-dish', 'pebble', 'pebble-chip'], signs: ['kick'] }),
   R('tank-lid', 'z00-tank', 'The Lid Gap', 3, 18, 1, 1, { purpose: ['tutorial'],
-    brief: 'Beat 5-6: the mesh lid is ajar. Squeeze through the 1-tile gap (hold Up: sign). Pip\'s leap off the rim knocks the feeder cup off the tank (scripted), then story panel 4 (open-4.webp) and the Bedroom begins in bed-carrier with the first Chirp prompt.',
-    props: ['mesh-lid', 'feeder-cup-tipped'], signs: ['squeeze'] }),
+    brief: 'Beat 5-6: the mesh lid is ajar. Squeeze through the 1-tile gap (hold Up: sign). Pip\'s leap off the rim knocks the pet-store cup (store-cup, on the lid) off the tank (scripted), then story panel 4 (open-4.webp) and the Bedroom begins in bed-carrier with the first Chirp prompt.',
+    props: ['mesh-lid', 'store-cup', 'store-cup-tipped'], signs: ['squeeze'] }),
 
   // ===== z01 Bedroom (x 0-7, y 3-5) =====
   R('bed-carrier', 'z01-bedroom', 'Beside the Carrier', 2, 5, 1, 1, { purpose: ['start', 'save', 'carrier', 'tutorial', 'secret'],
@@ -84,7 +84,7 @@ export const ROOMS = [
     brief: 'The dresser side is a 4-wide # shaft between the dresser and the wall (no ledges): only wall-jumps get up (Tape Booties, the zone\'s gate). The floor is 2 screens of floorboards from the desk (y 5). On the dresser top (y 4): save crack 2, the "Ready?" card and the tank\'s glass wall (G) with the mesh lid ajar above: the lair door. The bedroom door to the hall (right edge, y 4-5) is shut; its draft stopper is G (no way through).',
     save: 1, lairDoor: 'bed-lair', props: ['save-crack'] }),
   R('bed-lair', 'z01-bedroom', 'Duchess\'s Tank', 6, 3, 2, 1, { purpose: ['arena'],
-    brief: 'Duchess\'s old tank (boss: duchess). See LAIRS. After the rescue, the tipped feeder cup becomes a step to the right rim and the right edge (rows 10-13) opens into the Hall top: the way onward.',
+    brief: 'Duchess\'s old tank (boss: duchess). See LAIRS. After the rescue, the feeder cup, knocked over upside down, becomes a step to the right rim and the right edge (rows 10-13) opens into the Hall top: the way onward.',
     boss: 'duchess', cage: 'stripe' }),
 
   // ===== Hall (link; Bedroom palette and paintings) =====
@@ -506,7 +506,7 @@ export const SECRETS = [
   S('laun-thermo', 'laun-sink', 'crumbs', 'thermostat', 'thermostat lock 72°F', { crumbs: 40 }),
   S('laun-songseed-drum', 'laun-dryer', 'songSeed', 'earplugs', 'inside the running dryer drum (loud)'),
   S('laun-mote', 'laun-basket', 'crumbs', 'crack', 'the baseboard by the basket'),
-  S('laun-songseed-shelf', 'laun-shelf', 'songSeed', 'band', 'the top detergent shelf'),
+  S('laun-songseed-shelf', 'laun-shelf', 'songSeed', 'band', 'the top detergent shelf'), // [issue #19] or the Feather, late (Hump or Frost reach it without the Band): an intended alternative
   S('laun-duo', 'laun-shelf', 'crumbs', 'perk:shove', 'under the detergent box Duo shoves'),
   S('laun-beep-battery', 'laun-lair', 'notCricket', 'battery', 'give Beep the spare battery from the Basement workbench (after Peridot)', { who: 'beep' }),
   // z06
@@ -580,7 +580,7 @@ export const NOT_CRICKETS = {
   dryerSqueak: { room: 'laun-dryer', oneLiner: true }, hinge: { room: 'stu-door', oneLiner: true },
   fridge: { room: 'kit-fridge', oneLiner: true },
 };
-// After their fight each gecko dozes somewhere (a non-hostile sleeping prop, sleep.png + curled tail).
+// After their fight each gecko dozes somewhere (a non-hostile sleeping prop, sleep.webp + curled tail).
 export const DOZING = {
   duchess: 'bed-dresser', chikchak: 'bath-cabinet', bigtok: 'kit-counter', lashes: 'pan-jars', peridot: 'laun-sink',
   gargy: 'liv-armchair', mossy: 'stu-desk', kite: 'sun-canopy', ember: 'bas-furnace', nana: 'att-lair',
@@ -593,8 +593,8 @@ export const DOZING = {
 // ---------------------------------------------------------------------------------------------
 export const LAIRS = {
   duchess: { room: 'bed-lair', cricket: 'stripe', arena: [2, 1], chirp: { radius: 4, stun: 0 }, verb: 'avoid',
-    props: ['sand-berm', 'feeder-cup', 'cup-tab', 'cup-tab-pulled', 'hide-log', 'water-dish', 'fake-plant'],
-    layout: 'Her tank floor: sand, a sand berm (a 3-tile mound) at each side, the hide log (left, a hiding spot), the water dish (right). Stripe\'s feeder cup sits on the rock in the middle (4 tiles up) with three pull tabs (cup-tab).',
+    props: ['sand-berm', 'feeder-cup', 'feeder-cup-tipped', 'cup-tab', 'cup-tab-pulled', 'hide-log', 'water-dish', 'fake-plant'],
+    layout: 'Her tank floor: sand, a sand berm (a 3-tile mound) at each side, the hide log (left, a hiding spot), the water dish (right). Stripe\'s feeder cup (lidded, the same tub Pip started in) sits on the rock in the middle (4 tiles up) with three pull tabs (cup-tab) on its lid\'s front edge.',
     phases: [
       'Phase 1 (teach): she stalks the floor and, after the tell (0.8 s), lunges at where you stand. Stand in front of a sand berm so she lunges into it: her snout sticks for 3 s. While she\'s stuck, run up her back (her body is a platform while stuck) to the rock and kick tab 1. Ends: tab 1 pulled.',
       'Phase 2 (twist): she now feints once before each lunge (a tell, a pause, a second tell). Same move, berm on the other side; kick tab 2. Ends: tab 2 pulled.',

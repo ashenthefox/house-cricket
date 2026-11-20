@@ -170,7 +170,7 @@ export class MapView {
         c.strokeStyle = '#3B4A7A'; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y - r * 0.1, r * 0.6, Math.PI * 0.9, Math.PI * 2.3); c.quadraticCurveTo(x + r * 0.3, y + r * 0.6, x - r * 0.1, y + r * 0.8); c.stroke();
         c.beginPath(); c.arc(x + r * 1.1, y, r * 0.5, -0.8, 0.8); c.stroke(); break;
       case 'carrier': {
-        const img = S.get('carrier/feeder-cup-bed.png');
+        const img = S.get('carrier/feeder-cup-bed.webp');
         c.fillStyle = '#F4EBDD'; c.strokeStyle = '#3E2A20';
         c.beginPath(); c.roundRect ? c.roundRect(x - r * 1.2, y - r * 0.8, r * 2.4, r * 1.6, 4) : c.rect(x - r * 1.2, y - r * 0.8, r * 2.4, r * 1.6); c.fill(); c.stroke();
         c.beginPath(); c.moveTo(x - r * 1.3, y - r * 0.8); c.lineTo(x + r * 1.3, y - r * 0.8); c.lineWidth = 3; c.stroke();

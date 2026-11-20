@@ -42,7 +42,7 @@ Spans are in the local tiles of the shared cell: rows 0-17 for a left/right edge
 | stair-foot (D) | kit-fridge (A) | left, 16,8 | 12-15 exact | open |  |
 | stair-foot (D) | liv-armchair (B) | right, 17,8 | 12-15 exact | height (Rubber Band) built in the second room | the armchair back: G, 9 tiles tall, its foot 2+ tiles inside liv-armchair |
 | kit-pantrydoor (A) | pan-door (B) | left, 5,8 | 12-15 exact | water (Bottle-Cap Raft) built in the first room | the spill (~) is inside kit-pantrydoor; pan-door's floor at rows 16-17 |
-| kit-pantrydoor (A) | laun-stairs (B) | bottom, 5,8 | 18-25 exact | water (Bottle-Cap Raft) built in the first room | the head of the laundry stairs; laun-stairs leaves its top row open at cols 18-25 of x 5 |
+| kit-pantrydoor (A) | laun-stairs (B) | bottom, 5,8 | 18-19 exact | water (Bottle-Cap Raft) built in the first room | the head of the laundry stairs; laun-stairs leaves its top row open at cols 18-25 of x 5 ([playtest] the kitchen side opens at 18-19 over a ladder of one-way rungs: an 8-wide hole cut the Pantry off, and the Laundry had no way back up) |
 | laun-washer (B) | bas-stairs (C) | bottom, 8,10 | 12-17 exact | cereal (Thimble Helmet) built in the first room | C rubble in laun-washer rows 16-17, cols 12-17; bas-stairs is dark (needs glow) |
 | liv-hearth (B) | sun-door (C) | right, 24,8 | 12-15 exact | cereal (Thimble Helmet) built in the first room | sunken threshold in liv-hearth filled with C plaster rubble; sun-door floor at rows 16-17 |
 | liv-hearth (B) | chim-ash (D) | bottom, 24,8 | 14-17 exact | cereal (Thimble Helmet) built in the first room | the ash dump: C soot plug in liv-hearth rows 16-17, cols 14-17; chim-ash is dark (needs glow) |

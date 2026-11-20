@@ -22,28 +22,29 @@ import * as Geckos from '../geckos.js';
 import * as Audio from '../audio.js';
 import { voiceOf } from '../meta.js';
 import { line } from '../lines.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const T = TILE;
 const X0 = 12 * T, X1 = 95 * T;                        // the arena floor between the chimney breast and the door
-const BANDS = { low: [27 * T, 34 * T], high: [19 * T, 27 * T] };
-const STONES = [
+const BANDS = constant({ low: [27 * T, 34 * T], high: [19 * T, 27 * T] });
+const STONES = constant([
   { id: 'fork', prop: 'music-stone-fork', voice: 'low', x: 16, y: 31, note: 0 },
   { id: 'glass', prop: 'music-stone-glass', voice: 'mid', x: 50, y: 25, note: 2 },
   { id: 'bell', prop: 'music-stone-bell', voice: 'high', x: 75, y: 21, note: 4 },
-];
-const VOICE_COLOR = { low: '#9DB2E0', mid: '#E8B85A', high: '#E8846F' };
-const VOICE_NAME = { low: 'low', mid: 'middle', high: 'high' };
+]);
+const VOICE_COLOR = constant({ low: '#9DB2E0', mid: '#E8B85A', high: '#E8846F' });
+const VOICE_NAME = constant({ low: 'low', mid: 'middle', high: 'high' });
 const BEAT = 50, BEATS = 16, WINDOW = 9;               // 72 BPM; +/-150 ms
 const STONE_HEAR = 9;                                  // [fixer] tiles: a stone hears its voice this far (was 6)
-const NC_VOICE = { peeper: 'peeper', soot: 'swift-chitter', velvet: 'bat-squeaks', beep: 'alarm' };
+const NC_VOICE = constant({ peeper: 'peeper', soot: 'swift-chitter', velvet: 'bat-squeaks', beep: 'alarm' });
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const stoneBox = (s) => ({ x: s.x * T - 4, y: s.y * T - 8, w: T + 8, h: T + 8 });
 
 function setHint(g, text) {
-  // a moving sign that follows the cricket (the HUD hint line renders {chirp} etc. as key caps)
-  const p = g.player;
+  // [issue 9] a card-only tip (no paper note, glint or read tracking): the phase hint shows while it's up
+  // (the HUD card renders {chirp} etc. as key caps)
   g.signs = (g.signs || []).filter((s) => !s.nana);
-  if (text) g.signs.push({ nana: true, x: 0, y: p.cy - 20, w: 96 * T, text });
+  if (text) g.signs.push({ nana: true, kind: 'card', key: 'nana', x: 0, y: 0, w: 96 * T, text });
 }
 
 function chorusMembers(g) {
@@ -53,8 +54,19 @@ function chorusMembers(g) {
   for (const id of g.meta?.notCrickets || []) if (NC_VOICE[id]) out.push({ kind: 'npc', id, voice: NC_VOICE[id] });
   return out;
 }
+// [art] the stones, Chip, and the chorus that came along (drawn in phase 3)
+function nanaArt(g) {
+  const crickets = { chip: ['idle', 'leap'] }, props = STONES.map((s) => s.prop);
+  for (const m of g ? chorusMembers(g) : []) {
+    if (m.kind === 'npc') props.push(`sprites/npcs/${m.id}.webp`);
+    else crickets[m.id] = ['idle', 'chirp'];
+  }
+  return { props, crickets };
+}
 
 export default makeBoss('nana', {
+  sfx: ['bat-squeaks', 'gecko-growl', 'gecko-snore', 'swift-chitter'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
+  art: (e, o) => nanaArt(o.game), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: 980,
   focus() { return null; }, // [polish-V] she is painted on the far wall relative to the view (always in frame)
   start(b, g) {

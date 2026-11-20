@@ -55,7 +55,7 @@ export class Player {
     this.swing = null; this.hideSpot = null; this.listening = false; this.gliding = false;
     this.poundT = 0; this.recover = 0; this.wallRunLeft = 0;
     this.dashT = 0; this.dashCd = 0; this.lastTap = { dir: 0, t: 99 };
-    this.squash = 0; this.onRaft = false; this.dazed = 0;
+    this.squash = 0; this.onRaft = false; this.bobbing = false; this.dazed = 0; this.hideHold = false;
     this.lastSafe = null; this.anim = 0; this.landedHard = false;
     if (this.cloakT > 0) { this.cloakT = 0; this.cloakCd = CLOAK.recharge; } // [builder C] knocked about: the cloak drops
   }
@@ -110,6 +110,13 @@ export class Player {
     ctx.emit('dazed', { x: this.cx, y: this.y });
   }
 
+  // [issue 7] a plain shove (Duchess's skitter in the tank): no damage, no event, no invulnerability
+  // flash; half a second without control. ctx is unused (the call matches daze and hurt).
+  shove(dir, ctx, { vx = 380, vy = -420, lock = 30 } = {}) {
+    this.vx = dir * vx; this.vy = vy; this.state = 'air'; this.prof = this.P.fall; this.lock = lock; this.cutDone = true;
+    this.hideSpot = null; this.hideHold = false; this.listening = false; this.coyote = 0; this.crouchFrames = 0;
+  }
+
   launch(prof, ctx, kind = 'jump', dir = 0) {
     this.prof = prof; this.vy = -prof.v0;
     this.cutDone = !prof.cut; this.jumpHeldFrames = 0;
@@ -162,7 +169,8 @@ export class Player {
     if (Pr.chirp && this.state !== 'pound') this._chirp(ctx);
 
     const st = this.state;
-    if (st === 'ground') this._ground(inp, dir, ctx);
+    if (this._submerged(ctx)) this._bob(inp, dir, ctx); // [issue 20] the Raft floats
+    else if (st === 'ground') this._ground(inp, dir, ctx);
     else if (st === 'air') this._air(inp, dir, ctx);
     else if (st === 'cling') this._cling(inp, dir, ctx);
     else if (st === 'wallrun') this._wallrun(inp, dir, ctx);
@@ -170,6 +178,7 @@ export class Player {
     else if (st === 'pound') this._pound(inp, ctx);
     else if (st === 'charge') this._charge(inp, dir, ctx);
     else if (st === 'hide') this._hide(inp, dir, ctx);
+    if (this.state !== 'air' || !this._submerged(ctx)) this.bobbing = false;
 
     if (this.grounded && this.queuedSwap != null) this._doSwap(ctx);
     if (this.state === 'ground' && !this.onRaft) this._markSafe(ctx);
@@ -248,7 +257,7 @@ export class Player {
   // ---- ground ----
   _ground(inp, dir, ctx) {
     const H = inp.held, Pr = inp.pressed;
-    const g = groundUnder(ctx.grid, this.body);
+    const g = this._under(ctx);
     if (!g) { this._toAir(ctx, true); return this._air(inp, dir, ctx); }
     this.onRaft = g.every((t) => t.kind === K.WATER);
     this.canFlutter = true;
@@ -311,7 +320,21 @@ export class Player {
     this._dy = 0;
     this._moveBody(ctx);
     // walking off an edge
-    if (!groundUnder(ctx.grid, this.body)) this._toAir(ctx, true);
+    if (!this._under(ctx)) this._toAir(ctx, true);
+  }
+  // What the feet stand on: tiles, or (issue #15) the floor edge over a room you can't enter yet.
+  _under(ctx) { return groundUnder(ctx.grid, this.body) || (ctx.edgeFloor ? ctx.edgeFloor(this) : null); }
+  // [issue #15] game.checkExits stopped us at the bottom edge of a room we can't enter yet: that edge
+  // is a floor. Any falling state ends there as a landing (a pound ends as a pound landing), never
+  // held in its state while gravity pulls it over the edge again every frame.
+  landOnEdge(ctx, inp) {
+    const st = this.state;
+    if (st === 'pound') {
+      this.poundT = 0;
+      ctx.emit('pound', { x: this.cx, y: this.y + this.h, broke: false });
+      this.state = 'ground'; this.vy = 0; this.recover = F.poundRecover; this.squash = FEEL.squashLand * 1.4; this.prof = this.P.fall;
+    } else if (st === 'air' && this.vy >= 0) this._land(ctx, inp);
+    else if (st === 'cling' || st === 'wallrun') { this.state = 'ground'; this.vy = 0; ctx.emit('land', { x: this.cx, y: this.y + this.h, hard: false, v: 0 }); }
   }
   _toAir(ctx, coyote) {
     this.state = 'air'; this.prof = this.P.fall; this.cutDone = true; this.vy = Math.max(this.vy, 0);
@@ -343,7 +366,7 @@ export class Player {
       this.launch(this.P.sup, ctx, 'superjump', dir);
       return this._air(inp, dir, ctx);
     }
-    if (!groundUnder(ctx.grid, this.body)) this._toAir(ctx, false);
+    if (!this._under(ctx)) this._toAir(ctx, false);
   }
 
   // ---- air ----
@@ -443,6 +466,60 @@ export class Player {
     this.vy = -v0; this.state = 'air'; this.cutDone = true; this.coyote = 0; this.jumpBuf = 0; this.canFlutter = true;
     this.squash = -0.2;
     ctx.emit('spring', { x: this.cx, y: this.y + this.h, rise });
+  }
+
+  // ---- the Raft floats (issue 20) ----
+  // Holding the Bottle-Cap Raft, Pip never wades along a flood's bottom: in water below its surface
+  // (walked in at the bottom, fallen or knocked in from the side, slid down a wall into it) he bobs up
+  // to the surface. Passive, no button. An eased rise, steered at raft speed and pushed by currents;
+  // a covered surface (an overhang) stops him under it, and he drifts out sideways and on up. No jump
+  // until he is on the surface. Plain fields only (bobbing, vy): rewind and replays hold.
+  _submerged(ctx) {
+    if (!this.has('raft') || this.state === 'swing') return false;
+    return overlapKinds(ctx.grid, this.body).has(K.WATER);
+  }
+  // The top of the water the body is in: the highest surface over the columns it overlaps.
+  _waterTop(grid) {
+    const c0 = Math.floor(this.x / TILE), c1 = Math.floor((this.x + this.w - 1e-6) / TILE);
+    const r0 = Math.floor(this.y / TILE), r1 = Math.floor((this.y + this.h - 1e-6) / TILE);
+    let top = Infinity;
+    for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) {
+      if (grid.at(c, r) !== K.WATER) continue;
+      let s = r;
+      for (let n = 0; n < 64 && grid.at(c, s - 1) === K.WATER; n++) s--;
+      top = Math.min(top, s * TILE);
+      break;
+    }
+    return top;
+  }
+  _bob(inp, dir, ctx) {
+    const B = FEEL.bob;
+    if (!this.bobbing) { // in: drop whatever he was doing; one splash (fx here, the raft's sound as onRaft turns on)
+      this.bobbing = true;
+      ctx.emit('bob', { x: this.cx, y: Math.min(this._waterTop(ctx.grid), this.y + this.h) });
+    }
+    this.state = 'air'; this.prof = this.P.fall; this.cutDone = true; this.coyote = 0; this.canFlutter = true;
+    this.gliding = false; this.listening = false; this.crouchFrames = 0; this.poundT = 0; this.recover = 0;
+    this.hideSpot = null; this.hideHold = false; this.useHoldFromGround = false; this.useHold = 0; this.lifted = false;
+    this.onRaft = true;
+    if (this._tryHook(ctx)) { this.bobbing = false; this.onRaft = false; return; }
+    this._horizontal(dir, this.P.run * FEEL.raftSpeed, FEEL.groundAccel, FEEL.groundDecel, FEEL.groundDrag);
+    let drift = 0;
+    for (const c of ctx.currents || []) if (this._inRect(c)) drift += c.vx * DT;
+    const top = this._waterTop(ctx.grid), feet = this.y + this.h;
+    const want = -Math.min(B.speed, Math.max(B.min, (feet - top) * B.ease));
+    this.vy = approach(this.vy, want, B.accel * DT);
+    let dy = this.vy * DT;
+    if (dy < 0 && feet + dy <= top + 0.5) dy = top - feet; // arrive exactly on the surface
+    const b = this.body; b.lip = false;
+    const rx = moveX(ctx.grid, b, this.vx * DT + drift);
+    const ry = moveY(ctx.grid, b, dy);
+    this._apply(b);
+    if (rx.hit) this.vx = 0;
+    if (ry.ceiling || ry.landed) this.vy = 0;
+    if (Math.abs(this.y + this.h - top) < 0.01 && groundUnder(ctx.grid, this.body)) { // up: afloat on the surface
+      this.y = top - this.h; this.state = 'ground'; this.vy = 0; this.bobbing = false; this.squash = FEEL.squashLand * 0.4;
+    }
   }
 
   // ---- cling and wall-kick ----
@@ -601,10 +678,12 @@ export class Player {
     this.x = spot.x + spot.w / 2 - this.w / 2;
     ctx.emit('hide', { x: this.cx, y: this.y + this.h });
   }
+  // [issue 7] hideHold (set each step by a script, the tank's Duchess while she comes and sniffs): only
+  // Jump leaves, so a stick drifting sideways can't pop you out
   _hide(inp, dir, ctx) {
     this.listening = !!inp.held.listen;
-    if (dir !== 0 || this.jumpBuf > 0) {
-      this.state = 'ground'; this.hideSpot = null;
+    if ((dir !== 0 && !this.hideHold) || this.jumpBuf > 0) {
+      this.state = 'ground'; this.hideSpot = null; this.hideHold = false;
       ctx.emit('unhide', {});
       return this._ground(inp, dir, ctx);
     }

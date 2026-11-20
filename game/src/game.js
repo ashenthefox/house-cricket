@@ -12,6 +12,7 @@ import * as Mech from './mechanics.js'; // [mech] gates, switches, lifts, spring
 import { BOSSES } from './bosses/index.js';
 import { LAIRS } from '../data/house.js'; // [final-2] bossBeaten
 import { targetInRoom as beaconTargetInRoom } from './beacon.js'; // [audio] beacon target
+import { makeSign, floorProps } from './notes.js'; // [issue 9] tutorial notes on the path
 
 export class Game {
   constructor(zoneModules, opts = {}) {
@@ -28,13 +29,14 @@ export class Game {
     this.levelComplete = false; this.gameWon = false; this.bossPhase = null;
     this.hold = 0;           // frames the sim is held (transition wipe, item freeze)
     this.trans = null;       // {f, dur, kind}
+    this.bossWait = false;   // [art] set by main.js while the boss's gecko art loads: the boss doesn't act yet (never set headless)
     this.onSave = opts.onSave || null;
     this.lastCall = -999;
     this.player = new Player('pip');
     this.ctx = { grid: null, hooks: [], hideSpots: [], currents: [], emit: (t, d) => this.emit(t, d), breakUnder: (p) => this.breakUnder(p),
       // [mech] what the player reads from the room's mechanics
       surface: (p) => Mech.surfaceAt(this, p), liftAt: (p) => Mech.liftAt(this, p), springUnder: (p) => Mech.springUnder(this, p), dig: (p, dir) => Mech.dig(this, p, dir),
-      unsafeTile: (tx, ty) => Mech.unsafeTile(this, tx, ty) };
+      unsafeTile: (tx, ty) => Mech.unsafeTile(this, tx, ty), edgeFloor: (p) => this.edgeFloor(p) };
     this.projectiles = [];
     // [mech] shut gates in a neighbouring room are solid across the shared edge too
     // [fixer] ... and broken cereal / dug soil there is open too (the hearth plug seen from chim-ash)
@@ -119,7 +121,7 @@ export class Game {
     this.checkpoints = []; this.saves = []; this.beacons = []; this.doors = []; this.boss = null;
     this.metaEnts = []; // [meta] see buildEntities
 
-    const enemyDefs = [], mechDefs = [];
+    const enemyDefs = [], mechDefs = [], signDefs = [];
     room.entities.forEach((e, i) => {
       const key = `${e.type}@${e.x},${e.y}`;
       switch (e.type) {
@@ -130,7 +132,7 @@ export class Game {
         case 'checkpoint': this.checkpoints.push({ x: e.x * T, y: e.y * T - T, w: T, h: 2 * T, tx: e.x, ty: e.y, on: false }); break;
         case 'save': this.saves.push({ x: e.x * T, y: e.y * T, w: T, h: T, tx: e.x, ty: e.y }); break;
         case 'beacon': this.beacons.push({ x: (e.x + 0.5) * T, y: (e.y + 0.5) * T }); break;
-        case 'sign': this.signs.push({ x: e.x * T, y: e.y * T, w: (e.w || 4) * T, text: e.text }); break;
+        case 'sign': signDefs.push(e); break; // [issue 9] anchored once the grid has its gates (below)
         case 'door': this.doors.push({ x: e.x * T, y: e.y * T - T, w: (e.w || 1) * T, h: 2 * T, to: e.to, at: e.at, auto: !!e.auto, needs: e.needs || null, msg: e.msg || null, label: e.label || null }); break;
         case 'item':
           if (!this.player.has(e.item)) this.pickups.push({ key, kind: 'item', item: e.item, x: e.x * T + 8, y: e.y * T + 8, w: T - 16, h: T - 16 });
@@ -152,6 +154,12 @@ export class Game {
     this.enemies = enemyDefs.map((d, n) => spawnEnemy(d, n, room.id));
     this.projectiles = [];
     Mech.buildMech(this, mechDefs); // [mech] after the grid exists: shut gates, springs and crumbling floors set tiles
+    // [issue 9] each tip's paper note stands on the live grid (gates shut); ground broken earlier counts as
+    // its old self, so a note whose ground is gone stays retired (notes.js noteLive)
+    if (signDefs.length) {
+      const pristine = this.rs(room.id).broken.size ? this.world.makeGrid(room) : null, props = floorProps(room.entities);
+      for (const e of signDefs) this.signs.push(makeSign(e, `${room.id}:${e.x},${e.y}`, this.grid, pristine, props));
+    }
     this.ctx.hooks = this.hooks; this.ctx.hideSpots = this.hideSpots; this.ctx.currents = this.currents;
   }
 
@@ -171,7 +179,7 @@ export class Game {
     if (kb) kickEnemies(this.enemies, kb, p.facing, this);
     updateEnemies(this.enemies, this);
     Mech.updateMech(this); // [mech]
-    if (this.boss) { this.boss.update(this); this.bossPhase = this.boss.phase; }
+    if (this.boss && !this.bossWait) { this.boss.update(this); this.bossPhase = this.boss.phase; }
     this.checkTriggers();
     this.checkHazards();
     this.checkExits();
@@ -285,6 +293,18 @@ export class Game {
     return !!(c && this.rescued.has(c));
   }
   // [final-S] a gecko fight is on (the tank's scripted beats are not fights: no lose())
+  // [issue 9] a tip a script puts up mid-scene (the tank's cup rim, the log): a note that flutters down.
+  // key: its text id (the read set's key); e: a sign entity (tiles) in this room
+  scriptNote(key, e) {
+    if (this.signs.some((s) => s.key === key)) return null;
+    const s = makeSign({ type: 'sign', ...e }, key, this.grid, null, floorProps(this.room.entities));
+    s.born = this.frame;
+    this.signs.push(s);
+    if (s.kind === 'note') this.emit('sfx', { name: 'crinkle', gain: 0.35, rate: 1.5 }); // a paper sound (the tank's beats load it)
+    return s;
+  }
+  // [issue 9] a script retires a note whose lesson is over (the tongs once they're gone): note and card go
+  retireNote(key) { this.signs = this.signs.filter((s) => s.key !== key); }
   inFight() { return !!(this.boss && !this.boss.done && typeof this.boss.lose === 'function'); }
   // [final-S] Pause > "Back to room entrance": free; in a gecko fight it is the phase restart.
   backToEntrance() {
@@ -316,13 +336,28 @@ export class Game {
     if (next.needs && !p.has(next.needs)) {
       // gate by kind: bounce back with a hint
       if (cx < 0) p.x = 0; else if (cx >= room.pw) p.x = room.pw - p.w;
-      if (cy < 0) { p.y = 0; p.vy = Math.max(p.vy, 0); } else if (cy >= room.ph) { p.y = room.ph - p.h; p.vy = Math.min(p.vy, 0); }
+      if (cy < 0) { p.y = 0; p.vy = Math.max(p.vy, 0); } else if (cy >= room.ph) {
+        p.y = room.ph - p.h;
+        // [issue #15] the bottom edge is a floor: land on it (a pound used to stay a pound here for good)
+        if (p.vy >= 0) p.landOnEdge(this.ctx, this.inp || { held: {} });
+        p.vy = Math.min(p.vy, 0);
+      }
       p.vx = 0; p.dashT = 0;
       this.toast(next.needsMsg || `You need the ${ITEMS[next.needs]?.name || next.needs} to go on.`, 150);
       return;
     }
     // keep the upward momentum through a top exit so you land on the ledge above
     this.enterRoom(next, room.wx + p.x, room.wy + p.y, 'edge');
+  }
+
+  // [issue #15] Standing on the bottom edge of the room over one the cricket can't enter yet
+  // (checkExits stops it there): that edge holds it up like a floor. Tiles as groundUnder gives them.
+  edgeFloor(p) {
+    const room = this.room;
+    if (!room || Math.abs(p.y + p.h - room.ph) > 0.5) return null;
+    const n = this.world.roomAtPoint(room.wx + p.cx, room.wy + room.ph);
+    if (!n || n === room || !n.needs || p.has(n.needs)) return null;
+    return [{ tx: Math.floor(p.cx / TILE), ty: room.th, kind: K.SLICK }];
   }
 
   // Ground-pound landing: break every cereal clump under the feet.

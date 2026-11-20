@@ -18,19 +18,22 @@ import { TILE as T, DT, FPS } from '../../data/movement.js';
 import { TEXT } from '../../data/text.js';
 import { makeBoss } from './base.js';
 import * as Geckos from '../geckos.js';
+import { constant } from '../world.js'; // [issue 11] frozen module constants: a rewind shares them
 
 const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const FLOOR = 16 * T, LEN = 320;
-const LAMPS = [16, 48, 76];                       // lamp x (tiles); each lights a third of the room
-const CHAINS = [14, 46, 74];                      // the pull-chains hang beside them
+const LAMPS = constant([16, 48, 76]);                       // lamp x (tiles); each lights a third of the room
+const CHAINS = constant([14, 46, 74]);                      // the pull-chains hang beside them
 const THIRD = (x) => Math.max(0, Math.min(2, Math.floor(x / (32 * T))));
-const HUMP = { x: 91.2 * T, y: 15 * T - 6, w: 1.6 * T, h: T + 6 }; // under Beep's wall plate
+const HUMP = constant({ x: 91.2 * T, y: 15 * T - 6, w: 1.6 * T, h: T + 6 }); // under Beep's wall plate
 const RUN = 4.5 * T, LUNGE = 15 * T, YAWN = 2 * FPS;
 
 const litFor = (phase, done) => (done ? [false, false, false] : [phase < 2, phase < 3, true]);
 function onFloor(p) { return Math.abs(p.y + p.h - FLOOR) < 6 && p.state !== 'air'; }
 
 export default makeBoss('peridot', {
+  sfx: ['crinkle', 'gecko-chomp', 'gecko-growl', 'gecko-snore', 'hinge-creak'], // [issue 14] the recorded effects the fight plays (src/zone-sfx.js loads them with the zone)
+  art: () => ({ props: ['pull-chain'], crickets: { hump: ['idle', 'kick'] } }), // [art] what the fight draws (room-art.js loads it before the lair shows)
   phases: 3, len: LEN,
   start(b, g) {
     b.lit = litFor(b.phase, false);

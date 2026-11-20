@@ -68,6 +68,7 @@ export class FX {
         case 'pound': this.puff(d.x, d.y, 9, 1.5); this.shake(10); break;
         case 'item': this.spotlight(d.x, d.y, 100); this.petals(d.x, d.y, 10); break;
         case 'rescue': this.petals(d.x, d.y, 34); this.spotlight(d.x, d.y, 70); break;
+        case 'bob': this.dots(d.x, d.y, 5, '#A9C8E0', 150, 900, 3, 24); break; // [issue 20] the Raft bobs up: a small splash
         case 'pit': this.dots(d.x, d.y, 7, d.why === 'water' ? '#A9C8E0' : '#F4EBDD', 200, 900, 4, 30); break;
         case 'hurt': this.flash(4); this.shake(4); if (this.onHit) this.onHit(e); break;
         case 'swap': this.puff(d.x, d.y, 8, 1.1); break;

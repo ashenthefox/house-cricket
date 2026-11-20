@@ -50,7 +50,7 @@ export const hall = {
       y: 4,
       bg: {"v":"b","x":0.4,"y":0.6},
       loops: ["vacuum"],
-      decor: [{"prop":"drawer-pull","x":4,"y":20,"h":1.2},{"prop":"hook","x":16,"y":12,"h":1.4,"layer":"mid"},{"prop":"sock","x":17,"y":12,"h":1,"layer":"mid","rot":0.3},{"prop":"sprites/enemies/vacuum/0.png","x":9,"y":33,"h":1.1,"layer":"mid"},{"prop":"sock","x":4,"y":33,"h":0.8,"layer":"mid"},{"prop":"spool","x":13,"y":33,"h":0.9,"layer":"mid"},{"prop":"dice","x":44,"y":31,"h":1,"layer":"mid"},{"prop":"throw-pillow","x":56,"y":33,"h":1.2,"layer":"mid"}],
+      decor: [{"prop":"drawer-pull","x":4,"y":20,"h":1.2},{"prop":"hook","x":16,"y":12,"h":1.4,"layer":"mid"},{"prop":"sock","x":17,"y":12,"h":1,"layer":"mid","rot":0.3},{"prop":"sprites/enemies/vacuum/0.webp","x":9,"y":33,"h":1.1,"layer":"mid"},{"prop":"sock","x":4,"y":33,"h":0.8,"layer":"mid"},{"prop":"spool","x":13,"y":33,"h":0.9,"layer":"mid"},{"prop":"dice","x":44,"y":31,"h":1,"layer":"mid"},{"prop":"throw-pillow","x":56,"y":33,"h":1.2,"layer":"mid"}],
       paint: [{"kind":"plaster","x":7,"y":30,"w":9,"h":2}],
       grid: [
         '#######...##...................................................#',
@@ -93,7 +93,7 @@ export const hall = {
       entities: [
         {"type":"loud","x":6,"y":32,"w":6,"h":2},
         {"type":"secret","id":"hall-songseed-closet","x":2,"y":33},
-        {"type":"sign","x":7,"y":29,"w":4,"text":"Jump at a wall to stick to it. {jump} again to kick off. Shiny things (glass, porcelain) are too slippery."},
+        {"type":"sign","x":7,"y":29,"w":4,"text":"Jump at a wall to stick, {jump} again to kick off. Glass and porcelain are too slick."},
         {"type":"sign","x":18,"y":33,"w":6,"text":"Loud places make your legs ring. The Earplugs keep you steady."},
       ],
     },
@@ -157,7 +157,7 @@ export const stairwell = {
         '############################...................................G',
       ],
       entities: [
-        {"type":"sign","x":2,"y":33,"w":5,"text":"{use} near a hook to grab it. {left} {right} to swing. {jump} to let go with a fling."},
+        {"type":"sign","x":2,"y":33,"w":5,"text":"Press {use} near a hook to grab it. {left} {right} to swing. {jump} to let go with a fling."},
         {"type":"crumbs","x":41,"y":23,"n":5},
       ],
     },
@@ -260,7 +260,7 @@ export const stairwell = {
         {"type":"hide","x":58,"y":33,"w":1,"art":"sock"},
         {"type":"silverfish","x":40,"y":33,"range":[33,56]},
         {"type":"silverfish","x":18,"y":33,"range":[12,26]},
-        {"type":"sign","x":26,"y":33,"w":6,"text":"{up} at a crack in the baseboard to save. Every crack leads home to the Carrier."},
+        {"type":"sign","x":26,"y":33,"w":6,"text":"Press {up} at a baseboard crack to save. Every crack leads home to the Carrier."},
       ],
     },
   ],
@@ -283,7 +283,7 @@ export const chimney = {
       y: 3,
       bg: {"v":"a","x":0.5},
       near: false,
-      decor: [{"prop":"carrier/lookout-tower.png","x":9,"y":33,"h":2.6,"alpha":0.9},{"prop":"steam-puff","x":16,"y":60,"h":2,"alpha":0.25}],
+      decor: [{"prop":"carrier/lookout-tower.webp","x":9,"y":33,"h":2.6,"alpha":0.9},{"prop":"steam-puff","x":16,"y":60,"h":2,"alpha":0.25}],
       fx: [{"kind":"dust","x":12,"y":0,"w":8,"h":72}],
       grid: [
         'GGGGGGGGGGGG........GGGGGGGGGGGG',
@@ -362,7 +362,7 @@ export const chimney = {
       entities: [
         {"type":"secret","id":"chim-songseed-lookout","x":8,"y":33},
         {"type":"gate","id":"damper-under","x":12,"y":0,"w":8,"h":1,"opens":{"rescues":9},"card":"damper"},
-        {"type":"sign","x":13,"y":69,"w":6,"text":"Press {jump} again in the air to flutter."},
+        {"type":"sign","x":13,"y":69,"w":6,"nx":17,"text":"Press {jump} again in the air to flutter."},
       ],
     },
     {

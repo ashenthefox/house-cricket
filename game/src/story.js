@@ -105,8 +105,9 @@ export class Story {
     o.onDone && o.onDone(skipped);
   }
   // Keep the layer up (frozen) while the next screen opens: callers hide it with release().
-  holdOpen() { this.layer.hidden = false; }
-  release() { if (!this.active) this.layer.hidden = true; }
+  // calm: [issue 16] held while the room after it loads: no "next / skip all" hints, no bar
+  holdOpen(calm = false) { this.layer.hidden = false; this.layer.classList.toggle('held', !!calm); }
+  release() { if (!this.active) this.layer.hidden = true; this.layer.classList.remove('held'); }
   step(f) {
     if (!this.active) return;
     this.f++;

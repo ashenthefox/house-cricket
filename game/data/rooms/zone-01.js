@@ -98,6 +98,7 @@ function bedtop() {
   for (const [r, a, b] of steps) g.box(a, r, b - a + 1, 26 - r, '#');
   g.row(46, 8, 9, 'G');                       // the window sill (8 tiles above the headboard)
   g.box(14, 22, 6, 4, '#');                   // a folded quilt
+  g.box(12, 24, 2, 2, '#');                   // [issue #4] a rolled sock: back up onto the quilt from the bed's foot (was 4 up)
   g.row(4, 21, 6, '=');                       // the foot rail
   g.put(10, 25, 'k').put(30, 25, 'k').put(58, 15, 'k');
   return g.rows();
@@ -124,6 +125,9 @@ function lair() {
   g.clear(62, 10, 2, 4);                      // to the Hall (rows 10-13; the rescue gate)
   g.box(2, 4, 2, 12, 'G');                    // left glass
   g.box(58, 6, 2, 10, 'G').clear(58, 2, 2, 4); // right glass (the rim at row 6)
+  g.box(59, 6, 1, 10, '#');                   // [issue #4] the tank's frame outside the right glass: grippy, so the 2-wide gap down to
+                                              // the gate is a wall-jump climb back to the rim (before the rescue the gate is shut).
+                                              // (Rungs there caught the drop to the gate on the way out: full-run.json.)
   g.row(10, 16, 6, '=').clear(10, 17, 6, 1);  // the lid gap: up from the dresser (a flap you can jump up through)
   g.box(19, 14, 3, 2, '#');                   // sand berm (left)
   g.box(42, 14, 3, 2, '#');                   // sand berm (right)
@@ -157,7 +161,7 @@ export default {
       entities: [
         { type: 'carrier', x: 18, y: 14 },
         { type: 'sign', x: 10, y: 14, w: 5, text: S.chirp },
-        { type: 'sign', x: 24, y: 14, w: 6, text: S.listen },
+        { type: 'sign', x: 24, y: 14, w: 6, nx: 25, text: S.listen }, // [issue 9] the note on the raised floorboards
         { type: 'sign', x: 3, y: 14, w: 5, text: S.save },
         { type: 'secret', id: 'bed-mote', x: 22, y: 16 },
       ],

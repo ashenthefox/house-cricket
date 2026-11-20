@@ -1,6 +1,8 @@
 // [fixer] Recorded solutions for the gameplay fixes, authored with the headless sim:
 //   node tools/solutions/fixer.mjs [filter]
 // fixer-laun-duo     Duo shoves the detergent box into the cubby and takes the laun-duo cache
+// fixer-laun-shelf   [issue #19] the whole shelf room as Duo with the Band: in at the doorway, the cache, the
+//                    ironing board's crumbs, the top shelf's song-seed, and back out to the washer
 // fixer-stu-duet     post-game: Pip chirps at the Study music box, swap, Chip chirps: it opens
 // fixer-att-duet     post-game: the same at the Attic music box (Chip first this time)
 // fixer-kit-cloak    the Cellophane Cloak through the beetle nest under the dishwasher (kit-cloak)
@@ -8,7 +10,7 @@
 import { Author } from '../author.mjs';
 import { flag } from '../../game/src/mechanics.js';
 
-const R = 'ArrowRight', L = 'ArrowLeft', U = 'ArrowUp', D = 'ArrowDown', J = 'KeyZ', CHIRP = 'KeyC', SWAPN = 'KeyE';
+const R = 'ArrowRight', L = 'ArrowLeft', U = 'ArrowUp', D = 'ArrowDown', J = 'KeyZ', USE = 'KeyV', CHIRP = 'KeyC', SWAPN = 'KeyE';
 const T = 40;
 const only = process.argv[2];
 const want = (n) => !only || n.includes(only);
@@ -26,6 +28,35 @@ if (want('laun-duo')) {
   must(a.g.mech.pushes[0].x >= 28, 'box not shoved in');
   a.end();
   a.save('fixer-laun-duo', { room: 'laun-shelf' });
+}
+
+// ---- [issue #19] laun-shelf end to end: Duo (Jump 2) with the Band, as the Laundry is entered from the Pantry ----
+if (want('laun-shelf')) {
+  const a = new Author({ room: 'laun-shelf', x: 1, y: 15, items: ['booties', 'floss', 'raft', 'band'], party: ['duo'], rescued: ['stripe', 'katy', 'duo', 'frost'] });
+  // the headless sim does not run meta-run.js (crumbs, secrets): note what the cricket touches, as it does
+  const got = new Set(), ents = a.g.room.def.entities.filter((e) => e.type === 'secret' || e.type === 'crumbs');
+  const touches = (p, e) => p.x < (e.x + 1) * T && p.x + p.w > e.x * T && p.y < (e.y + 1) * T && p.y + p.h > e.y * T;
+  const step = a._step.bind(a);
+  a._step = (n = 1) => { for (let i = 0; i < n; i++) { step(1); if (a.g.room.id === 'laun-shelf') for (const e of ents) if (touches(a.p, e)) got.add(e.id || 'crumbs'); } };
+  a.wait(20).log('in the doorway (Duo)');
+  a.down(R).until((g) => tx(g) > 2.6, 60, 'to the bottle').tap(J, 14).until((g) => ground(g) && ty(g) < 14.1, 90, 'on the bottle').log('on the bottle');
+  a.tap(J, 14).until((g) => ground(g) && ty(g) < 12.1, 90, 'on the jugs').log('on the jugs');
+  a.until((g) => ty(g) > 15.9 && tx(g) > 13, 200, 'down the far side').log('down the far side');
+  a.until((g) => g.mech.pushes[0].x >= 25, 600, 'the box moves').log('shoving');
+  a.until((g) => tx(g) > 27.5, 600, 'into the cubby').up(R).log('in the cubby (laun-duo)');
+  must(a.g.mech.pushes[0].x >= 28, 'box not shoved in');
+  a.down(L).until((g) => tx(g) < 20.5, 300, 'out of the cubby').up(L).until(ground, 60, 'stopped').wait(6).log('under the ironing board');
+  a.down(USE).wait(22).up(USE).until((g) => ground(g) && ty(g) > 8.9 && ty(g) < 9.1, 120, 'on the ironing board').log('super-jump to the board (crumbs)');
+  a.down(L).until((g) => tx(g) < 14.4, 200, 'the board end').up(L).until((g) => ground(g) && Math.abs(g.player.vx) < 1, 30, 'stopped').log('the board end');
+  a.down(USE).wait(22).down(L).up(USE).until((g) => ground(g) && ty(g) < 3.1, 120, 'top shelf').log('super-jump to the top shelf');
+  a.until((g) => tx(g) < 5, 200, 'the song-seed').up(L).log('the song-seed');
+  a.down(R).until((g) => ground(g) && ty(g) > 8.9, 300, 'down').up(R).log('dropped to the board');
+  a.down(L).until((g) => ground(g) && ty(g) > 9.1, 300, 'off the board end').log('off the board end');
+  for (let i = 0; i < 3 && ty(a.g) > 12.1; i++) { const at = ty(a.g); a.tap(J, 14).until((g) => ground(g) && ty(g) < at - 1.9, 90, 'a step up').log('a step up'); } // the bottle, then the jugs
+  a.until((g) => g.room.id === 'laun-washer', 600, 'out the doorway').log('into the washer');
+  for (const id of ['laun-duo', 'crumbs', 'laun-songseed-shelf']) must(got.has(id), `missed ${id}`);
+  a.end();
+  a.save('fixer-laun-shelf', { room: 'laun-washer' });
 }
 
 // ---- Chip's Duet: chirp with one, swap, chirp with the other within 2 s ----

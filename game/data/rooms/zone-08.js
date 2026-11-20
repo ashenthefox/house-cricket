@@ -266,6 +266,7 @@ export default {
       x: 28, y: 7,
       temp: {"left": 86, "right": 66},
       bg: {"v": "a", "x": 0.7, "y": 0.75},
+      noWay: [{"from": [0, 26, 64, 10], "to": [0, 0, 64, 25]}],
       decor: [
         {"prop": "fake-plant", "x": 6, "y": 23, "h": 2.0, "layer": "mid"},
         {"prop": "fake-plant", "x": 22, "y": 23, "h": 2.4, "layer": "back", "flip": true},
